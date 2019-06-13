@@ -1,0 +1,57 @@
+i {
+  display: block;
+}
+.tetris__layout {
+  position: relative;
+  background: lightcyan;
+  width: 400px;
+  height: 800px;
+  margin: 0 auto;
+}
+.tetris__layout-Y,
+.tetris__layout-X {
+  opacity: 0.2;
+  display: flex;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  justify-content: flex-start;
+}
+.tetris__layout-X i {
+  width: 1px;
+  height: 100%;
+  background: red;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+.tetris__layout-X i {
+  margin-left: 19px;
+}
+.tetris__layout-Y {
+  flex-direction: column;
+}
+.tetris__layout-Y i {
+  width: 100%;
+  height: 1px;
+  background: red;
+  flex-shrink: 0;
+}
+.tetris__layout-Y i {
+  margin-top: 19px;
+}
+.figure__row {
+  display: flex;
+}
+.figure__point {
+  width: 20px;
+  height: 20px;
+  text-align: center;
+  font-size: 12px;
+  font-family: Georgia, 'Times New Roman', Times, serif;
+}
+.figure__point.active {
+  background: green;
+}
+
+
+/*# sourceMappingURL=/style.2cf34713.css.map */

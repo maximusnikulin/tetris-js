@@ -1,0 +1,80 @@
+body {
+  //   background: red;
+}
+
+i {
+  display: block;
+}
+
+.tetris {
+}
+
+@y: 40;
+@x: 20;
+@singleSize: 20px;
+
+.tetris__layout {
+  position: relative;
+  background: lightcyan;
+  width: @singleSize * @x;
+  height: @singleSize * @y;
+  margin: 0 auto;
+}
+
+.tetris__layout-Y,
+.tetris__layout-X {
+  opacity: 0.2;
+  display: flex;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  justify-content: flex-start;
+}
+
+.tetris__layout-X {
+  i {
+    width: 1px;
+    height: 100%;
+    background: red;
+    flex-shrink: 0;
+    box-sizing: border-box;
+  }
+
+  i {
+    margin-left: @singleSize - 1px;
+  }
+}
+
+.tetris__layout-Y {
+  flex-direction: column;
+
+  i {
+    width: 100%;
+    height: 1px;
+    background: red;
+    flex-shrink: 0;
+  }
+
+  i {
+    margin-top: @singleSize - 1px;
+  }
+}
+
+.figure {
+  &__row {
+    display: flex;
+  }
+
+  &__point {
+    width: 20px;
+    height: 20px;
+    text-align: center;
+    font-size: 12px;
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    // outline: 1px solid rgba(0, 0, 0, 0.2);
+
+    &.active {
+      background: green;
+    }
+  }
+}
