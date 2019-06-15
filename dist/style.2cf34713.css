@@ -5,8 +5,8 @@ i {
   position: relative;
   background: lightcyan;
   width: 400px;
-  height: 800px;
-  margin: 0 auto;
+  height: 160px;
+  margin: 40px auto;
 }
 .tetris__layout-Y,
 .tetris__layout-X {

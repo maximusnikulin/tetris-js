@@ -135,11 +135,9 @@ function () {
     var pattern = []; // Will be random value
     // Should be in empty space
 
-    var position = [2, 35];
-
     if (type === FigureType.first) {
-      pattern[0] = [1, 1, 1, 1];
-      pattern[1] = [0, 1, 1, 0];
+      pattern[0] = [0, 1, 1, 0];
+      pattern[1] = [1, 1, 1, 1];
     }
 
     if (type === FigureType.second) {
@@ -147,12 +145,12 @@ function () {
       pattern[1] = [0, 0, 0, 1];
     }
 
-    if (type === FigureType.second) {
+    if (type === FigureType.third) {
       pattern[0] = [1, 1, 1, 1];
       pattern[1] = [1, 0, 0, 0];
     }
 
-    return new Figure(pattern, position);
+    return new Figure(pattern, [2, -2]);
   };
 
   return FigureMaker;
@@ -211,9 +209,10 @@ function () {
         y = start[1];
     pattern.forEach(function (row, indexRow) {
       row.forEach(function (col, indexCol) {
-        _this.grid[y + indexRow][x + indexCol] = col;
+        _this.grid[y + indexRow + 1][x + indexCol] = col;
       });
     });
+    return true;
   };
 
   Layout.prototype.getNode = function () {
@@ -223,10 +222,9 @@ function () {
   Layout.prototype.renderFigure = function (figure) {
     var currPos = figure.getPosition();
     var pattern = figure.getPattern();
-    debugger;
-    var posX = currPos[0];
-    var posY = currPos[1];
-    var html = "\n      <div class='figure' style='position: absolute;      \n      left: " + posX * 20 + "px;\n      top: " + posY * 20 + "px'>\n        " + pattern.reduce(function (acc, nextRow) {
+    var x = currPos[0],
+        y = currPos[1];
+    var html = "\n      <div class='figure' style='position: absolute;      \n      left: " + x * 20 + "px;\n      top: " + y * 20 + "px'>\n        " + pattern.reduce(function (acc, nextRow) {
       return acc + ("\n            <div class='figure__row'>" + nextRow.reduce(function (acc, next) {
         return acc + ("<div class=\"figure__point " + (next ? 'active' : '') + "\">" + next + "</div>");
       }, '') + "</div>\n          ");
@@ -239,7 +237,7 @@ function () {
 }();
 
 var config = {
-  rows: 40,
+  rows: 8,
   columns: 20
 };
 
@@ -247,13 +245,16 @@ var Compositor =
 /** @class */
 function () {
   function Compositor(layout, figureCreator) {
+    var _this = this;
+
     this.figureCreator = figureCreator;
     this.layout = layout;
     this.currentFigure = null;
     this.figureStack = [];
-    this.runStep(); // setInterval(() => {
-    //   this.runStep()
-    // }, 1000)
+    this.runStep();
+    this.interval = setInterval(function () {
+      _this.runStep();
+    }, 200);
   }
 
   Compositor.prototype.onPressLeft = function (e) {};
@@ -279,7 +280,7 @@ function () {
   };
 
   Compositor.prototype.generateFigure = function () {
-    var figure = this.figureCreator.create(FigureType.first);
+    var figure = this.figureCreator.create(!this.figureStack.length ? FigureType.first : FigureType.second);
     this.figureStack.push(figure);
     return figure;
   };
@@ -292,17 +293,19 @@ function () {
     var figureY = currPosFigure[1];
     var patternFigure = this.currentFigure.getPattern();
     var figureWidth = patternFigure[0].length;
-    var figureHeight = patternFigure.length;
+    var figureHeight = patternFigure.length; // debugger
 
-    if (figureY + figureHeight >= config.rows || figureY + diffY < 0 || figureX + figureWidth >= config.columns || figureX + diffX < 0) {
+    if (figureY + figureHeight >= config.rows || figureX + figureWidth >= config.columns || figureX + diffX < 0) {
       return false;
     }
 
     var nextStepInterval = [figureX, figureX + figureWidth];
 
-    var layoutInterval = (_a = this.layout.grid[figureY + diffY]).slice.apply(_a, nextStepInterval);
+    var layoutInterval = (_a = this.layout.grid[figureY + diffY + figureHeight]).slice.apply(_a, nextStepInterval);
 
-    return true;
+    return !layoutInterval.some(function (layoutPoint, index) {
+      return patternFigure[figureHeight - 1][index] + layoutPoint > 1;
+    });
   };
 
   Compositor.prototype.updateLayout = function () {
@@ -313,13 +316,27 @@ function () {
     // TODO: Refactor it
     if (!this.currentFigure) {
       this.currentFigure = this.generateFigure();
-      this.layout.renderFigure(this.currentFigure);
+
+      for (var i = 0; i < 2; i++) {
+        if (this.canChangePosition(0, 1)) {
+          this.currentFigure.updatePosition(0, 1);
+        } else {
+          clearInterval(this.interval);
+          alert('end game');
+          return;
+        }
+      }
+
+      this.updateLayout();
     } else if (this.canChangePosition(0, 1)) {
-      // debugger
       this.currentFigure.updatePosition(0, 1);
       this.updateLayout();
     } else {
-      this.layout.fillLayoutOne(this.currentFigure.getPattern(), this.currentFigure.getPosition());
+      var _a = this.currentFigure.getPosition(),
+          x = _a[0],
+          y = _a[1];
+
+      this.layout.fillLayoutOne(this.currentFigure.getPattern(), [x, y]);
       this.currentFigure = null;
     }
   };

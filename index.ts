@@ -13,11 +13,10 @@ class FigureMaker {
     let pattern = []
     // Will be random value
     // Should be in empty space
-    let position = [2, 35]
 
     if (type === FigureType.first) {
-      pattern[0] = [1, 1, 1, 1]
-      pattern[1] = [0, 1, 1, 0]
+      pattern[0] = [0, 1, 1, 0]
+      pattern[1] = [1, 1, 1, 1]
     }
 
     if (type === FigureType.second) {
@@ -25,12 +24,12 @@ class FigureMaker {
       pattern[1] = [0, 0, 0, 1]
     }
 
-    if (type === FigureType.second) {
+    if (type === FigureType.third) {
       pattern[0] = [1, 1, 1, 1]
       pattern[1] = [1, 0, 0, 0]
     }
 
-    return new Figure(pattern, position)
+    return new Figure(pattern, [2, -2])
   }
 }
 
@@ -86,13 +85,15 @@ class Layout {
     }
   }
 
-  fillLayoutOne(pattern: number[][], start: number[]) {
+  fillLayoutOne(pattern: number[][], start: number[]): boolean {
     let [x, y] = start
     pattern.forEach((row, indexRow) => {
       row.forEach((col, indexCol) => {
-        this.grid[y + indexRow][x + indexCol] = col
+        this.grid[y + indexRow + 1][x + indexCol] = col
       })
     })
+
+    return true
   }
 
   getNode() {
@@ -102,14 +103,12 @@ class Layout {
   renderFigure(figure: Figure) {
     const currPos = figure.getPosition()
     const pattern = figure.getPattern()
-    debugger
-    const posX = currPos[0]
-    const posY = currPos[1]
+    const [x, y] = currPos
 
     const html = `
       <div class='figure' style='position: absolute;      
-      left: ${posX * 20}px;
-      top: ${posY * 20}px'>
+      left: ${x * 20}px;
+      top: ${y * 20}px'>
         ${pattern.reduce((acc, nextRow) => {
           return (
             acc +
@@ -134,7 +133,7 @@ class Layout {
 }
 
 const config = {
-  rows: 40,
+  rows: 8,
   columns: 20,
 }
 
@@ -143,6 +142,7 @@ class Compositor {
   private layout: Layout
   private currentFigure: Figure
   figureStack: Figure[]
+  interval: number
   constructor(layout: Layout, figureCreator: typeof FigureMaker) {
     this.figureCreator = figureCreator
     this.layout = layout
@@ -150,9 +150,9 @@ class Compositor {
     this.figureStack = []
 
     this.runStep()
-    // setInterval(() => {
-    //   this.runStep()
-    // }, 1000)
+    this.interval = setInterval(() => {
+      this.runStep()
+    }, 200)
   }
 
   onPressLeft(e: KeyboardEvent) {}
@@ -173,7 +173,10 @@ class Compositor {
   }
 
   generateFigure() {
-    const figure = this.figureCreator.create(FigureType.first)
+    const figure = this.figureCreator.create(
+      !this.figureStack.length ? FigureType.first : FigureType.second
+    )
+
     this.figureStack.push(figure)
     return figure
   }
@@ -187,9 +190,9 @@ class Compositor {
     const figureWidth = patternFigure[0].length
     const figureHeight = patternFigure.length
 
+    // debugger
     if (
       figureY + figureHeight >= config.rows ||
-      figureY + diffY < 0 ||
       figureX + figureWidth >= config.columns ||
       figureX + diffX < 0
     ) {
@@ -197,11 +200,13 @@ class Compositor {
     }
 
     const nextStepInterval = [figureX, figureX + figureWidth]
-    const layoutInterval = this.layout.grid[figureY + diffY].slice(
-      ...nextStepInterval
-    )
+    const layoutInterval = this.layout.grid[
+      figureY + diffY + figureHeight
+    ].slice(...nextStepInterval)
 
-    return true
+    return !layoutInterval.some((layoutPoint, index) => {
+      return patternFigure[figureHeight - 1][index] + layoutPoint > 1
+    })
   }
 
   updateLayout() {
@@ -212,16 +217,23 @@ class Compositor {
     // TODO: Refactor it
     if (!this.currentFigure) {
       this.currentFigure = this.generateFigure()
-      this.layout.renderFigure(this.currentFigure)
+      for (let i = 0; i < 2; i++) {
+        if (this.canChangePosition(0, 1)) {
+          this.currentFigure.updatePosition(0, 1)
+        } else {
+          clearInterval(this.interval)
+          alert('end game')
+          return
+        }
+      }
+
+      this.updateLayout()
     } else if (this.canChangePosition(0, 1)) {
-      // debugger
       this.currentFigure.updatePosition(0, 1)
       this.updateLayout()
     } else {
-      this.layout.fillLayoutOne(
-        this.currentFigure.getPattern(),
-        this.currentFigure.getPosition()
-      )
+      const [x, y] = this.currentFigure.getPosition()
+      this.layout.fillLayoutOne(this.currentFigure.getPattern(), [x, y])
       this.currentFigure = null
     }
   }
