@@ -12,7 +12,8 @@ class FigureMaker {
   static create(type: FigureType) {
     let pattern = []
     // Will be random value
-    let position = [2, 2]
+    // Should be in empty space
+    let position = [2, 35]
 
     if (type === FigureType.first) {
       pattern[0] = [1, 1, 1, 1]
@@ -53,15 +54,16 @@ class Figure {
     return this.position
   }
 
-  updatePosition(pos: number[]) {
-    this.position = pos
+  updatePosition(diffX: number, diffY: number) {
+    this.position[0] += diffX
+    this.position[1] += diffY
   }
 }
 
 interface ILayout {}
 
 class Layout {
-  layout: number[][]
+  grid: number[][]
   node: HTMLElement | null
   rect: ClientRect | DOMRect
   columns: number
@@ -69,24 +71,27 @@ class Layout {
   constructor(rows: number, columns: number) {
     this.rows = rows
     this.columns = columns
-    this.layout = []
+    this.grid = []
     this.node = document.getElementById('js-tetris')
     this.rect = this.node.getBoundingClientRect()
 
     // size of 1 cell = 20px
     for (let i = 0; i < rows; i++) {
       for (let j = 0; j < columns; j++) {
-        if (!this.layout[i]) {
-          this.layout[i] = []
+        if (!this.grid[i]) {
+          this.grid[i] = []
         }
-        this.layout[i][j] = 0
+        this.grid[i][j] = 0
       }
     }
   }
 
-  fillLayoutOne(points: number[][]) {
-    points.forEach(point => {
-      this.layout[point[0]][point[1]] = 1
+  fillLayoutOne(pattern: number[][], start: number[]) {
+    let [x, y] = start
+    pattern.forEach((row, indexRow) => {
+      row.forEach((col, indexCol) => {
+        this.grid[y + indexRow][x + indexCol] = col
+      })
     })
   }
 
@@ -97,12 +102,14 @@ class Layout {
   renderFigure(figure: Figure) {
     const currPos = figure.getPosition()
     const pattern = figure.getPattern()
-    const startLeftPoint = currPos[0]
+    debugger
+    const posX = currPos[0]
+    const posY = currPos[1]
 
     const html = `
       <div class='figure' style='position: absolute;      
-      left: ${startLeftPoint[0] * 20}px;
-      top: ${startLeftPoint[1] * 20}px'>
+      left: ${posX * 20}px;
+      top: ${posY * 20}px'>
         ${pattern.reduce((acc, nextRow) => {
           return (
             acc +
@@ -142,7 +149,27 @@ class Compositor {
     this.currentFigure = null
     this.figureStack = []
 
-    this.runFigure()
+    this.runStep()
+    // setInterval(() => {
+    //   this.runStep()
+    // }, 1000)
+  }
+
+  onPressLeft(e: KeyboardEvent) {}
+
+  onPressRight(e: KeyboardEvent) {}
+
+  keyListeners() {
+    document.addEventListener('keypress', e => {
+      switch (e.keyCode) {
+        case 39:
+          this.onPressRight(e)
+          break
+        case 37:
+          this.onPressRight(e)
+          break
+      }
+    })
   }
 
   generateFigure() {
@@ -151,17 +178,53 @@ class Compositor {
     return figure
   }
 
-  step() {
-    // const currPos = this.currentFigure.getPosition()
-    // const currY = currPos[0][1]
-    // const currX = currPos[0][0]
+  canChangePosition(diffX: number, diffY: number): boolean {
+    const currPosFigure = this.currentFigure.getPosition()
+    const figureX = currPosFigure[0]
+    const figureY = currPosFigure[1]
+
+    const patternFigure = this.currentFigure.getPattern()
+    const figureWidth = patternFigure[0].length
+    const figureHeight = patternFigure.length
+
+    if (
+      figureY + figureHeight >= config.rows ||
+      figureY + diffY < 0 ||
+      figureX + figureWidth >= config.columns ||
+      figureX + diffX < 0
+    ) {
+      return false
+    }
+
+    const nextStepInterval = [figureX, figureX + figureWidth]
+    const layoutInterval = this.layout.grid[figureY + diffY].slice(
+      ...nextStepInterval
+    )
+
+    return true
   }
 
-  runFigure() {
-    this.currentFigure = this.generateFigure()
+  updateLayout() {
     this.layout.renderFigure(this.currentFigure)
+  }
+
+  runStep() {
+    // TODO: Refactor it
+    if (!this.currentFigure) {
+      this.currentFigure = this.generateFigure()
+      this.layout.renderFigure(this.currentFigure)
+    } else if (this.canChangePosition(0, 1)) {
+      // debugger
+      this.currentFigure.updatePosition(0, 1)
+      this.updateLayout()
+    } else {
+      this.layout.fillLayoutOne(
+        this.currentFigure.getPattern(),
+        this.currentFigure.getPosition()
+      )
+      this.currentFigure = null
+    }
   }
 }
 
 let tetris = new Compositor(new Layout(40, 20), FigureMaker)
-debugger

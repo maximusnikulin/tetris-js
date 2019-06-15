@@ -132,8 +132,10 @@ function () {
   function FigureMaker() {}
 
   FigureMaker.create = function (type) {
-    var pattern = [];
-    var position = [[2, 2], [6, 2]];
+    var pattern = []; // Will be random value
+    // Should be in empty space
+
+    var position = [2, 35];
 
     if (type === FigureType.first) {
       pattern[0] = [1, 1, 1, 1];
@@ -173,8 +175,9 @@ function () {
     return this.position;
   };
 
-  Figure.prototype.updatePosition = function (pos) {
-    this.position = pos;
+  Figure.prototype.updatePosition = function (diffX, diffY) {
+    this.position[0] += diffX;
+    this.position[1] += diffY;
   };
 
   return Figure;
@@ -186,26 +189,30 @@ function () {
   function Layout(rows, columns) {
     this.rows = rows;
     this.columns = columns;
-    this.layout = [];
+    this.grid = [];
     this.node = document.getElementById('js-tetris');
     this.rect = this.node.getBoundingClientRect(); // size of 1 cell = 20px
 
     for (var i = 0; i < rows; i++) {
       for (var j = 0; j < columns; j++) {
-        if (!this.layout[i]) {
-          this.layout[i] = [];
+        if (!this.grid[i]) {
+          this.grid[i] = [];
         }
 
-        this.layout[i][j] = 0;
+        this.grid[i][j] = 0;
       }
     }
   }
 
-  Layout.prototype.fillLayoutOne = function (points) {
+  Layout.prototype.fillLayoutOne = function (pattern, start) {
     var _this = this;
 
-    points.forEach(function (point) {
-      _this.layout[point[0]][point[1]] = 1;
+    var x = start[0],
+        y = start[1];
+    pattern.forEach(function (row, indexRow) {
+      row.forEach(function (col, indexCol) {
+        _this.grid[y + indexRow][x + indexCol] = col;
+      });
     });
   };
 
@@ -216,8 +223,10 @@ function () {
   Layout.prototype.renderFigure = function (figure) {
     var currPos = figure.getPosition();
     var pattern = figure.getPattern();
-    var startLeftPoint = currPos[0];
-    var html = "\n      <div class='figure' style='position: absolute;      \n      left: " + startLeftPoint[0] * 20 + "px;\n      top: " + startLeftPoint[1] * 20 + "px'>\n        " + pattern.reduce(function (acc, nextRow) {
+    debugger;
+    var posX = currPos[0];
+    var posY = currPos[1];
+    var html = "\n      <div class='figure' style='position: absolute;      \n      left: " + posX * 20 + "px;\n      top: " + posY * 20 + "px'>\n        " + pattern.reduce(function (acc, nextRow) {
       return acc + ("\n            <div class='figure__row'>" + nextRow.reduce(function (acc, next) {
         return acc + ("<div class=\"figure__point " + (next ? 'active' : '') + "\">" + next + "</div>");
       }, '') + "</div>\n          ");
@@ -242,8 +251,32 @@ function () {
     this.layout = layout;
     this.currentFigure = null;
     this.figureStack = [];
-    this.runFigure();
+    this.runStep(); // setInterval(() => {
+    //   this.runStep()
+    // }, 1000)
   }
+
+  Compositor.prototype.onPressLeft = function (e) {};
+
+  Compositor.prototype.onPressRight = function (e) {};
+
+  Compositor.prototype.keyListeners = function () {
+    var _this = this;
+
+    document.addEventListener('keypress', function (e) {
+      switch (e.keyCode) {
+        case 39:
+          _this.onPressRight(e);
+
+          break;
+
+        case 37:
+          _this.onPressRight(e);
+
+          break;
+      }
+    });
+  };
 
   Compositor.prototype.generateFigure = function () {
     var figure = this.figureCreator.create(FigureType.first);
@@ -251,25 +284,50 @@ function () {
     return figure;
   };
 
-  Compositor.prototype.runFigure = function () {
-    var _this = this;
+  Compositor.prototype.canChangePosition = function (diffX, diffY) {
+    var _a;
 
-    this.currentFigure = this.generateFigure();
+    var currPosFigure = this.currentFigure.getPosition();
+    var figureX = currPosFigure[0];
+    var figureY = currPosFigure[1];
+    var patternFigure = this.currentFigure.getPattern();
+    var figureWidth = patternFigure[0].length;
+    var figureHeight = patternFigure.length;
+
+    if (figureY + figureHeight >= config.rows || figureY + diffY < 0 || figureX + figureWidth >= config.columns || figureX + diffX < 0) {
+      return false;
+    }
+
+    var nextStepInterval = [figureX, figureX + figureWidth];
+
+    var layoutInterval = (_a = this.layout.grid[figureY + diffY]).slice.apply(_a, nextStepInterval);
+
+    return true;
+  };
+
+  Compositor.prototype.updateLayout = function () {
     this.layout.renderFigure(this.currentFigure);
-    setTimeout(function () {
-      var currPos = _this.currentFigure.getPosition();
+  };
 
-      _this.currentFigure.updatePosition([[currPos[0][0], currPos[0][1] + 1], [0, 0]]);
-
-      _this.layout.renderFigure(_this.currentFigure);
-    }, 1000);
+  Compositor.prototype.runStep = function () {
+    // TODO: Refactor it
+    if (!this.currentFigure) {
+      this.currentFigure = this.generateFigure();
+      this.layout.renderFigure(this.currentFigure);
+    } else if (this.canChangePosition(0, 1)) {
+      // debugger
+      this.currentFigure.updatePosition(0, 1);
+      this.updateLayout();
+    } else {
+      this.layout.fillLayoutOne(this.currentFigure.getPattern(), this.currentFigure.getPosition());
+      this.currentFigure = null;
+    }
   };
 
   return Compositor;
 }();
 
 var tetris = new Compositor(new Layout(40, 20), FigureMaker);
-debugger;
 },{}],"node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
@@ -298,7 +356,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "54773" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "57607" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
