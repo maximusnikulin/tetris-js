@@ -11,7 +11,8 @@ interface IFigureMaker {
 class FigureMaker {
   static create(type: FigureType) {
     let pattern = []
-    let position = [[2, 2], [6, 2]]
+    // Will be random value
+    let position = [2, 2]
 
     if (type === FigureType.first) {
       pattern[0] = [1, 1, 1, 1]
@@ -36,9 +37,9 @@ interface IFigure {}
 class Figure {
   // Standart size of figure 4 x 2
   pattern: (0 | 1)[][]
-  position: number[][]
+  position: number[]
   htmlNode: HTMLDivElement
-  constructor(pattern: (0 | 1)[][], position: number[][]) {
+  constructor(pattern: (0 | 1)[][], position: number[]) {
     this.pattern = pattern
     this.position = position
     this.htmlNode = document.createElement('div')
@@ -52,7 +53,7 @@ class Figure {
     return this.position
   }
 
-  updatePosition(pos: number[][]) {
+  updatePosition(pos: number[]) {
     this.position = pos
   }
 }
@@ -150,18 +151,15 @@ class Compositor {
     return figure
   }
 
+  step() {
+    // const currPos = this.currentFigure.getPosition()
+    // const currY = currPos[0][1]
+    // const currX = currPos[0][0]
+  }
+
   runFigure() {
     this.currentFigure = this.generateFigure()
     this.layout.renderFigure(this.currentFigure)
-
-    setTimeout(() => {
-      const currPos = this.currentFigure.getPosition()
-      this.currentFigure.updatePosition([
-        [currPos[0][0], currPos[0][1] + 1],
-        [0, 0],
-      ])
-      this.layout.renderFigure(this.currentFigure)
-    }, 1000)
   }
 }
 
