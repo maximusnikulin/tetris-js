@@ -117,235 +117,73 @@ parcelRequire = (function (modules, cache, entry, globalName) {
   }
 
   return newRequire;
-})({"index.ts":[function(require,module,exports) {
-var FigureType;
+})({"classes/RendererCanvas.ts":[function(require,module,exports) {
+"use strict";
 
-(function (FigureType) {
-  FigureType[FigureType["first"] = 1] = "first";
-  FigureType[FigureType["second"] = 2] = "second";
-  FigureType[FigureType["third"] = 3] = "third";
-})(FigureType || (FigureType = {}));
+exports.__esModule = true;
 
-var FigureMaker =
+var RendererCanvas =
 /** @class */
 function () {
-  function FigureMaker() {}
-
-  FigureMaker.create = function (type) {
-    var pattern = []; // Will be random value
-    // Should be in empty space
-
-    if (type === FigureType.first) {
-      pattern[0] = [0, 1, 1, 0];
-      pattern[1] = [1, 1, 1, 1];
-    }
-
-    if (type === FigureType.second) {
-      pattern[0] = [1, 1, 1, 1];
-      pattern[1] = [0, 0, 0, 1];
-    }
-
-    if (type === FigureType.third) {
-      pattern[0] = [1, 1, 1, 1];
-      pattern[1] = [1, 0, 0, 0];
-    }
-
-    return new Figure(pattern, [2, -2]);
-  };
-
-  return FigureMaker;
-}();
-
-var Figure =
-/** @class */
-function () {
-  function Figure(pattern, position) {
-    this.pattern = pattern;
-    this.position = position;
-    this.htmlNode = document.createElement('div');
+  function RendererCanvas() {
+    this.node = document.getElementById('tetris-js');
+    this.ctx = this.node.getContext('2d');
   }
 
-  Figure.prototype.getPattern = function () {
-    return this.pattern;
+  RendererCanvas.prototype.renderGrid = function () {
+    var width = 20;
+    var height = 20;
+    this.node.width = 201;
+    this.node.height = 401;
+    this.ctx.lineWidth = 1;
+
+    for (var i = 0; i <= 11; i++) {
+      this.ctx.moveTo(i * 20 + 0.5, 0);
+      this.ctx.lineTo(i * 20 + 0.5, 400);
+      this.ctx.stroke();
+    }
+
+    for (var j = 0; j <= 21; j++) {
+      this.ctx.moveTo(0, j * 20 + 0.5);
+      this.ctx.lineTo(200, j * 20 + 0.5);
+      this.ctx.stroke();
+    }
   };
 
-  Figure.prototype.getPosition = function () {
-    return this.position;
-  };
+  RendererCanvas.prototype.render = function (grid) {};
 
-  Figure.prototype.updatePosition = function (diffX, diffY) {
-    this.position[0] += diffX;
-    this.position[1] += diffY;
-  };
-
-  return Figure;
+  return RendererCanvas;
 }();
 
-var Layout =
+exports.RendererCanvas = RendererCanvas;
+},{}],"classes/Tetris.ts":[function(require,module,exports) {
+"use strict";
+
+exports.__esModule = true;
+
+var RendererCanvas_1 = require("./RendererCanvas");
+
+var Tetris =
 /** @class */
 function () {
-  function Layout(rows, columns) {
-    this.rows = rows;
-    this.columns = columns;
-    this.grid = [];
-    this.node = document.getElementById('js-tetris');
-    this.rect = this.node.getBoundingClientRect(); // size of 1 cell = 20px
-
-    for (var i = 0; i < rows; i++) {
-      for (var j = 0; j < columns; j++) {
-        if (!this.grid[i]) {
-          this.grid[i] = [];
-        }
-
-        this.grid[i][j] = 0;
-      }
-    }
+  function Tetris() {
+    this.renderer = new RendererCanvas_1.RendererCanvas();
+    this.renderer.renderGrid();
   }
 
-  Layout.prototype.fillLayoutOne = function (pattern, start) {
-    var _this = this;
-
-    var x = start[0],
-        y = start[1];
-    pattern.forEach(function (row, indexRow) {
-      row.forEach(function (col, indexCol) {
-        _this.grid[y + indexRow + 1][x + indexCol] = col;
-      });
-    });
-    return true;
-  };
-
-  Layout.prototype.getNode = function () {
-    return this.node;
-  };
-
-  Layout.prototype.renderFigure = function (figure) {
-    var currPos = figure.getPosition();
-    var pattern = figure.getPattern();
-    var x = currPos[0],
-        y = currPos[1];
-    var html = "\n      <div class='figure' style='position: absolute;      \n      left: " + x * 20 + "px;\n      top: " + y * 20 + "px'>\n        " + pattern.reduce(function (acc, nextRow) {
-      return acc + ("\n            <div class='figure__row'>" + nextRow.reduce(function (acc, next) {
-        return acc + ("<div class=\"figure__point " + (next ? 'active' : '') + "\">" + next + "</div>");
-      }, '') + "</div>\n          ");
-    }, '') + "\n      </div>\n    ";
-    figure.htmlNode.innerHTML = html;
-    this.node.appendChild(figure.htmlNode);
-  };
-
-  return Layout;
+  return Tetris;
 }();
 
-var config = {
-  rows: 8,
-  columns: 20
-};
+exports.Tetris = Tetris;
+},{"./RendererCanvas":"classes/RendererCanvas.ts"}],"index.ts":[function(require,module,exports) {
+"use strict";
 
-var Compositor =
-/** @class */
-function () {
-  function Compositor(layout, figureCreator) {
-    var _this = this;
+exports.__esModule = true;
 
-    this.figureCreator = figureCreator;
-    this.layout = layout;
-    this.currentFigure = null;
-    this.figureStack = [];
-    this.runStep();
-    this.interval = setInterval(function () {
-      _this.runStep();
-    }, 200);
-  }
+var Tetris_1 = require("./classes/Tetris");
 
-  Compositor.prototype.onPressLeft = function (e) {};
-
-  Compositor.prototype.onPressRight = function (e) {};
-
-  Compositor.prototype.keyListeners = function () {
-    var _this = this;
-
-    document.addEventListener('keypress', function (e) {
-      switch (e.keyCode) {
-        case 39:
-          _this.onPressRight(e);
-
-          break;
-
-        case 37:
-          _this.onPressRight(e);
-
-          break;
-      }
-    });
-  };
-
-  Compositor.prototype.generateFigure = function () {
-    var figure = this.figureCreator.create(!this.figureStack.length ? FigureType.first : FigureType.second);
-    this.figureStack.push(figure);
-    return figure;
-  };
-
-  Compositor.prototype.canChangePosition = function (diffX, diffY) {
-    var _a;
-
-    var currPosFigure = this.currentFigure.getPosition();
-    var figureX = currPosFigure[0];
-    var figureY = currPosFigure[1];
-    var patternFigure = this.currentFigure.getPattern();
-    var figureWidth = patternFigure[0].length;
-    var figureHeight = patternFigure.length; // debugger
-
-    if (figureY + figureHeight >= config.rows || figureX + figureWidth >= config.columns || figureX + diffX < 0) {
-      return false;
-    }
-
-    var nextStepInterval = [figureX, figureX + figureWidth];
-
-    var layoutInterval = (_a = this.layout.grid[figureY + diffY + figureHeight]).slice.apply(_a, nextStepInterval);
-
-    return !layoutInterval.some(function (layoutPoint, index) {
-      return patternFigure[figureHeight - 1][index] + layoutPoint > 1;
-    });
-  };
-
-  Compositor.prototype.updateLayout = function () {
-    this.layout.renderFigure(this.currentFigure);
-  };
-
-  Compositor.prototype.runStep = function () {
-    // TODO: Refactor it
-    if (!this.currentFigure) {
-      this.currentFigure = this.generateFigure();
-
-      for (var i = 0; i < 2; i++) {
-        if (this.canChangePosition(0, 1)) {
-          this.currentFigure.updatePosition(0, 1);
-        } else {
-          clearInterval(this.interval);
-          alert('end game');
-          return;
-        }
-      }
-
-      this.updateLayout();
-    } else if (this.canChangePosition(0, 1)) {
-      this.currentFigure.updatePosition(0, 1);
-      this.updateLayout();
-    } else {
-      var _a = this.currentFigure.getPosition(),
-          x = _a[0],
-          y = _a[1];
-
-      this.layout.fillLayoutOne(this.currentFigure.getPattern(), [x, y]);
-      this.currentFigure = null;
-    }
-  };
-
-  return Compositor;
-}();
-
-var tetris = new Compositor(new Layout(40, 20), FigureMaker);
-},{}],"node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+var tetris = new Tetris_1.Tetris();
+},{"./classes/Tetris":"classes/Tetris.ts"}],"../../../../usr/local/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -373,7 +211,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "57607" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "60798" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
@@ -548,5 +386,5 @@ function hmrAcceptRun(bundle, id) {
     return true;
   }
 }
-},{}]},{},["node_modules/parcel-bundler/src/builtins/hmr-runtime.js","index.ts"], null)
+},{}]},{},["../../../../usr/local/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js","index.ts"], null)
 //# sourceMappingURL=/tetris-js.77de5100.js.map
