@@ -20,7 +20,7 @@ class Figure implements IFigure {
   pattern: (0 | 1)[][]
   position: number[]
   color: Colors
-  constructor(pattern: (0 | 1)[][], position: number[], color?: Colors) {
+  constructor(pattern: (0 | 1)[][], position?: number[], color?: Colors) {
     this.pattern = pattern
     this.position = position
     this.color = color || Colors.black

@@ -1,7 +1,7 @@
 import RendererCanvas from './RendererCanvas'
-import Layout from './Layout'
+import Layout from './Layout/Layout'
 import FigureMaker from './FigureMaker'
-import Figure, { FigureType } from './Figure'
+import Figure, { FigureType } from './Figure/Figure'
 
 interface ITetris {}
 

@@ -1,7 +1,7 @@
-import Figure, { FigureType } from './Figure'
+import Figure, { FigureType } from './Figure/Figure'
 
 class FigureMaker {
-  static create(type: FigureType) {
+  static create(type: FigureType, pos?: number[]) {
     let pattern = []
     // Will be random value
     // Should be in empty space
@@ -25,7 +25,7 @@ class FigureMaker {
       pattern[0] = [1, 1, 1, 1]
     }
 
-    return new Figure(pattern, [2, -2])
+    return new Figure(pattern, pos)
   }
 }
 

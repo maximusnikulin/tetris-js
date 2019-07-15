@@ -1,4 +1,4 @@
-import { Colors } from './Figure'
+import { Colors } from './Figure/Figure'
 
 interface IPoint {
   x: number

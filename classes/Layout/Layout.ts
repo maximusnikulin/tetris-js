@@ -1,25 +1,28 @@
-import Figure, { Colors } from './Figure'
-import { Point } from './Point'
+import Figure, { Colors } from '../Figure/Figure'
+import { Point } from '../Point'
 
-// Responsibilities
-// 1. Grid of points
+export const sum = (a: number, b: number) => a + b
 
 export interface ILayout {}
 
 class Layout {
-  grid: Point[]
+  grid: Point[][]
   columns: number
   rows: number
-  constructor(rows: number, columns: number) {
+  constructor(rows: number, columns: number, defaultValue: 1 | 0 = 0) {
     this.rows = rows
     this.columns = columns
-    this.grid = []
+    this.grid = [[]]
+    this.create(defaultValue)
   }
 
-  create() {
+  private create(defaultValue) {
     for (let i = 0; i < this.rows; i++) {
       for (let j = 0; j < this.columns; j++) {
-        this.grid[i][j] = new Point(j, i, 0)
+        if (!this.grid[i]) {
+          this.grid[i] = []
+        }
+        this.grid[i][j] = new Point(j, i, defaultValue)
       }
     }
   }
@@ -41,14 +44,21 @@ class Layout {
     }
   }
 
+  getSize() {
+    return {
+      width: this.grid[0].length,
+      height: this.grid.length,
+    }
+  }
+
   canPosFigure(figure: Figure, pos: number[]) {
     const { height, width } = figure.getSize()
     const pattern = figure.getPattern()
     const [x, y] = pos
 
     let res = true
-    out: for (let i = 0; i <= height; i++) {
-      for (let j = 0; j <= width; j++) {
+    out: for (let i = 0; i < height; i++) {
+      for (let j = 0; j < width; j++) {
         if (
           this.getPoint([j + x, i + y]).value + figure.getPatternValue([j, i]) >
           1
