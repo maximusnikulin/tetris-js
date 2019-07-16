@@ -150,32 +150,306 @@ function () {
     }
   };
 
-  RendererCanvas.prototype.render = function (grid) {};
+  RendererCanvas.prototype.render = function (layout) {};
 
   return RendererCanvas;
 }();
 
-exports.RendererCanvas = RendererCanvas;
-},{}],"classes/Tetris.ts":[function(require,module,exports) {
+exports["default"] = RendererCanvas;
+},{}],"classes/Figure/Figure.ts":[function(require,module,exports) {
+"use strict";
+
+exports.__esModule = true;
+var FigureType;
+
+(function (FigureType) {
+  FigureType[FigureType["first"] = 1] = "first";
+  FigureType[FigureType["second"] = 2] = "second";
+  FigureType[FigureType["third"] = 3] = "third";
+  FigureType[FigureType["forth"] = 4] = "forth";
+})(FigureType = exports.FigureType || (exports.FigureType = {}));
+
+var Colors;
+
+(function (Colors) {
+  Colors[Colors["green"] = 1] = "green";
+  Colors[Colors["blue"] = 2] = "blue";
+  Colors[Colors["black"] = 3] = "black";
+  Colors[Colors["violet"] = 4] = "violet";
+  Colors[Colors["transparent"] = 5] = "transparent";
+})(Colors = exports.Colors || (exports.Colors = {}));
+
+var Figure =
+/** @class */
+function () {
+  function Figure(pattern, position, color) {
+    this.pattern = pattern;
+    this.position = position;
+    this.color = color || Colors.black;
+  }
+
+  Figure.prototype.getSize = function () {
+    return {
+      height: this.pattern.length,
+      width: this.pattern[0].length
+    };
+  };
+
+  Figure.prototype.getPatternValue = function (pos) {
+    var x = pos[0],
+        y = pos[1];
+    return this.pattern[y][x];
+  };
+
+  Figure.prototype.getPattern = function () {
+    return this.pattern;
+  };
+
+  Figure.prototype.getPosition = function () {
+    return this.position;
+  };
+
+  Figure.prototype.getColor = function () {
+    return this.color;
+  };
+
+  return Figure;
+}();
+
+exports["default"] = Figure;
+},{}],"classes/Point.ts":[function(require,module,exports) {
 "use strict";
 
 exports.__esModule = true;
 
-var RendererCanvas_1 = require("./RendererCanvas");
+var Figure_1 = require("./Figure/Figure");
+
+var Point =
+/** @class */
+function () {
+  function Point(x, y, value, color) {
+    if (color === void 0) {
+      color = Figure_1.Colors.transparent;
+    }
+
+    this.x = x;
+    this.y = y;
+    this.color = color;
+
+    if (typeof value !== 'undefined') {
+      this.value = value;
+    }
+  }
+
+  Point.prototype.setColor = function (color) {
+    this.color = color;
+  };
+
+  Point.prototype.setValue = function (value) {
+    this.value = value;
+  };
+
+  return Point;
+}();
+
+exports.Point = Point;
+},{"./Figure/Figure":"classes/Figure/Figure.ts"}],"classes/Layout/Layout.ts":[function(require,module,exports) {
+"use strict";
+
+exports.__esModule = true;
+
+var Point_1 = require("../Point");
+
+exports.sum = function (a, b) {
+  return a + b;
+};
+
+var Layout =
+/** @class */
+function () {
+  function Layout(rows, columns, defaultValue) {
+    if (defaultValue === void 0) {
+      defaultValue = 0;
+    }
+
+    this.rows = rows;
+    this.columns = columns;
+    this.grid = [[]];
+    this.create(defaultValue);
+  }
+
+  Layout.prototype.create = function (defaultValue) {
+    for (var i = 0; i < this.rows; i++) {
+      for (var j = 0; j < this.columns; j++) {
+        if (!this.grid[i]) {
+          this.grid[i] = [];
+        }
+
+        this.grid[i][j] = new Point_1.Point(j, i, defaultValue);
+      }
+    }
+  };
+
+  Layout.prototype.getPoint = function (pos) {
+    var x = pos[0],
+        y = pos[1];
+    return this.grid[y][x];
+  };
+
+  Layout.prototype.addFigure = function (figure, pos) {
+    var _a = figure.getSize(),
+        height = _a.height,
+        width = _a.width;
+
+    var x = pos[0],
+        y = pos[1];
+
+    for (var i = 0; i < height; i++) {
+      for (var j = 0; j < width; j++) {
+        var patternValue = figure.getPatternValue([j, i]);
+        debugger;
+        this.grid[y + i][x + j].setValue(patternValue);
+      }
+    }
+  };
+
+  Layout.prototype.getSize = function () {
+    return {
+      width: this.grid[0].length,
+      height: this.grid.length
+    };
+  };
+
+  Layout.prototype.canPosFigure = function (figure, pos) {
+    var _a = figure.getSize(),
+        height = _a.height,
+        width = _a.width;
+
+    var pattern = figure.getPattern();
+    var x = pos[0],
+        y = pos[1];
+    var res = true;
+
+    out: for (var i = 0; i < height; i++) {
+      for (var j = 0; j < width; j++) {
+        if (this.getPoint([j + x, i + y]).value + figure.getPatternValue([j, i]) > 1) {
+          res = false;
+          break out;
+        }
+      }
+    }
+
+    return res;
+  };
+
+  return Layout;
+}();
+
+exports["default"] = Layout;
+},{"../Point":"classes/Point.ts"}],"classes/FigureMaker.ts":[function(require,module,exports) {
+"use strict";
+
+var __importStar = this && this.__importStar || function (mod) {
+  if (mod && mod.__esModule) return mod;
+  var result = {};
+  if (mod != null) for (var k in mod) {
+    if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+  }
+  result["default"] = mod;
+  return result;
+};
+
+exports.__esModule = true;
+
+var Figure_1 = __importStar(require("./Figure/Figure"));
+
+var FigureMaker =
+/** @class */
+function () {
+  function FigureMaker() {}
+
+  FigureMaker.create = function (type, pos) {
+    var pattern = []; // Will be random value
+    // Should be in empty space
+
+    if (type === Figure_1.FigureType.first) {
+      pattern[0] = [0, 1, 1, 0];
+      pattern[1] = [1, 1, 1, 1];
+    }
+
+    if (type === Figure_1.FigureType.second) {
+      pattern[0] = [1, 1, 1, 1];
+      pattern[1] = [0, 0, 0, 1];
+    }
+
+    if (type === Figure_1.FigureType.third) {
+      pattern[0] = [1, 1, 1, 1];
+      pattern[1] = [1, 0, 0, 0];
+    }
+
+    if (type === Figure_1.FigureType.forth) {
+      pattern[0] = [1, 1, 1, 1];
+    }
+
+    return new Figure_1["default"](pattern, pos);
+  };
+
+  return FigureMaker;
+}();
+
+exports["default"] = FigureMaker;
+},{"./Figure/Figure":"classes/Figure/Figure.ts"}],"classes/Tetris.ts":[function(require,module,exports) {
+"use strict";
+
+var __importDefault = this && this.__importDefault || function (mod) {
+  return mod && mod.__esModule ? mod : {
+    "default": mod
+  };
+};
+
+exports.__esModule = true;
+
+var RendererCanvas_1 = __importDefault(require("./RendererCanvas"));
+
+var Layout_1 = __importDefault(require("./Layout/Layout"));
+
+var FigureMaker_1 = __importDefault(require("./FigureMaker"));
+
+var Figure_1 = require("./Figure/Figure");
 
 var Tetris =
 /** @class */
 function () {
   function Tetris() {
-    this.renderer = new RendererCanvas_1.RendererCanvas();
+    this.layout = new Layout_1["default"](40, 20);
+    this.renderer = new RendererCanvas_1["default"]();
+    this.figureStack = [];
     this.renderer.renderGrid();
   }
+
+  Tetris.prototype.createFigure = function () {
+    return FigureMaker_1["default"].create(Figure_1.FigureType.first);
+  };
+
+  Tetris.prototype.posFigure = function (figure) {
+    var initPos = [0, 2];
+
+    if (this.layout.canPosFigure(figure, initPos)) {
+      this.layout.addFigure(figure, initPos);
+    }
+  };
+
+  Tetris.prototype.runStep = function () {
+    var figure = this.createFigure();
+    this.figureStack.push(figure);
+    this.posFigure(figure);
+  };
 
   return Tetris;
 }();
 
 exports.Tetris = Tetris;
-},{"./RendererCanvas":"classes/RendererCanvas.ts"}],"index.ts":[function(require,module,exports) {
+},{"./RendererCanvas":"classes/RendererCanvas.ts","./Layout/Layout":"classes/Layout/Layout.ts","./FigureMaker":"classes/FigureMaker.ts","./Figure/Figure":"classes/Figure/Figure.ts"}],"index.ts":[function(require,module,exports) {
 "use strict";
 
 exports.__esModule = true;
@@ -183,6 +457,7 @@ exports.__esModule = true;
 var Tetris_1 = require("./classes/Tetris");
 
 var tetris = new Tetris_1.Tetris();
+tetris.runStep();
 },{"./classes/Tetris":"classes/Tetris.ts"}],"../../../../usr/local/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
@@ -211,7 +486,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "60798" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "49423" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

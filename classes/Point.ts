@@ -20,4 +20,12 @@ export class Point implements IPoint {
       this.value = value
     }
   }
+
+  setColor(color: Colors) {
+    this.color = color
+  }
+
+  setValue(value: 1 | 0) {
+    this.value = value
+  }
 }

@@ -23,4 +23,16 @@ describe('Test Layout class', () => {
     layout = new Layout(40, 20, 1)
     expect(layout.canPosFigure(figure, [1, 0])).toBe(false)
   })
+
+  test('It should add figure', () => {
+    layout.addFigure(figure, [1, 0])
+    expect(layout.grid[0][1].value).toBe(0)
+    expect(layout.grid[0][2].value).toBe(1)
+    expect(layout.grid[0][3].value).toBe(1)
+    expect(layout.grid[0][4].value).toBe(0)
+    expect(layout.grid[1][1].value).toBe(1)
+    expect(layout.grid[1][2].value).toBe(1)
+    expect(layout.grid[1][3].value).toBe(1)
+    expect(layout.grid[1][4].value).toBe(1)
+  })
 })

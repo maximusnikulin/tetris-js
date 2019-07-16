@@ -34,12 +34,13 @@ class Layout {
 
   addFigure(figure, pos) {
     const { height, width } = figure.getSize()
-    const pattern = figure.getPattern()
     const [x, y] = pos
 
-    for (let i = 0; i <= height; i++) {
-      for (let j = 0; j <= width; j++) {
-        this.grid[j][i] = new Point(i, j, pattern[y][x])
+    for (let i = 0; i < height; i++) {
+      for (let j = 0; j < width; j++) {
+        const patternValue = figure.getPatternValue([j, i])
+        debugger
+        this.grid[y + i][x + j].setValue(patternValue)
       }
     }
   }
