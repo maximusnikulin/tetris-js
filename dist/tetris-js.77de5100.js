@@ -447,6 +447,8 @@ function () {
   };
 
   PointsStack.prototype.addFigure = function (figure) {
+    debugger;
+
     var _a = figure.getSize(),
         height = _a.height,
         width = _a.width;
@@ -579,9 +581,9 @@ function () {
     var _this = this;
 
     window.addEventListener('keydown', function (e) {
-      var figure = _this.figureStack[_this.figureStack.length - 1];
+      var figure = _this.getCurrentFigure();
 
-      if (e.keyCode !== 37 && e.keyCode !== 39 || !figure) {
+      if (e.keyCode !== 40 && e.keyCode !== 37 && e.keyCode !== 39 || !figure) {
         return;
       }
 
@@ -589,20 +591,33 @@ function () {
           x = _a[0],
           y = _a[1];
 
-      var newPos;
+      if (e.keyCode === 40) {
+        while (_this.pointsStack.canChangePosFigure(figure, [x, y])) {
+          figure.setPosition([x, y]);
+          y++;
+        }
 
-      if (e.keyCode === 37) {
-        newPos = [x - 1, y];
-      }
+        _this.pointsStack.addFigure(figure);
 
-      if (e.keyCode === 39) {
-        newPos = [x + 1, y];
-      }
+        _this.render();
 
-      if (_this.pointsStack.canChangePosFigure(figure, newPos)) {
-        figure.setPosition(newPos);
+        _this.figureStack.pop();
+      } else {
+        var newPos = void 0;
 
-        _this.renderFigure(figure);
+        if (e.keyCode === 37) {
+          newPos = [x - 1, y];
+        }
+
+        if (e.keyCode === 39) {
+          newPos = [x + 1, y];
+        }
+
+        if (_this.pointsStack.canChangePosFigure(figure, newPos)) {
+          figure.setPosition(newPos);
+
+          _this.render();
+        }
       }
     });
   };
@@ -617,15 +632,19 @@ function () {
       if (isEnd) {
         _this.endGame();
       }
-    }, 200);
+    }, 1000);
   };
 
-  Tetris.prototype.renderFigure = function (figure) {
-    this.renderer.renderPoints(this.getStackAndFigurePoints(figure, this.pointsStack));
+  Tetris.prototype.render = function () {
+    this.renderer.renderPoints(this.getStackAndFigurePoints(this.getCurrentFigure(), this.pointsStack));
+  };
+
+  Tetris.prototype.getCurrentFigure = function () {
+    return this.figureStack[this.figureStack.length - 1] || null;
   };
 
   Tetris.prototype.runStep = function () {
-    var figure = this.figureStack[this.figureStack.length - 1];
+    var figure = this.getCurrentFigure();
     var figurePos = null;
 
     if (figure) {
@@ -643,7 +662,6 @@ function () {
 
     if (this.pointsStack.canChangePosFigure(figure, figurePos)) {
       figure.setPosition(figurePos);
-      this.renderFigure(figure);
     } else {
       if (figurePos[1] === 0) {
         return false;
@@ -651,8 +669,10 @@ function () {
 
       this.pointsStack.addFigure(figure);
       this.figureStack.pop();
-      this.renderer.renderPoints(this.pointsStack.getPoints());
     }
+
+    this.render(); // if (this.pointsStack.hasRequalsRows()) {
+    // }
 
     return true;
   };
@@ -698,7 +718,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "59132" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "51855" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

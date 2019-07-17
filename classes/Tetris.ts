@@ -56,26 +56,40 @@ export class Tetris implements ITetris {
 
   initListeners() {
     window.addEventListener('keydown', e => {
-      const figure = this.figureStack[this.figureStack.length - 1]
-      if ((e.keyCode !== 37 && e.keyCode !== 39) || !figure) {
+      const figure = this.getCurrentFigure()
+      if (
+        (e.keyCode !== 40 && e.keyCode !== 37 && e.keyCode !== 39) ||
+        !figure
+      ) {
         return
       }
 
-      const [x, y] = figure.getPosition()
+      let [x, y] = figure.getPosition()
 
-      let newPos
+      if (e.keyCode === 40) {
+        while (this.pointsStack.canChangePosFigure(figure, [x, y])) {
+          figure.setPosition([x, y])
+          y++
+        }
 
-      if (e.keyCode === 37) {
-        newPos = [x - 1, y]
-      }
+        this.pointsStack.addFigure(figure)
+        this.render()
+        this.figureStack.pop()
+      } else {
+        let newPos
 
-      if (e.keyCode === 39) {
-        newPos = [x + 1, y]
-      }
+        if (e.keyCode === 37) {
+          newPos = [x - 1, y]
+        }
 
-      if (this.pointsStack.canChangePosFigure(figure, newPos)) {
-        figure.setPosition(newPos)
-        this.renderFigure(figure)
+        if (e.keyCode === 39) {
+          newPos = [x + 1, y]
+        }
+
+        if (this.pointsStack.canChangePosFigure(figure, newPos)) {
+          figure.setPosition(newPos)
+          this.render()
+        }
       }
     })
   }
@@ -89,17 +103,21 @@ export class Tetris implements ITetris {
       if (isEnd) {
         this.endGame()
       }
-    }, 200)
+    }, 1000)
   }
 
-  renderFigure(figure: Figure) {
+  render() {
     this.renderer.renderPoints(
-      this.getStackAndFigurePoints(figure, this.pointsStack)
+      this.getStackAndFigurePoints(this.getCurrentFigure(), this.pointsStack)
     )
   }
 
+  getCurrentFigure() {
+    return this.figureStack[this.figureStack.length - 1] || null
+  }
+
   runStep() {
-    let figure = this.figureStack[this.figureStack.length - 1]
+    let figure = this.getCurrentFigure()
     let figurePos = null
     if (figure) {
       const [x, y] = figure.getPosition()
@@ -113,15 +131,18 @@ export class Tetris implements ITetris {
 
     if (this.pointsStack.canChangePosFigure(figure, figurePos)) {
       figure.setPosition(figurePos)
-      this.renderFigure(figure)
     } else {
       if (figurePos[1] === 0) {
         return false
       }
       this.pointsStack.addFigure(figure)
       this.figureStack.pop()
-      this.renderer.renderPoints(this.pointsStack.getPoints())
     }
+
+    this.render()
+    // if (this.pointsStack.hasRequalsRows()) {
+
+    // }
 
     return true
   }
