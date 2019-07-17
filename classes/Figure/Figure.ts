@@ -47,19 +47,21 @@ class Figure implements IFigure {
 
   getPoints() {
     const [dX, dY] = this.position
-    let points = [[]]
 
-    return this.pattern.map((ptrnRow, y) => {
-      return ptrnRow.map(
-        (value, x) =>
+    let points: Point[] = []
+    this.pattern.forEach((ptrnRow, y) => {
+      return ptrnRow.forEach((value, x) =>
+        points.push(
           new Point(
             x + dX,
             y + dY,
             value,
             value ? this.color : Colors.transparent
           )
+        )
       )
     })
+    return points
   }
 
   getPattern() {

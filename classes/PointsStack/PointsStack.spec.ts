@@ -1,12 +1,12 @@
-import Layout, { sum } from './Layout'
+import PointsStack, { sum } from './PointsStack'
 import Figure, { FigureType } from '../Figure/Figure'
 import FigureMaker from '../FigureMaker'
 
 describe('Test Layout class', () => {
-  let layout: Layout = null
+  let layout: PointsStack = null
   let figure: Figure = null
   beforeEach(() => {
-    layout = new Layout(20, 10)
+    layout = new PointsStack(10, 20)
     figure = FigureMaker.create(FigureType.first)
   })
 
@@ -16,24 +16,24 @@ describe('Test Layout class', () => {
   })
 
   test('It should allow to add first figure', () => {
-    expect(layout.canPosFigure(figure, [1, 0])).toBe(true)
+    expect(layout.canChangePosFigure(figure, [1, 0])).toBe(true)
   })
 
   test('It should forbid to add first figure', () => {
-    layout = new Layout(40, 20, 1)
-    expect(layout.canPosFigure(figure, [1, 0])).toBe(false)
+    layout = new PointsStack(10, 20, 1)
+    expect(layout.canChangePosFigure(figure, [1, 0])).toBe(false)
   })
 
   test('It should allow to add figure', () => {
     figure.setPosition([1, 0])
-    expect(layout.canPosFigure(figure, [1, 1])).toBe(true)
+    expect(layout.canChangePosFigure(figure, [1, 1])).toBe(true)
   })
 
   test('It should forbid to add figure', () => {
     figure.setPosition([1, 0])
     layout.addFigure(figure)
     const nextFigure = FigureMaker.create(FigureType.first)
-    expect(layout.canPosFigure(nextFigure, [1, 1])).toBe(false)
+    expect(layout.canChangePosFigure(nextFigure, [1, 1])).toBe(false)
   })
 
   test('It should add figure', () => {
@@ -58,8 +58,8 @@ describe('Test Layout class', () => {
   })
 
   test('It should forbid to change position figure', () => {
-    layout = new Layout(20, 10)
+    layout = new PointsStack(10, 20)
     figure.setPosition([0, 18])
-    expect(layout.canPosFigure(figure, [0, 21])).toBe(false)
+    expect(layout.canChangePosFigure(figure, [0, 21])).toBe(false)
   })
 })

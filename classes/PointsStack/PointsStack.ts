@@ -5,11 +5,11 @@ export const sum = (a: number, b: number) => a + b
 
 export interface ILayout {}
 
-class Layout {
+class PointsStack {
   private points: Point[][]
   private columns: number
   private rows: number
-  constructor(rows: number, columns: number, defaultValue: 1 | 0 = 0) {
+  constructor(columns: number, rows: number, defaultValue: 1 | 0 = 0) {
     this.rows = rows
     this.columns = columns
     this.points = [[]]
@@ -28,7 +28,11 @@ class Layout {
   }
 
   getPoints() {
-    return this.points
+    let points: Point[] = []
+    this.points.forEach(row => {
+      row.forEach(point => points.push(point))
+    })
+    return points
   }
 
   getPoint(pos: number[]): Point {
@@ -57,7 +61,7 @@ class Layout {
     }
   }
 
-  canPosFigure(figure: Figure, pos: number[]) {
+  canChangePosFigure(figure: Figure, pos: number[]) {
     const { height, width } = figure.getSize()
     const [x, y] = pos
 
@@ -81,4 +85,4 @@ class Layout {
   }
 }
 
-export default Layout
+export default PointsStack
