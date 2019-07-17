@@ -1,3 +1,5 @@
+import { Point } from '../Point'
+
 export enum FigureType {
   'first' = 1,
   'second',
@@ -21,10 +23,14 @@ class Figure implements IFigure {
   pattern: (0 | 1)[][]
   position: number[]
   color: Colors
-  constructor(pattern: (0 | 1)[][], position?: number[], color?: Colors) {
+  constructor(pattern: (0 | 1)[][], position: number[] = null, color?: Colors) {
     this.pattern = pattern
     this.position = position
     this.color = color || Colors.black
+  }
+
+  setPosition(pos: number[]) {
+    this.position = pos
   }
 
   getSize() {
@@ -37,6 +43,23 @@ class Figure implements IFigure {
   getPatternValue(pos: number[]) {
     const [x, y] = pos
     return this.pattern[y][x]
+  }
+
+  getPoints() {
+    const [dX, dY] = this.position
+    let points = [[]]
+
+    return this.pattern.map((ptrnRow, y) => {
+      return ptrnRow.map(
+        (value, x) =>
+          new Point(
+            x + dX,
+            y + dY,
+            value,
+            value ? this.color : Colors.transparent
+          )
+      )
+    })
   }
 
   getPattern() {

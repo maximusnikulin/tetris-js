@@ -6,44 +6,44 @@ export const sum = (a: number, b: number) => a + b
 export interface ILayout {}
 
 class Layout {
-  private grid: Point[][]
+  private points: Point[][]
   private columns: number
   private rows: number
   constructor(rows: number, columns: number, defaultValue: 1 | 0 = 0) {
     this.rows = rows
     this.columns = columns
-    this.grid = [[]]
+    this.points = [[]]
     this.create(defaultValue)
   }
 
   private create(defaultValue) {
     for (let i = 0; i < this.rows; i++) {
       for (let j = 0; j < this.columns; j++) {
-        if (!this.grid[i]) {
-          this.grid[i] = []
+        if (!this.points[i]) {
+          this.points[i] = []
         }
-        this.grid[i][j] = new Point(j, i, defaultValue)
+        this.points[i][j] = new Point(j, i, defaultValue)
       }
     }
   }
 
-  getGrid() {
-    return this.grid
+  getPoints() {
+    return this.points
   }
 
   getPoint(pos: number[]): Point {
     const [x, y] = pos
-    return this.grid[y][x]
+    return this.points[y][x]
   }
 
-  addFigure(figure, pos) {
+  addFigure(figure: Figure) {
     const { height, width } = figure.getSize()
-    const [x, y] = pos
+    const [x, y] = figure.getPosition()
 
     for (let i = 0; i < height; i++) {
       for (let j = 0; j < width; j++) {
         const patternValue = figure.getPatternValue([j, i])
-        const point = this.grid[y + i][x + j]
+        const point = this.points[y + i][x + j]
         point.setValue(patternValue)
         point.setColor(figure.getColor())
       }
@@ -52,15 +52,18 @@ class Layout {
 
   getSize() {
     return {
-      width: this.grid[0].length,
-      height: this.grid.length,
+      columns: this.columns,
+      rows: this.rows,
     }
   }
 
   canPosFigure(figure: Figure, pos: number[]) {
     const { height, width } = figure.getSize()
-    const pattern = figure.getPattern()
     const [x, y] = pos
+
+    if (y + height > this.rows || x > this.columns || x < 0) {
+      return false
+    }
 
     let res = true
     out: for (let i = 0; i < height; i++) {

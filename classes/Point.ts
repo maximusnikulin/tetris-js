@@ -21,6 +21,13 @@ export class Point implements IPoint {
     }
   }
 
+  getPosition() {
+    return [this.x, this.y]
+  }
+
+  getColor() {
+    return this.color
+  }
   setColor(color: Colors) {
     this.color = color
   }

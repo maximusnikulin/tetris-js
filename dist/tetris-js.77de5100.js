@@ -117,10 +117,57 @@ parcelRequire = (function (modules, cache, entry, globalName) {
   }
 
   return newRequire;
-})({"classes/Figure/Figure.ts":[function(require,module,exports) {
+})({"classes/Point.ts":[function(require,module,exports) {
 "use strict";
 
 exports.__esModule = true;
+
+var Figure_1 = require("./Figure/Figure");
+
+var Point =
+/** @class */
+function () {
+  function Point(x, y, value, color) {
+    if (color === void 0) {
+      color = Figure_1.Colors.transparent;
+    }
+
+    this.x = x;
+    this.y = y;
+    this.color = color;
+
+    if (typeof value !== 'undefined') {
+      this.value = value;
+    }
+  }
+
+  Point.prototype.getPosition = function () {
+    return [this.x, this.y];
+  };
+
+  Point.prototype.getColor = function () {
+    return this.color;
+  };
+
+  Point.prototype.setColor = function (color) {
+    this.color = color;
+  };
+
+  Point.prototype.setValue = function (value) {
+    this.value = value;
+  };
+
+  return Point;
+}();
+
+exports.Point = Point;
+},{"./Figure/Figure":"classes/Figure/Figure.ts"}],"classes/Figure/Figure.ts":[function(require,module,exports) {
+"use strict";
+
+exports.__esModule = true;
+
+var Point_1 = require("../Point");
+
 var FigureType;
 
 (function (FigureType) {
@@ -145,10 +192,18 @@ var Figure =
 /** @class */
 function () {
   function Figure(pattern, position, color) {
+    if (position === void 0) {
+      position = null;
+    }
+
     this.pattern = pattern;
     this.position = position;
     this.color = color || Colors.black;
   }
+
+  Figure.prototype.setPosition = function (pos) {
+    this.position = pos;
+  };
 
   Figure.prototype.getSize = function () {
     return {
@@ -161,6 +216,20 @@ function () {
     var x = pos[0],
         y = pos[1];
     return this.pattern[y][x];
+  };
+
+  Figure.prototype.getPoints = function () {
+    var _this = this;
+
+    var _a = this.position,
+        dX = _a[0],
+        dY = _a[1];
+    var points = [[]];
+    return this.pattern.map(function (ptrnRow, y) {
+      return ptrnRow.map(function (value, x) {
+        return new Point_1.Point(x + dX, y + dY, value, value ? _this.color : Colors.transparent);
+      });
+    });
   };
 
   Figure.prototype.getPattern = function () {
@@ -179,7 +248,7 @@ function () {
 }();
 
 exports["default"] = Figure;
-},{}],"classes/RendererCanvas.ts":[function(require,module,exports) {
+},{"../Point":"classes/Point.ts"}],"classes/RendererCanvas.ts":[function(require,module,exports) {
 "use strict";
 
 exports.__esModule = true;
@@ -189,47 +258,78 @@ var Figure_1 = require("./Figure/Figure");
 var RendererCanvas =
 /** @class */
 function () {
-  function RendererCanvas() {
+  function RendererCanvas(columns, rows, square) {
+    if (square === void 0) {
+      square = 20;
+    }
+
     this.node = document.getElementById('tetris-js');
     this.ctx = this.node.getContext('2d');
+    this.columns = columns;
+    this.rows = rows;
+    this.width = columns * square + 1;
+    this.height = rows * square + 1;
+    this.node.width = this.width;
+    this.node.height = this.height;
+    this.square = square;
   }
 
   RendererCanvas.prototype.renderGrid = function () {
-    var width = 20;
-    var height = 20;
-    this.node.width = 201;
-    this.node.height = 401;
     this.ctx.lineWidth = 1;
+    var columns = this.width / this.square + 1;
+    var rows = this.height / this.square + 1;
 
-    for (var i = 0; i <= 11; i++) {
-      this.ctx.moveTo(i * 20 + 0.5, 0);
-      this.ctx.lineTo(i * 20 + 0.5, 400);
+    for (var i = 0; i <= columns; i++) {
+      this.ctx.moveTo(i * this.square + 0.5, 0);
+      this.ctx.lineTo(i * this.square + 0.5, this.height);
       this.ctx.stroke();
     }
 
-    for (var j = 0; j <= 21; j++) {
-      this.ctx.moveTo(0, j * 20 + 0.5);
-      this.ctx.lineTo(200, j * 20 + 0.5);
+    for (var j = 0; j <= rows; j++) {
+      this.ctx.moveTo(0, j * this.square + 0.5);
+      this.ctx.lineTo(this.width, j * this.square + 0.5);
       this.ctx.stroke();
     }
   };
 
-  RendererCanvas.prototype.render = function (layout) {
-    this.ctx.beginPath();
+  RendererCanvas.prototype.renderFigure = function (figure) {
+    var points = figure.getPoints();
+    var startXY = figure.getPosition();
+    var size = figure.getSize();
+    this.renderPoints(points, startXY, size);
+  };
 
-    var _a = layout.getSize(),
-        width = _a.width,
-        height = _a.height;
+  RendererCanvas.prototype.renderLayout = function (layout) {
+    var points = layout.getPoints();
+    var size = layout.getSize();
+    this.renderPoints(points, [0, 0], size);
+  };
+
+  RendererCanvas.prototype.renderPoints = function (points, startXY, size) {
+    var startX = startXY[0],
+        startY = startXY[1];
+    var width = size.width,
+        height = size.height; // this.ctx.clearRect(
+    //   startX * this.square + 0.5,
+    //   (startY - 1) * this.square + 0.5,
+    //   width * this.square + 0.5,
+    //   height * this.square + 0.5
+    // )
+
+    this.ctx.clearRect(0, 0, this.width, this.height);
+    this.renderGrid();
+    this.ctx.beginPath();
 
     for (var i = 0; i < height; i++) {
       this.ctx.fillStyle = Figure_1.Colors.transparent;
 
       for (var j = 0; j < width; j++) {
-        var point = layout.getPoint([j, i]);
+        var point = points[i][j];
 
         if (point.value === 1) {
           this.ctx.fillStyle = point.color;
-          this.ctx.rect(j * 20 + 0.5, i * 20 + 0.5, 20, 20);
+          this.ctx.rect( //TODO: Create util for thar
+          (startX + j) * this.square + 0.5, (startY + i) * this.square + 0.5, this.square, this.square);
           this.ctx.fill();
           this.ctx.strokeStyle = Figure_1.Colors.black;
           this.ctx.stroke();
@@ -244,42 +344,6 @@ function () {
 }();
 
 exports["default"] = RendererCanvas;
-},{"./Figure/Figure":"classes/Figure/Figure.ts"}],"classes/Point.ts":[function(require,module,exports) {
-"use strict";
-
-exports.__esModule = true;
-
-var Figure_1 = require("./Figure/Figure");
-
-var Point =
-/** @class */
-function () {
-  function Point(x, y, value, color) {
-    if (color === void 0) {
-      color = Figure_1.Colors.transparent;
-    }
-
-    this.x = x;
-    this.y = y;
-    this.color = color;
-
-    if (typeof value !== 'undefined') {
-      this.value = value;
-    }
-  }
-
-  Point.prototype.setColor = function (color) {
-    this.color = color;
-  };
-
-  Point.prototype.setValue = function (value) {
-    this.value = value;
-  };
-
-  return Point;
-}();
-
-exports.Point = Point;
 },{"./Figure/Figure":"classes/Figure/Figure.ts"}],"classes/Layout/Layout.ts":[function(require,module,exports) {
 "use strict";
 
@@ -301,44 +365,45 @@ function () {
 
     this.rows = rows;
     this.columns = columns;
-    this.grid = [[]];
+    this.points = [[]];
     this.create(defaultValue);
   }
 
   Layout.prototype.create = function (defaultValue) {
     for (var i = 0; i < this.rows; i++) {
       for (var j = 0; j < this.columns; j++) {
-        if (!this.grid[i]) {
-          this.grid[i] = [];
+        if (!this.points[i]) {
+          this.points[i] = [];
         }
 
-        this.grid[i][j] = new Point_1.Point(j, i, defaultValue);
+        this.points[i][j] = new Point_1.Point(j, i, defaultValue);
       }
     }
   };
 
-  Layout.prototype.getGrid = function () {
-    return this.grid;
+  Layout.prototype.getPoints = function () {
+    return this.points;
   };
 
   Layout.prototype.getPoint = function (pos) {
     var x = pos[0],
         y = pos[1];
-    return this.grid[y][x];
+    return this.points[y][x];
   };
 
-  Layout.prototype.addFigure = function (figure, pos) {
+  Layout.prototype.addFigure = function (figure) {
     var _a = figure.getSize(),
         height = _a.height,
         width = _a.width;
 
-    var x = pos[0],
-        y = pos[1];
+    var _b = figure.getPosition(),
+        x = _b[0],
+        y = _b[1];
 
     for (var i = 0; i < height; i++) {
       for (var j = 0; j < width; j++) {
         var patternValue = figure.getPatternValue([j, i]);
-        var point = this.grid[y + i][x + j];
+        var point = this.points[y + i][x + j];
         point.setValue(patternValue);
         point.setColor(figure.getColor());
       }
@@ -347,8 +412,8 @@ function () {
 
   Layout.prototype.getSize = function () {
     return {
-      width: this.grid[0].length,
-      height: this.grid.length
+      columns: this.columns,
+      rows: this.rows
     };
   };
 
@@ -357,9 +422,13 @@ function () {
         height = _a.height,
         width = _a.width;
 
-    var pattern = figure.getPattern();
     var x = pos[0],
         y = pos[1];
+
+    if (y + height > this.rows || x > this.columns || x < 0) {
+      return false;
+    }
+
     var res = true;
 
     out: for (var i = 0; i < height; i++) {
@@ -458,8 +527,13 @@ var Tetris =
 /** @class */
 function () {
   function Tetris() {
-    this.layout = new Layout_1["default"](40, 20);
-    this.renderer = new RendererCanvas_1["default"]();
+    this.layout = new Layout_1["default"](20, 10);
+
+    var _a = this.layout.getSize(),
+        columns = _a.columns,
+        rows = _a.rows;
+
+    this.renderer = new RendererCanvas_1["default"](columns, rows);
     this.figureStack = [];
     this.renderer.renderGrid();
   }
@@ -468,26 +542,40 @@ function () {
     return FigureMaker_1["default"].create(Figure_1.FigureType.first);
   };
 
-  Tetris.prototype.posFigure = function (figure) {
-    var initPos = [2, 0];
-
-    if (this.layout.canPosFigure(figure, initPos)) {
-      this.layout.addFigure(figure, initPos);
+  Tetris.prototype.changePosFigure = function (figure, pos) {
+    if (this.layout.canPosFigure(figure, pos)) {
+      figure.setPosition(pos);
       return true;
     }
 
     return false;
   };
 
-  Tetris.prototype.render = function () {
-    this.renderer.render(this.layout);
-  };
-
   Tetris.prototype.runStep = function () {
-    var figure = this.createFigure();
-    this.figureStack.push(figure);
-    this.posFigure(figure);
-    this.render();
+    var figure = this.figureStack[this.figureStack.length - 1];
+    var figurePos = null;
+
+    if (figure) {
+      var _a = figure.getPosition(),
+          x = _a[0],
+          y = _a[1];
+
+      figurePos = [x, y + 1];
+    } else {
+      figure = this.createFigure();
+      this.figureStack.push(figure);
+      figurePos = [2, 0];
+    }
+
+    if (this.changePosFigure(figure, figurePos)) {
+      this.renderer.renderFigure(figure);
+      return true;
+    } else {
+      // this.layout.addFigure(figure)
+      // this.figureStack.pop()
+      // this.renderer.renderLayout(this.layout)
+      return false;
+    }
   };
 
   return Tetris;
@@ -502,7 +590,15 @@ exports.__esModule = true;
 var Tetris_1 = require("./classes/Tetris");
 
 var tetris = new Tetris_1.Tetris();
-tetris.runStep();
+var res = tetris.runStep();
+var interval = setInterval(function () {
+  if (res) {
+    res = tetris.runStep();
+  } else {
+    alert('!!');
+    clearInterval(interval);
+  }
+}, 200);
 },{"./classes/Tetris":"classes/Tetris.ts"}],"../../../../usr/local/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';

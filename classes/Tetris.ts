@@ -10,8 +10,9 @@ export class Tetris implements ITetris {
   layout: Layout
   figureStack: Figure[]
   constructor() {
-    this.layout = new Layout(40, 20)
-    this.renderer = new RendererCanvas()
+    this.layout = new Layout(20, 10)
+    const { columns, rows } = this.layout.getSize()
+    this.renderer = new RendererCanvas(columns, rows)
     this.figureStack = []
     this.renderer.renderGrid()
   }
@@ -20,24 +21,34 @@ export class Tetris implements ITetris {
     return FigureMaker.create(FigureType.first)
   }
 
-  posFigure(figure: Figure) {
-    const initPos = [2, 0]
-    if (this.layout.canPosFigure(figure, initPos)) {
-      this.layout.addFigure(figure, initPos)
+  changePosFigure(figure: Figure, pos: number[]) {
+    if (this.layout.canPosFigure(figure, pos)) {
+      figure.setPosition(pos)
       return true
     }
-
     return false
   }
 
-  render() {
-    this.renderer.render(this.layout)
-  }
-
   runStep() {
-    let figure = this.createFigure()
-    this.figureStack.push(figure)
-    this.posFigure(figure)
-    this.render()
+    let figure = this.figureStack[this.figureStack.length - 1]
+    let figurePos = null
+    if (figure) {
+      const [x, y] = figure.getPosition()
+      figurePos = [x, y + 1]
+    } else {
+      figure = this.createFigure()
+      this.figureStack.push(figure)
+      figurePos = [2, 0]
+    }
+
+    if (this.changePosFigure(figure, figurePos)) {
+      this.renderer.renderFigure(figure)
+      return true
+    } else {
+      // this.layout.addFigure(figure)
+      // this.figureStack.pop()
+      // this.renderer.renderLayout(this.layout)
+      return false
+    }
   }
 }
