@@ -21,15 +21,23 @@ export class Tetris implements ITetris {
   }
 
   posFigure(figure: Figure) {
-    const initPos = [0, 2]
+    const initPos = [2, 0]
     if (this.layout.canPosFigure(figure, initPos)) {
       this.layout.addFigure(figure, initPos)
+      return true
     }
+
+    return false
+  }
+
+  render() {
+    this.renderer.render(this.layout)
   }
 
   runStep() {
     let figure = this.createFigure()
     this.figureStack.push(figure)
     this.posFigure(figure)
+    this.render()
   }
 }

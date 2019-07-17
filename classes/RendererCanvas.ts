@@ -1,4 +1,6 @@
 import { Point } from './Point'
+import Layout from './Layout/Layout'
+import { Colors } from './Figure/Figure'
 
 class RendererCanvas {
   ctx: any
@@ -28,7 +30,24 @@ class RendererCanvas {
     }
   }
 
-  render(layout: Point[][]) {}
+  render(layout: Layout) {
+    this.ctx.beginPath()
+    const { width, height } = layout.getSize()
+    for (let i = 0; i < height; i++) {
+      this.ctx.fillStyle = Colors.transparent
+      for (let j = 0; j < width; j++) {
+        const point = layout.getPoint([j, i])
+        if (point.value === 1) {
+          this.ctx.fillStyle = point.color
+          this.ctx.rect(j * 20 + 0.5, i * 20 + 0.5, 20, 20)
+          this.ctx.fill()
+          this.ctx.strokeStyle = Colors.black
+          this.ctx.stroke()
+        }
+      }
+    }
+    this.ctx.closePath()
+  }
 }
 
 export default RendererCanvas

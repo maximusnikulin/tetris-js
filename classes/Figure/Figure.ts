@@ -6,11 +6,12 @@ export enum FigureType {
 }
 
 export enum Colors {
-  'green' = 1,
-  'blue',
-  'black',
-  'violet',
-  'transparent',
+  green = 'green',
+  blue = 'blue',
+  black = 'black',
+  violet = 'violet',
+  transparent = 'transparent',
+  yellow = 'yellow',
 }
 
 export interface IFigure {}
