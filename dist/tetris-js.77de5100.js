@@ -291,8 +291,17 @@ function () {
     }
   };
 
-  RendererCanvas.prototype.renderPoints = function (points) {
+  RendererCanvas.prototype.renderPoints = function (points, clearMeasure) {
     var _this = this;
+
+    if (clearMeasure === void 0) {
+      clearMeasure = {
+        x: 0,
+        y: 0,
+        width: this.width,
+        height: this.height
+      };
+    }
 
     var width = this.width;
     var height = this.height;
@@ -471,7 +480,7 @@ function () {
     var x = pos[0],
         y = pos[1];
 
-    if (y + height > this.rows || x > this.columns || x < 0) {
+    if (y + height > this.rows || x + width > this.columns || x < 0) {
       return false;
     }
 
@@ -529,6 +538,7 @@ function () {
     this.figureStack = [];
     this.renderer.renderGrid();
     this.isFull = false;
+    this.initListeners();
   }
 
   Tetris.prototype.createFigure = function () {
@@ -565,6 +575,38 @@ function () {
     this.interval = null;
   };
 
+  Tetris.prototype.initListeners = function () {
+    var _this = this;
+
+    window.addEventListener('keydown', function (e) {
+      var figure = _this.figureStack[_this.figureStack.length - 1];
+
+      if (e.keyCode !== 37 && e.keyCode !== 39 || !figure) {
+        return;
+      }
+
+      var _a = figure.getPosition(),
+          x = _a[0],
+          y = _a[1];
+
+      var newPos;
+
+      if (e.keyCode === 37) {
+        newPos = [x - 1, y];
+      }
+
+      if (e.keyCode === 39) {
+        newPos = [x + 1, y];
+      }
+
+      if (_this.pointsStack.canChangePosFigure(figure, newPos)) {
+        figure.setPosition(newPos);
+
+        _this.renderFigure(figure);
+      }
+    });
+  };
+
   Tetris.prototype.runTetris = function () {
     var _this = this;
 
@@ -576,6 +618,10 @@ function () {
         _this.endGame();
       }
     }, 200);
+  };
+
+  Tetris.prototype.renderFigure = function (figure) {
+    this.renderer.renderPoints(this.getStackAndFigurePoints(figure, this.pointsStack));
   };
 
   Tetris.prototype.runStep = function () {
@@ -597,7 +643,7 @@ function () {
 
     if (this.pointsStack.canChangePosFigure(figure, figurePos)) {
       figure.setPosition(figurePos);
-      this.renderer.renderPoints(this.getStackAndFigurePoints(figure, this.pointsStack));
+      this.renderFigure(figure);
     } else {
       if (figurePos[1] === 0) {
         return false;
@@ -624,7 +670,7 @@ var Tetris_1 = require("./classes/Tetris");
 
 var tetris = new Tetris_1.Tetris();
 tetris.runTetris();
-},{"./classes/Tetris":"classes/Tetris.ts"}],"../../../../usr/local/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"./classes/Tetris":"classes/Tetris.ts"}],"node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -652,7 +698,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "49423" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "59132" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
@@ -827,5 +873,5 @@ function hmrAcceptRun(bundle, id) {
     return true;
   }
 }
-},{}]},{},["../../../../usr/local/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js","index.ts"], null)
+},{}]},{},["node_modules/parcel-bundler/src/builtins/hmr-runtime.js","index.ts"], null)
 //# sourceMappingURL=/tetris-js.77de5100.js.map

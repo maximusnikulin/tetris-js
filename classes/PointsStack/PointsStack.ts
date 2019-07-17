@@ -65,7 +65,7 @@ class PointsStack {
     const { height, width } = figure.getSize()
     const [x, y] = pos
 
-    if (y + height > this.rows || x > this.columns || x < 0) {
+    if (y + height > this.rows || x + width > this.columns || x < 0) {
       return false
     }
 

@@ -25,6 +25,7 @@ export class Tetris implements ITetris {
     this.figureStack = []
     this.renderer.renderGrid()
     this.isFull = false
+    this.initListeners()
   }
 
   createFigure() {
@@ -53,6 +54,32 @@ export class Tetris implements ITetris {
     this.interval = null
   }
 
+  initListeners() {
+    window.addEventListener('keydown', e => {
+      const figure = this.figureStack[this.figureStack.length - 1]
+      if ((e.keyCode !== 37 && e.keyCode !== 39) || !figure) {
+        return
+      }
+
+      const [x, y] = figure.getPosition()
+
+      let newPos
+
+      if (e.keyCode === 37) {
+        newPos = [x - 1, y]
+      }
+
+      if (e.keyCode === 39) {
+        newPos = [x + 1, y]
+      }
+
+      if (this.pointsStack.canChangePosFigure(figure, newPos)) {
+        figure.setPosition(newPos)
+        this.renderFigure(figure)
+      }
+    })
+  }
+
   runTetris() {
     let res = this.runStep()
 
@@ -63,6 +90,12 @@ export class Tetris implements ITetris {
         this.endGame()
       }
     }, 200)
+  }
+
+  renderFigure(figure: Figure) {
+    this.renderer.renderPoints(
+      this.getStackAndFigurePoints(figure, this.pointsStack)
+    )
   }
 
   runStep() {
@@ -80,9 +113,7 @@ export class Tetris implements ITetris {
 
     if (this.pointsStack.canChangePosFigure(figure, figurePos)) {
       figure.setPosition(figurePos)
-      this.renderer.renderPoints(
-        this.getStackAndFigurePoints(figure, this.pointsStack)
-      )
+      this.renderFigure(figure)
     } else {
       if (figurePos[1] === 0) {
         return false
