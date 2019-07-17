@@ -36,7 +36,15 @@ class RendererCanvas {
     }
   }
 
-  renderPoints(points: Point[]) {
+  renderPoints(
+    points: Point[],
+    clearMeasure: { x: number; y: number; width: number; height: number } = {
+      x: 0,
+      y: 0,
+      width: this.width,
+      height: this.height,
+    }
+  ) {
     const width = this.width
     const height = this.height
 
