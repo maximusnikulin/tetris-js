@@ -25,14 +25,24 @@ export class Point implements IPoint {
     return [this.x, this.y]
   }
 
+  getValue() {
+    return this.value
+  }
+
   getColor() {
     return this.color
   }
+
   setColor(color: Colors) {
     this.color = color
   }
 
   setValue(value: 1 | 0) {
     this.value = value
+  }
+
+  setPosition(pos: number[]) {
+    this.x = pos[0]
+    this.y = pos[1]
   }
 }

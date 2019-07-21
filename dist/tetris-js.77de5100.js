@@ -145,6 +145,10 @@ function () {
     return [this.x, this.y];
   };
 
+  Point.prototype.getValue = function () {
+    return this.value;
+  };
+
   Point.prototype.getColor = function () {
     return this.color;
   };
@@ -155,6 +159,11 @@ function () {
 
   Point.prototype.setValue = function (value) {
     this.value = value;
+  };
+
+  Point.prototype.setPosition = function (pos) {
+    this.x = pos[0];
+    this.y = pos[1];
   };
 
   return Point;
@@ -447,8 +456,6 @@ function () {
   };
 
   PointsStack.prototype.addFigure = function (figure) {
-    debugger;
-
     var _a = figure.getSize(),
         height = _a.height,
         width = _a.width;
@@ -472,6 +479,56 @@ function () {
       columns: this.columns,
       rows: this.rows
     };
+  };
+
+  PointsStack.prototype.removeRow = function (row) {
+    this.points[row].forEach(function (point) {
+      point.setValue(0);
+    });
+  };
+
+  PointsStack.prototype.shrink = function (row) {
+    while (row > 0) {
+      debugger;
+      this.points[row].forEach(function (point) {
+        var _a = point.getPosition(),
+            x = _a[0],
+            y = _a[1];
+
+        point.setPosition([x, y + 1]);
+      });
+      row--;
+    }
+  };
+
+  PointsStack.prototype.getEqualsRows = function () {
+    var points = this.getPoints();
+    var equals = [];
+
+    var _loop_1 = function _loop_1(i) {
+      var pointsRow = points.filter(function (point) {
+        var _a = point.getPosition(),
+            x = _a[0],
+            y = _a[1];
+
+        return y === i;
+      });
+      var sumValues = pointsRow.reduce(function (acc, next) {
+        return acc += next.getValue();
+      }, 0);
+
+      if (sumValues === this_1.columns) {
+        equals.push(i);
+      }
+    };
+
+    var this_1 = this;
+
+    for (var i = 0; i < this.rows; i++) {
+      _loop_1(i);
+    }
+
+    return equals.length ? equals : null;
   };
 
   PointsStack.prototype.canChangePosFigure = function (figure, pos) {
@@ -527,6 +584,34 @@ var Tetris =
 /** @class */
 function () {
   function Tetris() {
+    var _this = this;
+
+    this.addFigureToStack = function (figure) {
+      _this.pointsStack.addFigure(figure);
+
+      _this.render();
+
+      _this.figureStack.pop();
+    };
+
+    this.checkEqualRows = function () {
+      var equalsRows = _this.pointsStack.getEqualsRows();
+
+      if (equalsRows) {
+        equalsRows.forEach(function (rowNumber) {
+          _this.pointsStack.removeRow(rowNumber);
+
+          _this.render();
+
+          _this.pointsStack.shrink(rowNumber); // clearInterval(this.interval)
+
+
+          _this.render(); // this.runCycle()
+
+        });
+      }
+    };
+
     this.pointsStack = new PointsStack_1["default"](10, 20);
 
     var _a = this.pointsStack.getSize(),
@@ -548,13 +633,18 @@ function () {
   };
 
   Tetris.prototype.getStackAndFigurePoints = function (figure, pointsStack) {
+    var stackPoints = pointsStack.getPoints();
+
+    if (!figure) {
+      return stackPoints;
+    }
+
     var figurePoints = figure.getPoints();
 
     var _a = figure.getPosition(),
         fX = _a[0],
         fY = _a[1];
 
-    var stackPoints = pointsStack.getPoints();
     return stackPoints.map(function (point) {
       var _a = point.getPosition(),
           x = _a[0],
@@ -597,11 +687,9 @@ function () {
           y++;
         }
 
-        _this.pointsStack.addFigure(figure);
+        _this.addFigureToStack(figure);
 
-        _this.render();
-
-        _this.figureStack.pop();
+        _this.checkEqualRows();
       } else {
         var newPos = void 0;
 
@@ -622,7 +710,7 @@ function () {
     });
   };
 
-  Tetris.prototype.runTetris = function () {
+  Tetris.prototype.runCycle = function () {
     var _this = this;
 
     var res = this.runStep();
@@ -632,7 +720,7 @@ function () {
       if (isEnd) {
         _this.endGame();
       }
-    }, 1000);
+    }, 100);
   };
 
   Tetris.prototype.render = function () {
@@ -662,17 +750,15 @@ function () {
 
     if (this.pointsStack.canChangePosFigure(figure, figurePos)) {
       figure.setPosition(figurePos);
+      this.render();
     } else {
       if (figurePos[1] === 0) {
         return false;
       }
 
-      this.pointsStack.addFigure(figure);
-      this.figureStack.pop();
+      this.addFigureToStack(figure);
+      this.checkEqualRows();
     }
-
-    this.render(); // if (this.pointsStack.hasRequalsRows()) {
-    // }
 
     return true;
   };
@@ -689,7 +775,7 @@ exports.__esModule = true;
 var Tetris_1 = require("./classes/Tetris");
 
 var tetris = new Tetris_1.Tetris();
-tetris.runTetris();
+tetris.runCycle();
 },{"./classes/Tetris":"classes/Tetris.ts"}],"node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
@@ -718,7 +804,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "51855" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "53635" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

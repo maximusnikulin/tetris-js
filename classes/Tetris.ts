@@ -33,9 +33,13 @@ export class Tetris implements ITetris {
   }
 
   getStackAndFigurePoints(figure: Figure, pointsStack: PointsStack) {
+    const stackPoints = pointsStack.getPoints()
+    if (!figure) {
+      return stackPoints
+    }
+
     const figurePoints = figure.getPoints()
     const [fX, fY] = figure.getPosition()
-    const stackPoints = pointsStack.getPoints()
 
     return stackPoints.map(point => {
       const [x, y] = point.getPosition()
@@ -72,9 +76,8 @@ export class Tetris implements ITetris {
           y++
         }
 
-        this.pointsStack.addFigure(figure)
-        this.render()
-        this.figureStack.pop()
+        this.addFigureToStack(figure)
+        this.checkEqualRows()
       } else {
         let newPos
 
@@ -94,7 +97,7 @@ export class Tetris implements ITetris {
     })
   }
 
-  runTetris() {
+  runCycle() {
     let res = this.runStep()
 
     this.interval = setInterval(() => {
@@ -103,13 +106,34 @@ export class Tetris implements ITetris {
       if (isEnd) {
         this.endGame()
       }
-    }, 1000)
+    }, 100)
   }
 
   render() {
     this.renderer.renderPoints(
       this.getStackAndFigurePoints(this.getCurrentFigure(), this.pointsStack)
     )
+  }
+
+  addFigureToStack = (figure: Figure) => {
+    this.pointsStack.addFigure(figure)
+    this.render()
+    this.figureStack.pop()
+  }
+
+  checkEqualRows = () => {
+    const equalsRows = this.pointsStack.getEqualsRows()
+
+    if (equalsRows) {
+      equalsRows.forEach(rowNumber => {
+        this.pointsStack.removeRow(rowNumber)
+        this.render()
+        this.pointsStack.shrink(rowNumber)
+        // clearInterval(this.interval)
+        this.render()
+        // this.runCycle()
+      })
+    }
   }
 
   getCurrentFigure() {
@@ -131,18 +155,14 @@ export class Tetris implements ITetris {
 
     if (this.pointsStack.canChangePosFigure(figure, figurePos)) {
       figure.setPosition(figurePos)
+      this.render()
     } else {
       if (figurePos[1] === 0) {
         return false
       }
-      this.pointsStack.addFigure(figure)
-      this.figureStack.pop()
+      this.addFigureToStack(figure)
+      this.checkEqualRows()
     }
-
-    this.render()
-    // if (this.pointsStack.hasRequalsRows()) {
-
-    // }
 
     return true
   }

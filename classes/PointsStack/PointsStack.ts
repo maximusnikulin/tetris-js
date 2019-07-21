@@ -61,6 +61,45 @@ class PointsStack {
     }
   }
 
+  removeRow(row: number) {
+    this.points[row].forEach(point => {
+      point.setValue(0)
+    })
+  }
+
+  shrink(row: number) {
+    while (row > 0) {
+      debugger
+      this.points[row].forEach(point => {
+        const [x, y] = point.getPosition()
+        point.setPosition([x, y + 1])
+      })
+
+      row--
+    }
+  }
+
+  getEqualsRows(): number[] | null {
+    const points = this.getPoints()
+    let equals = []
+    for (let i = 0; i < this.rows; i++) {
+      let pointsRow = points.filter(point => {
+        const [x, y] = point.getPosition()
+        return y === i
+      })
+
+      const sumValues = pointsRow.reduce((acc, next) => {
+        return (acc += next.getValue())
+      }, 0)
+
+      if (sumValues === this.columns) {
+        equals.push(i)
+      }
+    }
+
+    return equals.length ? equals : null
+  }
+
   canChangePosFigure(figure: Figure, pos: number[]) {
     const { height, width } = figure.getSize()
     const [x, y] = pos
