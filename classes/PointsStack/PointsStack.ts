@@ -27,7 +27,7 @@ class PointsStack {
     }
   }
 
-  getPoints() {
+  getFlatPoints() {
     let points: Point[] = []
     this.points.forEach(row => {
       row.forEach(point => points.push(point))
@@ -40,17 +40,15 @@ class PointsStack {
     return this.points[y][x]
   }
 
-  addFigure(figure: Figure) {
-    const { height, width } = figure.getSize()
-    const [x, y] = figure.getPosition()
+  addPoints(points: Point[]) {}
 
-    for (let i = 0; i < height; i++) {
-      for (let j = 0; j < width; j++) {
-        const patternValue = figure.getPatternValue([j, i])
-        const point = this.points[y + i][x + j]
-        point.setValue(patternValue)
-        point.setColor(figure.getColor())
-      }
+  getAreaPointsMeasure = (points: Point[][]) => {
+    const [x, y] = points[0][0].getPosition()
+    return {
+      height: points.length,
+      width: points[0].length,
+      x,
+      y,
     }
   }
 
@@ -61,58 +59,27 @@ class PointsStack {
     }
   }
 
-  removeRow(row: number) {
-    this.points[row].forEach(point => {
-      point.setValue(0)
-    })
-  }
+  resetRow(row: number) {}
 
-  shrink(row: number) {
-    while (row > 0) {
-      debugger
-      this.points[row].forEach(point => {
-        const [x, y] = point.getPosition()
-        point.setPosition([x, y + 1])
-      })
+  shrink(row: number) {}
 
-      row--
-    }
-  }
-
-  getEqualsRows(): number[] | null {
-    const points = this.getPoints()
-    let equals = []
-    for (let i = 0; i < this.rows; i++) {
-      let pointsRow = points.filter(point => {
-        const [x, y] = point.getPosition()
-        return y === i
-      })
-
-      const sumValues = pointsRow.reduce((acc, next) => {
-        return (acc += next.getValue())
-      }, 0)
-
-      if (sumValues === this.columns) {
-        equals.push(i)
-      }
-    }
-
-    return equals.length ? equals : null
-  }
-
-  canChangePosFigure(figure: Figure, pos: number[]) {
-    const { height, width } = figure.getSize()
-    const [x, y] = pos
-
-    if (y + height > this.rows || x + width > this.columns || x < 0) {
+  canChangePosPoints(points: Point[][], diff: { dY?: number; dX?: number }) {
+    const { height, width, x, y } = this.getAreaPointsMeasure(points)
+    let { dX = 0, dY = 0 } = diff
+    if (
+      y + height + dY > this.rows ||
+      x + width + dX > this.columns ||
+      x + dX < 0
+    ) {
       return false
     }
 
     let res = true
+
     out: for (let i = 0; i < height; i++) {
       for (let j = 0; j < width; j++) {
         if (
-          this.getPoint([j + x, i + y]).value + figure.getPatternValue([j, i]) >
+          this.getPoint([j + dX, i + dY]).value + points[i][j].getValue() >
           1
         ) {
           res = false
@@ -120,6 +87,7 @@ class PointsStack {
         }
       }
     }
+
     return res
   }
 }

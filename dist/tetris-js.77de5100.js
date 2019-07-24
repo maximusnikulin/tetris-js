@@ -155,15 +155,18 @@ function () {
 
   Point.prototype.setColor = function (color) {
     this.color = color;
+    return this;
   };
 
   Point.prototype.setValue = function (value) {
     this.value = value;
+    return this;
   };
 
   Point.prototype.setPosition = function (pos) {
     this.x = pos[0];
     this.y = pos[1];
+    return this;
   };
 
   return Point;
@@ -184,6 +187,7 @@ var FigureType;
   FigureType[FigureType["second"] = 2] = "second";
   FigureType[FigureType["third"] = 3] = "third";
   FigureType[FigureType["forth"] = 4] = "forth";
+  FigureType[FigureType["five"] = 5] = "five";
 })(FigureType = exports.FigureType || (exports.FigureType = {}));
 
 var Colors;
@@ -395,6 +399,11 @@ function () {
       color = Figure_1.Colors.yellow;
     }
 
+    if (type === Figure_1.FigureType.five) {
+      pattern[0] = [1, 1, 1, 1, 1, 1];
+      color = Figure_1.Colors.yellow;
+    }
+
     return new Figure_1["default"](pattern, pos, color);
   };
 
@@ -421,6 +430,19 @@ function () {
       defaultValue = 0;
     }
 
+    this.getAreaPointsMeasure = function (points) {
+      var _a = points[0][0].getPosition(),
+          x = _a[0],
+          y = _a[1];
+
+      return {
+        height: points.length,
+        width: points[0].length,
+        x: x,
+        y: y
+      };
+    };
+
     this.rows = rows;
     this.columns = columns;
     this.points = [[]];
@@ -439,7 +461,7 @@ function () {
     }
   };
 
-  PointsStack.prototype.getPoints = function () {
+  PointsStack.prototype.getFlatPoints = function () {
     var points = [];
     this.points.forEach(function (row) {
       row.forEach(function (point) {
@@ -455,24 +477,7 @@ function () {
     return this.points[y][x];
   };
 
-  PointsStack.prototype.addFigure = function (figure) {
-    var _a = figure.getSize(),
-        height = _a.height,
-        width = _a.width;
-
-    var _b = figure.getPosition(),
-        x = _b[0],
-        y = _b[1];
-
-    for (var i = 0; i < height; i++) {
-      for (var j = 0; j < width; j++) {
-        var patternValue = figure.getPatternValue([j, i]);
-        var point = this.points[y + i][x + j];
-        point.setValue(patternValue);
-        point.setColor(figure.getColor());
-      }
-    }
-  };
+  PointsStack.prototype.addPoints = function (points) {};
 
   PointsStack.prototype.getSize = function () {
     return {
@@ -481,63 +486,22 @@ function () {
     };
   };
 
-  PointsStack.prototype.removeRow = function (row) {
-    this.points[row].forEach(function (point) {
-      point.setValue(0);
-    });
-  };
+  PointsStack.prototype.resetRow = function (row) {};
 
-  PointsStack.prototype.shrink = function (row) {
-    while (row > 0) {
-      debugger;
-      this.points[row].forEach(function (point) {
-        var _a = point.getPosition(),
-            x = _a[0],
-            y = _a[1];
+  PointsStack.prototype.shrink = function (row) {}; //TODO: R
 
-        point.setPosition([x, y + 1]);
-      });
-      row--;
-    }
-  };
 
-  PointsStack.prototype.getEqualsRows = function () {
-    var points = this.getPoints();
-    var equals = [];
-
-    var _loop_1 = function _loop_1(i) {
-      var pointsRow = points.filter(function (point) {
-        var _a = point.getPosition(),
-            x = _a[0],
-            y = _a[1];
-
-        return y === i;
-      });
-      var sumValues = pointsRow.reduce(function (acc, next) {
-        return acc += next.getValue();
-      }, 0);
-
-      if (sumValues === this_1.columns) {
-        equals.push(i);
-      }
-    };
-
-    var this_1 = this;
-
-    for (var i = 0; i < this.rows; i++) {
-      _loop_1(i);
-    }
-
-    return equals.length ? equals : null;
-  };
-
-  PointsStack.prototype.canChangePosFigure = function (figure, pos) {
-    var _a = figure.getSize(),
+  PointsStack.prototype.canChangePosPoints = function (points, diff) {
+    var _a = this.getAreaPointsMeasure(points),
         height = _a.height,
-        width = _a.width;
+        width = _a.width,
+        x = _a.x,
+        y = _a.y;
 
-    var x = pos[0],
-        y = pos[1];
+    var _b = diff.dX,
+        dX = _b === void 0 ? 0 : _b,
+        _c = diff.dY,
+        dY = _c === void 0 ? 0 : _c;
 
     if (y + height > this.rows || x + width > this.columns || x < 0) {
       return false;
@@ -547,7 +511,7 @@ function () {
 
     out: for (var i = 0; i < height; i++) {
       for (var j = 0; j < width; j++) {
-        if (this.getPoint([j + x, i + y]).value + figure.getPatternValue([j, i]) > 1) {
+        if (this.getPoint([j + dX, i + dY]).value + points[i][j].getValue() > 1) {
           res = false;
           break out;
         }
@@ -586,29 +550,43 @@ function () {
   function Tetris() {
     var _this = this;
 
-    this.addFigureToStack = function (figure) {
-      _this.pointsStack.addFigure(figure);
+    this.handleKeyPress = function (e) {
+      // if (!this.canHandleKey) return
+      var figure = _this.getCurrentFigure();
 
-      _this.render();
+      if (e.keyCode !== 40 && e.keyCode !== 37 && e.keyCode !== 39 || !figure) {
+        return;
+      }
 
-      _this.figureStack.pop();
-    };
+      var _a = figure.getPosition(),
+          x = _a[0],
+          y = _a[1];
 
-    this.checkEqualRows = function () {
-      var equalsRows = _this.pointsStack.getEqualsRows();
+      if (e.keyCode === 40) {
+        while (_this.pointsStack.canChangePosPoints(figure, [x, y])) {
+          figure.setPosition([x, y]);
+          y++;
+        }
 
-      if (equalsRows) {
-        equalsRows.forEach(function (rowNumber) {
-          _this.pointsStack.removeRow(rowNumber);
+        _this.addFigureToStack(figure);
+
+        _this.checkEqualRows();
+      } else {
+        var newPos = void 0;
+
+        if (e.keyCode === 37) {
+          newPos = [x - 1, y];
+        }
+
+        if (e.keyCode === 39) {
+          newPos = [x + 1, y];
+        }
+
+        if (_this.pointsStack.canChangePosPoints(figure, newPos)) {
+          figure.setPosition(newPos);
 
           _this.render();
-
-          _this.pointsStack.shrink(rowNumber); // clearInterval(this.interval)
-
-
-          _this.render(); // this.runCycle()
-
-        });
+        }
       }
     };
 
@@ -625,6 +603,7 @@ function () {
     this.figureStack = [];
     this.renderer.renderGrid();
     this.isFull = false;
+    this.canHandleKey = true;
     this.initListeners();
   }
 
@@ -632,7 +611,7 @@ function () {
     return FigureMaker_1["default"].create(Figure_1.FigureType.first);
   };
 
-  Tetris.prototype.getStackAndFigurePoints = function (figure, pointsStack) {
+  Tetris.prototype.getRenderPoints = function (figure, pointsStack) {
     var stackPoints = pointsStack.getPoints();
 
     if (!figure) {
@@ -640,11 +619,6 @@ function () {
     }
 
     var figurePoints = figure.getPoints();
-
-    var _a = figure.getPosition(),
-        fX = _a[0],
-        fY = _a[1];
-
     return stackPoints.map(function (point) {
       var _a = point.getPosition(),
           x = _a[0],
@@ -667,47 +641,10 @@ function () {
     this.interval = null;
   };
 
-  Tetris.prototype.initListeners = function () {
-    var _this = this;
+  Tetris.prototype.initListeners = function () {// window.addEventListener('keydown', e => this.handleKeyPress(e))
+  };
 
-    window.addEventListener('keydown', function (e) {
-      var figure = _this.getCurrentFigure();
-
-      if (e.keyCode !== 40 && e.keyCode !== 37 && e.keyCode !== 39 || !figure) {
-        return;
-      }
-
-      var _a = figure.getPosition(),
-          x = _a[0],
-          y = _a[1];
-
-      if (e.keyCode === 40) {
-        while (_this.pointsStack.canChangePosFigure(figure, [x, y])) {
-          figure.setPosition([x, y]);
-          y++;
-        }
-
-        _this.addFigureToStack(figure);
-
-        _this.checkEqualRows();
-      } else {
-        var newPos = void 0;
-
-        if (e.keyCode === 37) {
-          newPos = [x - 1, y];
-        }
-
-        if (e.keyCode === 39) {
-          newPos = [x + 1, y];
-        }
-
-        if (_this.pointsStack.canChangePosFigure(figure, newPos)) {
-          figure.setPosition(newPos);
-
-          _this.render();
-        }
-      }
-    });
+  Tetris.prototype.removeListeners = function () {// window.removeEventListener('keydown', this.handleKeyPress)
   };
 
   Tetris.prototype.runCycle = function () {
@@ -724,8 +661,12 @@ function () {
   };
 
   Tetris.prototype.render = function () {
-    this.renderer.renderPoints(this.getStackAndFigurePoints(this.getCurrentFigure(), this.pointsStack));
-  };
+    this.renderer.renderPoints(this.getRenderPoints(this.getCurrentFigure(), this.pointsStack));
+  }; // addFigureToStack = (figure: Figure) => {
+  //   this.pointsStack.addPoints(figure)
+  //   this.figureStack.pop()
+  // }
+
 
   Tetris.prototype.getCurrentFigure = function () {
     return this.figureStack[this.figureStack.length - 1] || null;
@@ -748,7 +689,14 @@ function () {
       figure.setPosition(figurePos);
     }
 
-    if (this.pointsStack.canChangePosFigure(figure, figurePos)) {
+    var _b = figure.getSize(),
+        width = _b.width,
+        height = _b.height;
+
+    if (this.pointsStack.canChangePosPoints(figure.getPoints(), {
+      dX: 0,
+      dY: 1
+    })) {
       figure.setPosition(figurePos);
       this.render();
     } else {
@@ -758,9 +706,9 @@ function () {
 
       this.addFigureToStack(figure);
       this.checkEqualRows();
-    }
+      this.render();
+    } //   return true
 
-    return true;
   };
 
   return Tetris;
@@ -774,8 +722,7 @@ exports.__esModule = true;
 
 var Tetris_1 = require("./classes/Tetris");
 
-var tetris = new Tetris_1.Tetris();
-tetris.runCycle();
+var tetris = new Tetris_1.Tetris(); // tetris.runCycle()
 },{"./classes/Tetris":"classes/Tetris.ts"}],"node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
@@ -804,7 +751,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "53635" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "56161" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

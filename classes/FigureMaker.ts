@@ -30,6 +30,11 @@ class FigureMaker {
       color = Colors.yellow
     }
 
+    if (type === FigureType.five) {
+      pattern[0] = [1, 1, 1, 1, 1, 1]
+      color = Colors.yellow
+    }
+
     return new Figure(pattern, pos, color)
   }
 }

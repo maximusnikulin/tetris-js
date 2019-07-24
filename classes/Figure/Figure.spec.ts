@@ -14,10 +14,10 @@ describe('Test Layout class', () => {
   })
 
   test('It should has 0 value of pattern', () => {
-    expect(figureFirst.getPatternValue([0, 0])).toBe(0)
+    expect(figureFirst.getPointsArea()[0][0].getValue()).toBe(0)
   })
 
   test('It should has 1 value of pattern', () => {
-    expect(figureFirst.getPatternValue([0, 1])).toBe(1)
+    expect(figureFirst.getPointsArea()[0][1].getValue()).toBe(1)
   })
 })

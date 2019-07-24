@@ -5,6 +5,7 @@ export enum FigureType {
   'second',
   'third',
   'forth',
+  'five',
 }
 
 export enum Colors {
@@ -23,7 +24,11 @@ class Figure implements IFigure {
   pattern: (0 | 1)[][]
   position: number[]
   color: Colors
-  constructor(pattern: (0 | 1)[][], position: number[] = null, color?: Colors) {
+  constructor(
+    pattern: (0 | 1)[][],
+    position: number[] = [0, 0],
+    color?: Colors
+  ) {
     this.pattern = pattern
     this.position = position
     this.color = color || Colors.black
@@ -33,6 +38,21 @@ class Figure implements IFigure {
     this.position = pos
   }
 
+  getPointsArea() {
+    const [dX, dY] = this.position
+    return this.pattern.map((ptrnRow, y) =>
+      ptrnRow.map(
+        (value, x) =>
+          new Point(
+            x + dX,
+            y + dY,
+            value,
+            value ? this.color : Colors.transparent
+          )
+      )
+    )
+  }
+
   getSize() {
     return {
       height: this.pattern.length,
@@ -40,12 +60,7 @@ class Figure implements IFigure {
     }
   }
 
-  getPatternValue(pos: number[]) {
-    const [x, y] = pos
-    return this.pattern[y][x]
-  }
-
-  getPoints() {
+  getFlatPoints() {
     const [dX, dY] = this.position
 
     let points: Point[] = []
