@@ -1,4 +1,4 @@
-import { Colors } from './Figure/Figure'
+import { Colors, PosXY } from './Figure/Figure'
 
 interface IPoint {
   x: number
@@ -22,7 +22,7 @@ export class Point implements IPoint {
   }
 
   getPosition() {
-    return [this.x, this.y]
+    return { x: this.x, y: this.y }
   }
 
   getValue() {
@@ -43,9 +43,11 @@ export class Point implements IPoint {
     return this
   }
 
-  setPosition(pos: number[]) {
-    this.x = pos[0]
-    this.y = pos[1]
+  setPosition(pos: Partial<PosXY>) {
+    for (let key in pos) {
+      this[key] = pos[key]
+    }
+
     return this
   }
 }

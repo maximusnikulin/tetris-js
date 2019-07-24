@@ -19,14 +19,19 @@ export enum Colors {
 
 export interface IFigure {}
 
+export interface PosXY {
+  x: number
+  y: number
+}
+
 class Figure implements IFigure {
   // Standart size of figure 4 x 2
   pattern: (0 | 1)[][]
-  position: number[]
+  position: PosXY
   color: Colors
   constructor(
     pattern: (0 | 1)[][],
-    position: number[] = [0, 0],
+    position: { x: number; y: number } = { x: 0, y: 0 },
     color?: Colors
   ) {
     this.pattern = pattern
@@ -34,12 +39,14 @@ class Figure implements IFigure {
     this.color = color || Colors.black
   }
 
-  setPosition(pos: number[]) {
-    this.position = pos
+  setPosition(pos: Partial<PosXY>) {
+    for (let key in pos) {
+      this.position[key] = pos[key]
+    }
   }
 
   getPointsArea() {
-    const [dX, dY] = this.position
+    const { x: dX, y: dY } = this.position
     return this.pattern.map((ptrnRow, y) =>
       ptrnRow.map(
         (value, x) =>
@@ -61,7 +68,7 @@ class Figure implements IFigure {
   }
 
   getFlatPoints() {
-    const [dX, dY] = this.position
+    const { x: dX, y: dY } = this.position
 
     let points: Point[] = []
     this.pattern.forEach((ptrnRow, y) => {

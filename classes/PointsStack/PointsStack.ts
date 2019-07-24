@@ -1,4 +1,4 @@
-import Figure, { Colors } from '../Figure/Figure'
+import Figure, { Colors, PosXY } from '../Figure/Figure'
 import { Point } from '../Point'
 
 export const sum = (a: number, b: number) => a + b
@@ -35,15 +35,22 @@ class PointsStack {
     return points
   }
 
-  getPoint(pos: number[]): Point {
-    const [x, y] = pos
+  getPoint(pos: PosXY): Point {
+    const { x, y } = pos
     return this.points[y][x]
   }
 
-  addPoints(points: Point[]) {}
+  addPoints(points: Point[][]) {
+    points.forEach(row => {
+      row.forEach(point => {
+        const { x, y } = point.getPosition()
+        this.points[y][x] = point
+      })
+    })
+  }
 
   getAreaPointsMeasure = (points: Point[][]) => {
-    const [x, y] = points[0][0].getPosition()
+    const { x, y } = points[0][0].getPosition()
     return {
       height: points.length,
       width: points[0].length,
@@ -65,30 +72,30 @@ class PointsStack {
 
   canChangePosPoints(points: Point[][], diff: { dY?: number; dX?: number }) {
     const { height, width, x, y } = this.getAreaPointsMeasure(points)
-    let { dX = 0, dY = 0 } = diff
-    if (
-      y + height + dY > this.rows ||
-      x + width + dX > this.columns ||
-      x + dX < 0
-    ) {
+    let { dX = 0, dY = 1 } = diff
+
+    if (y + height + dY > this.rows || x + width + dX > this.columns || x < 0) {
       return false
     }
 
-    let res = true
-
-    out: for (let i = 0; i < height; i++) {
-      for (let j = 0; j < width; j++) {
-        if (
-          this.getPoint([j + dX, i + dY]).value + points[i][j].getValue() >
-          1
-        ) {
-          res = false
-          break out
-        }
-      }
+    if (dX) {
     }
 
-    return res
+    if (dY) {
+      let res = true
+
+      points[height - 1].forEach(point => {
+        const { x, y } = point.getPosition()
+
+        if (this.getPoint({ x, y: y + dY }).getValue() + point.getValue() > 1) {
+          res = false
+        }
+      })
+
+      return res
+    }
+
+    return true
   }
 }
 

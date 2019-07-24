@@ -1,7 +1,7 @@
-import Figure, { FigureType, Colors } from './Figure/Figure'
+import Figure, { FigureType, Colors, PosXY } from './Figure/Figure'
 
 class FigureMaker {
-  static create(type: FigureType, pos?: number[]) {
+  static create(type: FigureType, pos?: PosXY) {
     let pattern = []
     let color = Colors.black
     // Will be random value

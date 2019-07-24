@@ -36,15 +36,8 @@ class RendererCanvas {
     }
   }
 
-  renderPoints(
-    points: Point[],
-    clearMeasure: { x: number; y: number; width: number; height: number } = {
-      x: 0,
-      y: 0,
-      width: this.width,
-      height: this.height,
-    }
-  ) {
+  renderPoints(points: Point[]) {
+    // debugger
     const width = this.width
     const height = this.height
 
@@ -56,7 +49,7 @@ class RendererCanvas {
     points.forEach(point => {
       this.ctx.fillStyle = Colors.transparent
       if (point.value === 1) {
-        const [x, y] = point.getPosition()
+        const { x, y } = point.getPosition()
         this.ctx.fillStyle = point.color
         this.ctx.rect(
           //TODO: Create util for thar
@@ -72,6 +65,7 @@ class RendererCanvas {
 
       this.ctx.closePath()
     })
+    console.log('render')
   }
 }
 

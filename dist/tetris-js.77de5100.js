@@ -142,7 +142,10 @@ function () {
   }
 
   Point.prototype.getPosition = function () {
-    return [this.x, this.y];
+    return {
+      x: this.x,
+      y: this.y
+    };
   };
 
   Point.prototype.getValue = function () {
@@ -164,8 +167,10 @@ function () {
   };
 
   Point.prototype.setPosition = function (pos) {
-    this.x = pos[0];
-    this.y = pos[1];
+    for (var key in pos) {
+      this[key] = pos[key];
+    }
+
     return this;
   };
 
@@ -206,7 +211,10 @@ var Figure =
 function () {
   function Figure(pattern, position, color) {
     if (position === void 0) {
-      position = null;
+      position = {
+        x: 0,
+        y: 0
+      };
     }
 
     this.pattern = pattern;
@@ -215,7 +223,22 @@ function () {
   }
 
   Figure.prototype.setPosition = function (pos) {
-    this.position = pos;
+    for (var key in pos) {
+      this.position[key] = pos[key];
+    }
+  };
+
+  Figure.prototype.getPointsArea = function () {
+    var _this = this;
+
+    var _a = this.position,
+        dX = _a.x,
+        dY = _a.y;
+    return this.pattern.map(function (ptrnRow, y) {
+      return ptrnRow.map(function (value, x) {
+        return new Point_1.Point(x + dX, y + dY, value, value ? _this.color : Colors.transparent);
+      });
+    });
   };
 
   Figure.prototype.getSize = function () {
@@ -225,18 +248,12 @@ function () {
     };
   };
 
-  Figure.prototype.getPatternValue = function (pos) {
-    var x = pos[0],
-        y = pos[1];
-    return this.pattern[y][x];
-  };
-
-  Figure.prototype.getPoints = function () {
+  Figure.prototype.getFlatPoints = function () {
     var _this = this;
 
     var _a = this.position,
-        dX = _a[0],
-        dY = _a[1];
+        dX = _a.x,
+        dY = _a.y;
     var points = [];
     this.pattern.forEach(function (ptrnRow, y) {
       return ptrnRow.forEach(function (value, x) {
@@ -304,17 +321,9 @@ function () {
     }
   };
 
-  RendererCanvas.prototype.renderPoints = function (points, clearMeasure) {
-    var _this = this;
+  RendererCanvas.prototype.renderPoints = function (points) {
+    var _this = this; // debugger
 
-    if (clearMeasure === void 0) {
-      clearMeasure = {
-        x: 0,
-        y: 0,
-        width: this.width,
-        height: this.height
-      };
-    }
 
     var width = this.width;
     var height = this.height;
@@ -326,8 +335,8 @@ function () {
 
       if (point.value === 1) {
         var _a = point.getPosition(),
-            x = _a[0],
-            y = _a[1];
+            x = _a.x,
+            y = _a.y;
 
         _this.ctx.fillStyle = point.color;
 
@@ -343,6 +352,7 @@ function () {
 
       _this.ctx.closePath();
     });
+    console.log('render');
   };
 
   return RendererCanvas;
@@ -432,8 +442,8 @@ function () {
 
     this.getAreaPointsMeasure = function (points) {
       var _a = points[0][0].getPosition(),
-          x = _a[0],
-          y = _a[1];
+          x = _a.x,
+          y = _a.y;
 
       return {
         height: points.length,
@@ -472,12 +482,24 @@ function () {
   };
 
   PointsStack.prototype.getPoint = function (pos) {
-    var x = pos[0],
-        y = pos[1];
+    var x = pos.x,
+        y = pos.y;
     return this.points[y][x];
   };
 
-  PointsStack.prototype.addPoints = function (points) {};
+  PointsStack.prototype.addPoints = function (points) {
+    var _this = this;
+
+    points.forEach(function (row) {
+      row.forEach(function (point) {
+        var _a = point.getPosition(),
+            x = _a.x,
+            y = _a.y;
+
+        _this.points[y][x] = point;
+      });
+    });
+  };
 
   PointsStack.prototype.getSize = function () {
     return {
@@ -488,10 +510,11 @@ function () {
 
   PointsStack.prototype.resetRow = function (row) {};
 
-  PointsStack.prototype.shrink = function (row) {}; //TODO: R
-
+  PointsStack.prototype.shrink = function (row) {};
 
   PointsStack.prototype.canChangePosPoints = function (points, diff) {
+    var _this = this;
+
     var _a = this.getAreaPointsMeasure(points),
         height = _a.height,
         width = _a.width,
@@ -501,24 +524,32 @@ function () {
     var _b = diff.dX,
         dX = _b === void 0 ? 0 : _b,
         _c = diff.dY,
-        dY = _c === void 0 ? 0 : _c;
+        dY = _c === void 0 ? 1 : _c;
 
-    if (y + height > this.rows || x + width > this.columns || x < 0) {
+    if (y + height + dY > this.rows || x + width + dX > this.columns || x < 0) {
       return false;
     }
 
-    var res = true;
+    if (dX) {}
 
-    out: for (var i = 0; i < height; i++) {
-      for (var j = 0; j < width; j++) {
-        if (this.getPoint([j + dX, i + dY]).value + points[i][j].getValue() > 1) {
-          res = false;
-          break out;
+    if (dY) {
+      var res_1 = true;
+      points[height - 1].forEach(function (point) {
+        var _a = point.getPosition(),
+            x = _a.x,
+            y = _a.y;
+
+        if (_this.getPoint({
+          x: x,
+          y: y + dY
+        }).getValue() + point.getValue() > 1) {
+          res_1 = false;
         }
-      }
+      });
+      return res_1;
     }
 
-    return res;
+    return true;
   };
 
   return PointsStack;
@@ -559,35 +590,50 @@ function () {
       }
 
       var _a = figure.getPosition(),
-          x = _a[0],
-          y = _a[1];
+          x = _a.x,
+          y = _a.y;
 
       if (e.keyCode === 40) {
-        while (_this.pointsStack.canChangePosPoints(figure, [x, y])) {
-          figure.setPosition([x, y]);
-          y++;
+        var dY = 1;
+
+        while (_this.pointsStack.canChangePosPoints(figure.getPointsArea(), {
+          dY: dY
+        })) {
+          dY++;
         }
 
-        _this.addFigureToStack(figure);
+        figure.setPosition({
+          y: y
+        });
 
-        _this.checkEqualRows();
+        _this.addFigureToStack(figure);
       } else {
-        var newPos = void 0;
+        var dX = 0;
 
         if (e.keyCode === 37) {
-          newPos = [x - 1, y];
+          dX = -1;
         }
 
         if (e.keyCode === 39) {
-          newPos = [x + 1, y];
+          dX = 1;
         }
 
-        if (_this.pointsStack.canChangePosPoints(figure, newPos)) {
-          figure.setPosition(newPos);
+        if (_this.pointsStack.canChangePosPoints(figure.getPointsArea(), {
+          dX: dX
+        })) {
+          figure.setPosition({
+            x: x + dX
+          });
 
           _this.render();
         }
       }
+    };
+
+    this.addFigureToStack = function (figure) {
+      _this.pointsStack.addPoints(figure.getPointsArea());
+
+      _this.figureStack.pop();
     };
 
     this.pointsStack = new PointsStack_1["default"](10, 20);
@@ -607,27 +653,27 @@ function () {
     this.initListeners();
   }
 
-  Tetris.prototype.createFigure = function () {
-    return FigureMaker_1["default"].create(Figure_1.FigureType.first);
+  Tetris.prototype.createFigure = function (pos) {
+    return FigureMaker_1["default"].create(Figure_1.FigureType.first, pos);
   };
 
   Tetris.prototype.getRenderPoints = function (figure, pointsStack) {
-    var stackPoints = pointsStack.getPoints();
+    var stackPoints = pointsStack.getFlatPoints();
 
     if (!figure) {
       return stackPoints;
     }
 
-    var figurePoints = figure.getPoints();
+    var figurePoints = figure.getFlatPoints();
     return stackPoints.map(function (point) {
       var _a = point.getPosition(),
-          x = _a[0],
-          y = _a[1];
+          x = _a.x,
+          y = _a.y;
 
       var matchPoint = figurePoints.find(function (figPoint) {
         var _a = figPoint.getPosition(),
-            fpX = _a[0],
-            fpY = _a[1];
+            fpX = _a.x,
+            fpY = _a.y;
 
         return fpX === x && fpY === y;
       });
@@ -662,11 +708,7 @@ function () {
 
   Tetris.prototype.render = function () {
     this.renderer.renderPoints(this.getRenderPoints(this.getCurrentFigure(), this.pointsStack));
-  }; // addFigureToStack = (figure: Figure) => {
-  //   this.pointsStack.addPoints(figure)
-  //   this.figureStack.pop()
-  // }
-
+  };
 
   Tetris.prototype.getCurrentFigure = function () {
     return this.figureStack[this.figureStack.length - 1] || null;
@@ -674,41 +716,39 @@ function () {
 
   Tetris.prototype.runStep = function () {
     var figure = this.getCurrentFigure();
-    var figurePos = null;
+    var dY = 1;
 
-    if (figure) {
-      var _a = figure.getPosition(),
-          x = _a[0],
-          y = _a[1];
-
-      figurePos = [x, y + 1];
-    } else {
-      figure = this.createFigure();
+    if (!figure) {
+      dY = 0;
+      var figurePos = {
+        x: 2,
+        y: 0
+      };
+      figure = this.createFigure(figurePos);
       this.figureStack.push(figure);
-      figurePos = [2, 0];
-      figure.setPosition(figurePos);
     }
 
-    var _b = figure.getSize(),
-        width = _b.width,
-        height = _b.height;
+    var _a = figure.getPosition(),
+        x = _a.x,
+        y = _a.y;
 
-    if (this.pointsStack.canChangePosPoints(figure.getPoints(), {
-      dX: 0,
-      dY: 1
+    if (this.pointsStack.canChangePosPoints(figure.getPointsArea(), {
+      dY: dY
     })) {
-      figure.setPosition(figurePos);
+      figure.setPosition({
+        y: y + dY
+      });
       this.render();
     } else {
-      if (figurePos[1] === 0) {
+      if (y === 0) {
         return false;
       }
 
       this.addFigureToStack(figure);
-      this.checkEqualRows();
       this.render();
-    } //   return true
+    }
 
+    return true;
   };
 
   return Tetris;
@@ -722,7 +762,8 @@ exports.__esModule = true;
 
 var Tetris_1 = require("./classes/Tetris");
 
-var tetris = new Tetris_1.Tetris(); // tetris.runCycle()
+var tetris = new Tetris_1.Tetris();
+tetris.runCycle();
 },{"./classes/Tetris":"classes/Tetris.ts"}],"node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';

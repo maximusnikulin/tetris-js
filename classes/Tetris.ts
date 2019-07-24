@@ -1,6 +1,6 @@
 import RendererCanvas from './RendererCanvas'
 import FigureMaker from './FigureMaker'
-import Figure, { FigureType } from './Figure/Figure'
+import Figure, { FigureType, PosXY } from './Figure/Figure'
 import PointsStack from './PointsStack/PointsStack'
 import { Point } from './Point'
 
@@ -14,6 +14,7 @@ export class Tetris implements ITetris {
   width: number
   height: number
   isFull: boolean
+  //@ts-ignore
   interval: NodeJS.Timeout
   canHandleKey: boolean
   constructor() {
@@ -30,22 +31,22 @@ export class Tetris implements ITetris {
     this.initListeners()
   }
 
-  createFigure() {
-    return FigureMaker.create(FigureType.first)
+  createFigure(pos: PosXY) {
+    return FigureMaker.create(FigureType.first, pos)
   }
 
   getRenderPoints(figure: Figure, pointsStack: PointsStack) {
-    const stackPoints = pointsStack.getPoints()
+    const stackPoints = pointsStack.getFlatPoints()
     if (!figure) {
       return stackPoints
     }
 
-    const figurePoints = figure.getPoints()
+    const figurePoints = figure.getFlatPoints()
 
     return stackPoints.map(point => {
-      const [x, y] = point.getPosition()
+      const { x, y } = point.getPosition()
       const matchPoint = figurePoints.find(figPoint => {
-        const [fpX, fpY] = figPoint.getPosition()
+        const { x: fpX, y: fpY } = figPoint.getPosition()
         return fpX === x && fpY === y
       })
 
@@ -66,29 +67,31 @@ export class Tetris implements ITetris {
       return
     }
 
-    let [x, y] = figure.getPosition()
+    let { x, y } = figure.getPosition()
 
     if (e.keyCode === 40) {
-      while (this.pointsStack.canChangePosPoints(figure, [x, y])) {
-        figure.setPosition([x, y])
-        y++
+      let dY = 1
+      while (
+        this.pointsStack.canChangePosPoints(figure.getPointsArea(), { dY })
+      ) {
+        dY++
       }
 
+      figure.setPosition({ y })
       this.addFigureToStack(figure)
-      this.checkEqualRows()
     } else {
-      let newPos
+      let dX = 0
 
       if (e.keyCode === 37) {
-        newPos = [x - 1, y]
+        dX = -1
       }
 
       if (e.keyCode === 39) {
-        newPos = [x + 1, y]
+        dX = 1
       }
 
-      if (this.pointsStack.canChangePosPoints(figure, newPos)) {
-        figure.setPosition(newPos)
+      if (this.pointsStack.canChangePosPoints(figure.getPointsArea(), { dX })) {
+        figure.setPosition({ x: x + dX })
         this.render()
       }
     }
@@ -107,7 +110,6 @@ export class Tetris implements ITetris {
 
     this.interval = setInterval(() => {
       const isEnd = !this.runStep()
-
       if (isEnd) {
         this.endGame()
       }
@@ -120,10 +122,10 @@ export class Tetris implements ITetris {
     )
   }
 
-  // addFigureToStack = (figure: Figure) => {
-  //   this.pointsStack.addPoints(figure)
-  //   this.figureStack.pop()
-  // }
+  addFigureToStack = (figure: Figure) => {
+    this.pointsStack.addPoints(figure.getPointsArea())
+    this.figureStack.pop()
+  }
 
   getCurrentFigure() {
     return this.figureStack[this.figureStack.length - 1] || null
@@ -131,34 +133,26 @@ export class Tetris implements ITetris {
 
   runStep() {
     let figure = this.getCurrentFigure()
-    let figurePos = null
-
-    if (figure) {
-      const [x, y] = figure.getPosition()
-      figurePos = [x, y + 1]
-    } else {
-      figure = this.createFigure()
+    let dY = 1
+    if (!figure) {
+      dY = 0
+      let figurePos = { x: 2, y: 0 }
+      figure = this.createFigure(figurePos)
       this.figureStack.push(figure)
-      figurePos = [2, 0]
-      figure.setPosition(figurePos)
     }
 
-    const { width, height } = figure.getSize()
-
-    if (
-      // this.pointsStack.canChangePosPoints()
-    ) {
-      // figure.setPosition(figurePos)
-      // this.render()
+    let { x, y } = figure.getPosition()
+    if (this.pointsStack.canChangePosPoints(figure.getPointsArea(), { dY })) {
+      figure.setPosition({ y: y + dY })
+      this.render()
     } else {
-      if (figurePos[1] === 0) {
+      if (y === 0) {
         return false
       }
-      // this.addFigureToStack(figure)
-      // this.checkEqualRows()
-      // this.render()
+      this.addFigureToStack(figure)
+      this.render()
     }
 
-    //   return true
+    return true
   }
 }
