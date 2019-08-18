@@ -37,13 +37,13 @@ class RendererCanvas {
   }
 
   renderPoints(
-    points: Point[],
-    clearMeasure: { x: number; y: number; width: number; height: number } = {
-      x: 0,
-      y: 0,
-      width: this.width,
-      height: this.height,
-    }
+    points: Point[]
+    // clearMeasure: { x: number; y: number; width: number; height: number } = {
+    //   x: 0,
+    //   y: 0,
+    //   width: this.width,
+    //   height: this.height,
+    // }
   ) {
     const width = this.width
     const height = this.height
@@ -53,13 +53,15 @@ class RendererCanvas {
     this.ctx.beginPath()
     this.renderGrid()
 
-    points.forEach(point => {
+    Object.keys(points).forEach(key => {
+      const point = points[key]
+      const [x, y] = key.split(',').map(Number)
+
       this.ctx.fillStyle = Colors.transparent
       if (point.value === 1) {
-        const [x, y] = point.getPosition()
         this.ctx.fillStyle = point.color
         this.ctx.rect(
-          //TODO: Create util for thar
+          // TODO: Create util for thar
           x * this.square + 0.5,
           y * this.square + 0.5,
           this.square,

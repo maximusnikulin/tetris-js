@@ -51,14 +51,7 @@ class Figure implements IFigure {
     let points: Point[] = []
     this.pattern.forEach((ptrnRow, y) => {
       return ptrnRow.forEach((value, x) =>
-        points.push(
-          new Point(
-            x + dX,
-            y + dY,
-            value,
-            value ? this.color : Colors.transparent
-          )
-        )
+        points.push(new Point(value, value ? this.color : Colors.transparent))
       )
     })
     return points

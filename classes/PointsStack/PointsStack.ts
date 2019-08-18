@@ -7,43 +7,48 @@ export interface ILayout {}
 
 class PointsStack {
   // TODO: Make private it
-  public points: Point[]
+  public points: { [key: string]: Point }
   private columns: number
   private rows: number
   constructor(columns: number, rows: number, pattern?: (0 | 1)[][]) {
     this.rows = rows
     this.columns = columns
-    this.points = []
+    this.points = {}
     this.create(pattern)
-  }
-
-  getPoint = (pos: Pos) => {
-    const { x, y } = pos
-    const res = this.points.find(point => {
-      const { x: pX, y: pY } = point.getPosition()
-      return pX === x && pY === y
-    })
-
-    if (!res) {
-      throw new Error('Point not found')
-    }
-
-    return res
   }
 
   private create(pattern?: (0 | 1)[][]) {
     for (let i = 0; i < this.rows; i++) {
       for (let j = 0; j < this.columns; j++) {
         let val = pattern ? pattern[i][j] : 0
-        this.points.push(new Point(j, i, val))
+        this.points[`${j},${i}`] = new Point(val)
       }
     }
+  }
+
+  getPoint(pos: number[]) {
+    const key = pos.join(',')
+    if (!(key in this.points)) {
+      throw new Error('Cant add point')
+    }
+
+    return this.points[key]
   }
 
   getSize() {
     return {
       columns: this.columns,
       rows: this.rows,
+    }
+  }
+
+  addPoints(points: { [key: string]: Point }) {
+    for (let key in Object.keys(points)) {
+      if (!(key in this.points)) {
+        throw new Error('Coordinate is not exists')
+      }
+
+      this.points[key] = points[key]
     }
   }
 }
