@@ -1,6 +1,7 @@
 import Figure, { FigureType } from '../Figure/Figure'
 import FigureMaker from '../FigureMaker'
 import PointsStack from './PointsStack'
+import { Point } from '../Point'
 
 describe('Test Layout class', () => {
   let pointsStack: PointsStack = null
@@ -17,5 +18,13 @@ describe('Test Layout class', () => {
   test('It should has 3 columns and 3 rows', () => {
     expect(pointsStack.getSize().columns).toBe(3)
     expect(pointsStack.getSize().rows).toBe(3)
+  })
+
+  test('It should return row', () => {
+    expect(pointsStack.getRow(1)).toEqual({
+      '0,1': new Point(0),
+      '1,1': new Point(1),
+      '2,1': new Point(0),
+    })
   })
 })

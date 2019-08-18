@@ -42,6 +42,18 @@ class PointsStack {
     }
   }
 
+  getRow(row: number) {
+    let keys = Object.keys(this.points).filter(key => {
+      let [x, y] = key.split(',').map(Number)
+      return y === row
+    })
+
+    return keys.reduce((acc, next) => {
+      acc[next] = this.points[next]
+      return acc
+    }, {})
+  }
+
   addPoints(points: { [key: string]: Point }) {
     for (let key in Object.keys(points)) {
       if (!(key in this.points)) {
