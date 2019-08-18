@@ -69,7 +69,6 @@ class PointsStack {
 
   shrink(row: number) {
     while (row > 0) {
-      debugger
       this.points[row].forEach(point => {
         const [x, y] = point.getPosition()
         point.setPosition([x, y + 1])
