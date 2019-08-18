@@ -7,6 +7,10 @@ interface IPoint {
   color: Colors
 }
 
+export interface Pos {
+  x: number
+  y: number
+}
 export class Point implements IPoint {
   x: number
   y: number
@@ -22,7 +26,10 @@ export class Point implements IPoint {
   }
 
   getPosition() {
-    return [this.x, this.y]
+    return {
+      x: this.x,
+      y: this.y,
+    }
   }
 
   getValue() {
@@ -41,8 +48,8 @@ export class Point implements IPoint {
     this.value = value
   }
 
-  setPosition(pos: number[]) {
-    this.x = pos[0]
-    this.y = pos[1]
+  setPosition(pos: Pos) {
+    this.x = pos.x
+    this.y = pos.y
   }
 }
