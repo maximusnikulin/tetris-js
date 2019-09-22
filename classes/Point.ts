@@ -1,7 +1,7 @@
 import { Colors } from './Figure/Figure'
 
 interface IPoint {
-  value: 0 | 1
+  fill: boolean
   color: Colors
 }
 
@@ -11,17 +11,15 @@ export interface Pos {
 }
 
 export class Point implements IPoint {
-  value: 0 | 1
+  fill: boolean
   color: Colors
-  constructor(value?: 0 | 1, color = Colors.transparent) {
+  constructor(fill: boolean = false, color = Colors.transparent) {
     this.color = color
-    if (typeof value !== 'undefined') {
-      this.value = value
-    }
+    this.fill = fill
   }
 
-  getValue() {
-    return this.value
+  isFill() {
+    return this.fill
   }
 
   getColor() {
@@ -32,7 +30,7 @@ export class Point implements IPoint {
     this.color = color
   }
 
-  setValue(value: 1 | 0) {
-    this.value = value
+  setValue(value: boolean) {
+    this.fill = value
   }
 }

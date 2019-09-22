@@ -7,32 +7,37 @@ export interface ILayout {}
 
 class PointsStack {
   // TODO: Make private it
-  public points: { [key: string]: Point }
+  public points: Point[][]
   private columns: number
   private rows: number
   constructor(columns: number, rows: number, pattern?: (0 | 1)[][]) {
     this.rows = rows
     this.columns = columns
-    this.points = {}
+    this.points = []
     this.create(pattern)
   }
 
   private create(pattern?: (0 | 1)[][]) {
     for (let i = 0; i < this.rows; i++) {
+      if (!this.points[i]) {
+        this.points[i] = []
+      }
       for (let j = 0; j < this.columns; j++) {
         let val = pattern ? pattern[i][j] : 0
-        this.points[`${j},${i}`] = new Point(val)
+        this.points[i][j] = new Point(val)
       }
     }
   }
 
   getPoint(pos: number[]) {
-    const key = pos.join(',')
-    if (!(key in this.points)) {
+    const [x, y] = pos
+    const match = this.points[y][x]
+
+    if (!this.points[y][x]) {
       throw new Error('Cant add point')
     }
 
-    return this.points[key]
+    return match
   }
 
   getSize() {
@@ -43,24 +48,23 @@ class PointsStack {
   }
 
   getRow(row: number) {
-    let keys = Object.keys(this.points).filter(key => {
-      let [x, y] = key.split(',').map(Number)
-      return y === row
-    })
+    if (!this.points[row]) {
+      throw new Error('Row is not exists')
+    }
 
-    return keys.reduce((acc, next) => {
-      acc[next] = this.points[next]
-      return acc
-    }, {})
+    return this.points[row]
   }
 
   addPoints(points: { [key: string]: Point }) {
     for (let key in Object.keys(points)) {
-      if (!(key in this.points)) {
+      const [x, y] = key.split(',')
+      let match = this.points[y][x]
+
+      if (!match) {
         throw new Error('Coordinate is not exists')
       }
 
-      this.points[key] = points[key]
+      match = points[key]
     }
   }
 }

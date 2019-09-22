@@ -120,33 +120,30 @@ parcelRequire = (function (modules, cache, entry, globalName) {
 })({"classes/Point.ts":[function(require,module,exports) {
 "use strict";
 
-exports.__esModule = true;
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 
 var Figure_1 = require("./Figure/Figure");
 
 var Point =
 /** @class */
 function () {
-  function Point(x, y, value, color) {
+  function Point(fill, color) {
+    if (fill === void 0) {
+      fill = false;
+    }
+
     if (color === void 0) {
       color = Figure_1.Colors.transparent;
     }
 
-    this.x = x;
-    this.y = y;
     this.color = color;
-
-    if (typeof value !== 'undefined') {
-      this.value = value;
-    }
+    this.fill = fill;
   }
 
-  Point.prototype.getPosition = function () {
-    return [this.x, this.y];
-  };
-
-  Point.prototype.getValue = function () {
-    return this.value;
+  Point.prototype.isFill = function () {
+    return this.fill;
   };
 
   Point.prototype.getColor = function () {
@@ -158,12 +155,7 @@ function () {
   };
 
   Point.prototype.setValue = function (value) {
-    this.value = value;
-  };
-
-  Point.prototype.setPosition = function (pos) {
-    this.x = pos[0];
-    this.y = pos[1];
+    this.fill = value;
   };
 
   return Point;
@@ -173,7 +165,9 @@ exports.Point = Point;
 },{"./Figure/Figure":"classes/Figure/Figure.ts"}],"classes/Figure/Figure.ts":[function(require,module,exports) {
 "use strict";
 
-exports.__esModule = true;
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 
 var Point_1 = require("../Point");
 
@@ -202,7 +196,7 @@ var Figure =
 function () {
   function Figure(pattern, position, color) {
     if (position === void 0) {
-      position = null;
+      position = [0, 0];
     }
 
     this.pattern = pattern;
@@ -221,25 +215,22 @@ function () {
     };
   };
 
-  Figure.prototype.getPatternValue = function (pos) {
-    var x = pos[0],
-        y = pos[1];
-    return this.pattern[y][x];
-  };
-
-  Figure.prototype.getPoints = function () {
+  Figure.prototype.getFigurePoints = function () {
     var _this = this;
 
-    var _a = this.position,
-        dX = _a[0],
-        dY = _a[1];
-    var points = [];
-    this.pattern.forEach(function (ptrnRow, y) {
-      return ptrnRow.forEach(function (value, x) {
-        return points.push(new Point_1.Point(x + dX, y + dY, value, value ? _this.color : Colors.transparent));
+    var height = this.pattern.length;
+    var width = this.pattern[0].length;
+    return this.pattern.map(function (ptrnRow, y) {
+      return ptrnRow.map(function (value, x) {
+        return new Point_1.Point(!!value, value ? _this.color : Colors.transparent);
       });
     });
-    return points;
+  };
+
+  Figure.prototype.isFillPoint = function (pos) {
+    var x = pos[0],
+        y = pos[1];
+    return !!this.pattern[y][x];
   };
 
   Figure.prototype.getPattern = function () {
@@ -257,11 +248,13 @@ function () {
   return Figure;
 }();
 
-exports["default"] = Figure;
+exports.default = Figure;
 },{"../Point":"classes/Point.ts"}],"classes/RendererCanvas.ts":[function(require,module,exports) {
 "use strict";
 
-exports.__esModule = true;
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 
 var Figure_1 = require("./Figure/Figure");
 
@@ -300,34 +293,27 @@ function () {
     }
   };
 
-  RendererCanvas.prototype.renderPoints = function (points, clearMeasure) {
+  RendererCanvas.prototype.renderPoints = function (points) {
     var _this = this;
-
-    if (clearMeasure === void 0) {
-      clearMeasure = {
-        x: 0,
-        y: 0,
-        width: this.width,
-        height: this.height
-      };
-    }
 
     var width = this.width;
     var height = this.height;
     this.ctx.clearRect(0, 0, width, height);
     this.ctx.beginPath();
     this.renderGrid();
-    points.forEach(function (point) {
+    Object.keys(points).forEach(function (key) {
+      var point = points[key];
+
+      var _a = key.split(',').map(Number),
+          x = _a[0],
+          y = _a[1];
+
       _this.ctx.fillStyle = Figure_1.Colors.transparent;
 
       if (point.value === 1) {
-        var _a = point.getPosition(),
-            x = _a[0],
-            y = _a[1];
-
         _this.ctx.fillStyle = point.color;
 
-        _this.ctx.rect( //TODO: Create util for thar
+        _this.ctx.rect( // TODO: Create util for thar
         x * _this.square + 0.5, y * _this.square + 0.5, _this.square, _this.square);
 
         _this.ctx.fill();
@@ -344,7 +330,7 @@ function () {
   return RendererCanvas;
 }();
 
-exports["default"] = RendererCanvas;
+exports.default = RendererCanvas;
 },{"./Figure/Figure":"classes/Figure/Figure.ts"}],"classes/FigureMaker.ts":[function(require,module,exports) {
 "use strict";
 
@@ -358,9 +344,16 @@ var __importStar = this && this.__importStar || function (mod) {
   return result;
 };
 
-exports.__esModule = true;
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 
 var Figure_1 = __importStar(require("./Figure/Figure"));
+
+exports.firstPattern = [[0, 1, 1, 0], [1, 1, 1, 1]];
+exports.secondPattern = [[1, 1, 1, 1], [0, 0, 0, 1]];
+exports.thirdPattern = [[1, 1, 1, 1], [1, 0, 0, 0]];
+exports.forthPattern = [[1, 1, 1, 1]];
 
 var FigureMaker =
 /** @class */
@@ -369,43 +362,41 @@ function () {
 
   FigureMaker.create = function (type, pos) {
     var pattern = [];
-    var color = Figure_1.Colors.black; // Will be random value
-    // Should be in empty space
+    var color = Figure_1.Colors.black;
 
     if (type === Figure_1.FigureType.first) {
-      pattern[0] = [0, 1, 1, 0];
-      pattern[1] = [1, 1, 1, 1];
+      pattern = exports.firstPattern;
       color = Figure_1.Colors.violet;
     }
 
     if (type === Figure_1.FigureType.second) {
-      pattern[0] = [1, 1, 1, 1];
-      pattern[1] = [0, 0, 0, 1];
+      pattern = exports.secondPattern;
       color = Figure_1.Colors.green;
     }
 
     if (type === Figure_1.FigureType.third) {
-      pattern[0] = [1, 1, 1, 1];
-      pattern[1] = [1, 0, 0, 0];
+      pattern = exports.thirdPattern;
       color = Figure_1.Colors.blue;
     }
 
     if (type === Figure_1.FigureType.forth) {
-      pattern[0] = [1, 1, 1, 1];
+      pattern = exports.forthPattern;
       color = Figure_1.Colors.yellow;
     }
 
-    return new Figure_1["default"](pattern, pos, color);
+    return new Figure_1.default(pattern, pos, color);
   };
 
   return FigureMaker;
 }();
 
-exports["default"] = FigureMaker;
+exports.default = FigureMaker;
 },{"./Figure/Figure":"classes/Figure/Figure.ts"}],"classes/PointsStack/PointsStack.ts":[function(require,module,exports) {
 "use strict";
 
-exports.__esModule = true;
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 
 var Point_1 = require("../Point");
 
@@ -416,62 +407,36 @@ exports.sum = function (a, b) {
 var PointsStack =
 /** @class */
 function () {
-  function PointsStack(columns, rows, defaultValue) {
-    if (defaultValue === void 0) {
-      defaultValue = 0;
-    }
-
+  function PointsStack(columns, rows, pattern) {
     this.rows = rows;
     this.columns = columns;
-    this.points = [[]];
-    this.create(defaultValue);
+    this.points = [];
+    this.create(pattern);
   }
 
-  PointsStack.prototype.create = function (defaultValue) {
+  PointsStack.prototype.create = function (pattern) {
     for (var i = 0; i < this.rows; i++) {
-      for (var j = 0; j < this.columns; j++) {
-        if (!this.points[i]) {
-          this.points[i] = [];
-        }
+      if (!this.points[i]) {
+        this.points[i] = [];
+      }
 
-        this.points[i][j] = new Point_1.Point(j, i, defaultValue);
+      for (var j = 0; j < this.columns; j++) {
+        var val = pattern ? pattern[i][j] : 0;
+        this.points[i][j] = new Point_1.Point(val);
       }
     }
-  };
-
-  PointsStack.prototype.getPoints = function () {
-    var points = [];
-    this.points.forEach(function (row) {
-      row.forEach(function (point) {
-        return points.push(point);
-      });
-    });
-    return points;
   };
 
   PointsStack.prototype.getPoint = function (pos) {
     var x = pos[0],
         y = pos[1];
-    return this.points[y][x];
-  };
+    var match = this.points[y][x];
 
-  PointsStack.prototype.addFigure = function (figure) {
-    var _a = figure.getSize(),
-        height = _a.height,
-        width = _a.width;
-
-    var _b = figure.getPosition(),
-        x = _b[0],
-        y = _b[1];
-
-    for (var i = 0; i < height; i++) {
-      for (var j = 0; j < width; j++) {
-        var patternValue = figure.getPatternValue([j, i]);
-        var point = this.points[y + i][x + j];
-        point.setValue(patternValue);
-        point.setColor(figure.getColor());
-      }
+    if (!this.points[y][x]) {
+      throw new Error('Cant add point');
     }
+
+    return match;
   };
 
   PointsStack.prototype.getSize = function () {
@@ -481,86 +446,34 @@ function () {
     };
   };
 
-  PointsStack.prototype.removeRow = function (row) {
-    this.points[row].forEach(function (point) {
-      point.setValue(0);
-    });
-  };
-
-  PointsStack.prototype.shrink = function (row) {
-    while (row > 0) {
-      debugger;
-      this.points[row].forEach(function (point) {
-        var _a = point.getPosition(),
-            x = _a[0],
-            y = _a[1];
-
-        point.setPosition([x, y + 1]);
-      });
-      row--;
+  PointsStack.prototype.getRow = function (row) {
+    if (!this.points[row]) {
+      throw new Error('Row is not exists');
     }
+
+    return this.points[row];
   };
 
-  PointsStack.prototype.getEqualsRows = function () {
-    var points = this.getPoints();
-    var equals = [];
+  PointsStack.prototype.addPoints = function (points) {
+    for (var key in Object.keys(points)) {
+      var _a = key.split(','),
+          x = _a[0],
+          y = _a[1];
 
-    var _loop_1 = function _loop_1(i) {
-      var pointsRow = points.filter(function (point) {
-        var _a = point.getPosition(),
-            x = _a[0],
-            y = _a[1];
+      var match = this.points[y][x];
 
-        return y === i;
-      });
-      var sumValues = pointsRow.reduce(function (acc, next) {
-        return acc += next.getValue();
-      }, 0);
-
-      if (sumValues === this_1.columns) {
-        equals.push(i);
+      if (!match) {
+        throw new Error('Coordinate is not exists');
       }
-    };
 
-    var this_1 = this;
-
-    for (var i = 0; i < this.rows; i++) {
-      _loop_1(i);
+      match = points[key];
     }
-
-    return equals.length ? equals : null;
-  };
-
-  PointsStack.prototype.canChangePosFigure = function (figure, pos) {
-    var _a = figure.getSize(),
-        height = _a.height,
-        width = _a.width;
-
-    var x = pos[0],
-        y = pos[1];
-
-    if (y + height > this.rows || x + width > this.columns || x < 0) {
-      return false;
-    }
-
-    var res = true;
-
-    out: for (var i = 0; i < height; i++) {
-      for (var j = 0; j < width; j++) {
-        if (this.getPoint([j + x, i + y]).value + figure.getPatternValue([j, i]) > 1) {
-          res = false;
-          break out;
-        }
-      }
-    }
-
-    return res;
   };
 
   return PointsStack;
 }();
 
-exports["default"] = PointsStack;
+exports.default = PointsStack;
 },{"../Point":"classes/Point.ts"}],"classes/Tetris.ts":[function(require,module,exports) {
 "use strict";
 
@@ -570,7 +483,9 @@ var __importDefault = this && this.__importDefault || function (mod) {
   };
 };
 
-exports.__esModule = true;
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 
 var RendererCanvas_1 = __importDefault(require("./RendererCanvas"));
 
@@ -584,183 +499,19 @@ var Tetris =
 /** @class */
 function () {
   function Tetris() {
-    var _this = this;
-
-    this.addFigureToStack = function (figure) {
-      _this.pointsStack.addFigure(figure);
-
-      _this.render();
-
-      _this.figureStack.pop();
-    };
-
-    this.checkEqualRows = function () {
-      var equalsRows = _this.pointsStack.getEqualsRows();
-
-      if (equalsRows) {
-        equalsRows.forEach(function (rowNumber) {
-          _this.pointsStack.removeRow(rowNumber);
-
-          _this.render();
-
-          _this.pointsStack.shrink(rowNumber); // clearInterval(this.interval)
-
-
-          _this.render(); // this.runCycle()
-
-        });
-      }
-    };
-
-    this.pointsStack = new PointsStack_1["default"](10, 20);
+    this.pointsStack = new PointsStack_1.default(10, 20);
 
     var _a = this.pointsStack.getSize(),
         columns = _a.columns,
         rows = _a.rows;
 
-    this.square = 20;
-    this.width = columns * this.square;
-    this.height = rows * this.square;
-    this.renderer = new RendererCanvas_1["default"](this.width, this.height);
+    this.renderer = new RendererCanvas_1.default(columns * 20, rows * 20);
     this.figureStack = [];
     this.renderer.renderGrid();
-    this.isFull = false;
-    this.initListeners();
   }
 
   Tetris.prototype.createFigure = function () {
-    return FigureMaker_1["default"].create(Figure_1.FigureType.first);
-  };
-
-  Tetris.prototype.getStackAndFigurePoints = function (figure, pointsStack) {
-    var stackPoints = pointsStack.getPoints();
-
-    if (!figure) {
-      return stackPoints;
-    }
-
-    var figurePoints = figure.getPoints();
-
-    var _a = figure.getPosition(),
-        fX = _a[0],
-        fY = _a[1];
-
-    return stackPoints.map(function (point) {
-      var _a = point.getPosition(),
-          x = _a[0],
-          y = _a[1];
-
-      var matchPoint = figurePoints.find(function (figPoint) {
-        var _a = figPoint.getPosition(),
-            fpX = _a[0],
-            fpY = _a[1];
-
-        return fpX === x && fpY === y;
-      });
-      return matchPoint || point;
-    });
-  };
-
-  Tetris.prototype.endGame = function () {
-    alert('END GAME');
-    clearInterval(this.interval);
-    this.interval = null;
-  };
-
-  Tetris.prototype.initListeners = function () {
-    var _this = this;
-
-    window.addEventListener('keydown', function (e) {
-      var figure = _this.getCurrentFigure();
-
-      if (e.keyCode !== 40 && e.keyCode !== 37 && e.keyCode !== 39 || !figure) {
-        return;
-      }
-
-      var _a = figure.getPosition(),
-          x = _a[0],
-          y = _a[1];
-
-      if (e.keyCode === 40) {
-        while (_this.pointsStack.canChangePosFigure(figure, [x, y])) {
-          figure.setPosition([x, y]);
-          y++;
-        }
-
-        _this.addFigureToStack(figure);
-
-        _this.checkEqualRows();
-      } else {
-        var newPos = void 0;
-
-        if (e.keyCode === 37) {
-          newPos = [x - 1, y];
-        }
-
-        if (e.keyCode === 39) {
-          newPos = [x + 1, y];
-        }
-
-        if (_this.pointsStack.canChangePosFigure(figure, newPos)) {
-          figure.setPosition(newPos);
-
-          _this.render();
-        }
-      }
-    });
-  };
-
-  Tetris.prototype.runCycle = function () {
-    var _this = this;
-
-    var res = this.runStep();
-    this.interval = setInterval(function () {
-      var isEnd = !_this.runStep();
-
-      if (isEnd) {
-        _this.endGame();
-      }
-    }, 100);
-  };
-
-  Tetris.prototype.render = function () {
-    this.renderer.renderPoints(this.getStackAndFigurePoints(this.getCurrentFigure(), this.pointsStack));
-  };
-
-  Tetris.prototype.getCurrentFigure = function () {
-    return this.figureStack[this.figureStack.length - 1] || null;
-  };
-
-  Tetris.prototype.runStep = function () {
-    var figure = this.getCurrentFigure();
-    var figurePos = null;
-
-    if (figure) {
-      var _a = figure.getPosition(),
-          x = _a[0],
-          y = _a[1];
-
-      figurePos = [x, y + 1];
-    } else {
-      figure = this.createFigure();
-      this.figureStack.push(figure);
-      figurePos = [2, 0];
-      figure.setPosition(figurePos);
-    }
-
-    if (this.pointsStack.canChangePosFigure(figure, figurePos)) {
-      figure.setPosition(figurePos);
-      this.render();
-    } else {
-      if (figurePos[1] === 0) {
-        return false;
-      }
-
-      this.addFigureToStack(figure);
-      this.checkEqualRows();
-    }
-
-    return true;
+    return FigureMaker_1.default.create(Figure_1.FigureType.first);
   };
 
   return Tetris;
@@ -770,13 +521,14 @@ exports.Tetris = Tetris;
 },{"./RendererCanvas":"classes/RendererCanvas.ts","./FigureMaker":"classes/FigureMaker.ts","./Figure/Figure":"classes/Figure/Figure.ts","./PointsStack/PointsStack":"classes/PointsStack/PointsStack.ts"}],"index.ts":[function(require,module,exports) {
 "use strict";
 
-exports.__esModule = true;
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 
 var Tetris_1 = require("./classes/Tetris");
 
 var tetris = new Tetris_1.Tetris();
-tetris.runCycle();
-},{"./classes/Tetris":"classes/Tetris.ts"}],"node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"./classes/Tetris":"classes/Tetris.ts"}],"../../../../usr/local/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -804,7 +556,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "53635" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55504" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
@@ -979,5 +731,5 @@ function hmrAcceptRun(bundle, id) {
     return true;
   }
 }
-},{}]},{},["node_modules/parcel-bundler/src/builtins/hmr-runtime.js","index.ts"], null)
+},{}]},{},["../../../../usr/local/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js","index.ts"], null)
 //# sourceMappingURL=/tetris-js.77de5100.js.map

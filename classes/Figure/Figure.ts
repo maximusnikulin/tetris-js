@@ -23,7 +23,11 @@ class Figure implements IFigure {
   pattern: (0 | 1)[][]
   position: number[]
   color: Colors
-  constructor(pattern: (0 | 1)[][], position: number[] = null, color?: Colors) {
+  constructor(
+    pattern: (0 | 1)[][],
+    position: number[] = [0, 0],
+    color?: Colors
+  ) {
     this.pattern = pattern
     this.position = position
     this.color = color || Colors.black
@@ -40,21 +44,20 @@ class Figure implements IFigure {
     }
   }
 
-  getPatternValue(pos: number[]) {
-    const [x, y] = pos
-    return this.pattern[y][x]
+  getFigurePoints() {
+    const height = this.pattern.length
+    const width = this.pattern[0].length
+
+    return this.pattern.map((ptrnRow, y) => {
+      return ptrnRow.map((value, x) => {
+        return new Point(!!value, value ? this.color : Colors.transparent)
+      })
+    })
   }
 
-  getPoints() {
-    const [dX, dY] = this.position
-
-    let points: Point[] = []
-    this.pattern.forEach((ptrnRow, y) => {
-      return ptrnRow.forEach((value, x) =>
-        points.push(new Point(value, value ? this.color : Colors.transparent))
-      )
-    })
-    return points
+  isFillPoint(pos: number[]) {
+    const [x, y] = pos
+    return !!this.pattern[y][x]
   }
 
   getPattern() {
