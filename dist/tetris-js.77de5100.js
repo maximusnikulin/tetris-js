@@ -201,7 +201,7 @@ function () {
 
     this.pattern = pattern;
     this.position = position;
-    this.color = color || Colors.black;
+    this.color = color || Colors.violet;
   }
 
   Figure.prototype.setPosition = function (pos) {
@@ -218,13 +218,13 @@ function () {
   Figure.prototype.getFigurePoints = function () {
     var _this = this;
 
-    var height = this.pattern.length;
-    var width = this.pattern[0].length;
-    return this.pattern.map(function (ptrnRow, y) {
-      return ptrnRow.map(function (value, x) {
-        return new Point_1.Point(!!value, value ? _this.color : Colors.transparent);
+    var coordPoint = {};
+    this.pattern.forEach(function (ptrnRow, y) {
+      ptrnRow.forEach(function (value, x) {
+        coordPoint[x + _this.position[0] + "," + (y + _this.position[1])] = new Point_1.Point(!!value, value ? _this.color : Colors.transparent);
       });
     });
+    return coordPoint;
   };
 
   Figure.prototype.isFillPoint = function (pos) {
@@ -318,7 +318,7 @@ function () {
 
         _this.ctx.fill();
 
-        _this.ctx.strokeStyle = Figure_1.Colors.black;
+        _this.ctx.strokeStyle = Figure_1.Colors.violet;
 
         _this.ctx.stroke();
       }
@@ -362,7 +362,7 @@ function () {
 
   FigureMaker.create = function (type, pos) {
     var pattern = [];
-    var color = Figure_1.Colors.black;
+    var color = Figure_1.Colors.violet;
 
     if (type === Figure_1.FigureType.first) {
       pattern = exports.firstPattern;
@@ -414,6 +414,10 @@ function () {
     this.create(pattern);
   }
 
+  PointsStack.prototype.getPoints = function () {
+    return this.points;
+  };
+
   PointsStack.prototype.create = function (pattern) {
     for (var i = 0; i < this.rows; i++) {
       if (!this.points[i]) {
@@ -422,9 +426,31 @@ function () {
 
       for (var j = 0; j < this.columns; j++) {
         var val = pattern ? pattern[i][j] : 0;
-        this.points[i][j] = new Point_1.Point(val);
+        this.points[i][j] = new Point_1.Point(!!val);
       }
     }
+  }; // private isEqual = (row: number) => {
+  //   return this.points[row].every(p => p.isFill())
+  // }
+  // findEqualRows() {
+  //   return this.points.reduce(
+  //     (acc, next, index) => {
+  //       const isEqual = this.isEqual(index)
+  //       if (isEqual) {
+  //         acc.push(index)
+  //       }
+  //       return acc
+  //     },
+  //     [] as number[]
+  //   )
+  // }
+
+
+  PointsStack.prototype.shrink = function (numRow) {
+    this.points.splice(numRow, 1);
+    this.points.unshift(this.points[0].map(function () {
+      return new Point_1.Point(false);
+    }));
   };
 
   PointsStack.prototype.getPoint = function (pos) {
@@ -455,19 +481,23 @@ function () {
   };
 
   PointsStack.prototype.addPoints = function (points) {
-    for (var key in Object.keys(points)) {
+    var _this = this;
+
+    Object.keys(points).forEach(function (key) {
       var _a = key.split(','),
           x = _a[0],
           y = _a[1];
 
-      var match = this.points[y][x];
+      var match = null;
 
-      if (!match) {
+      try {
+        match = _this.points[y][x];
+      } catch (_b) {
         throw new Error('Coordinate is not exists');
       }
 
-      match = points[key];
-    }
+      _this.points[y][x] = points[key];
+    });
   };
 
   return PointsStack;

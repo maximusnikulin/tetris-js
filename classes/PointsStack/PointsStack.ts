@@ -17,6 +17,10 @@ class PointsStack {
     this.create(pattern)
   }
 
+  getPoints() {
+    return this.points
+  }
+
   private create(pattern?: (0 | 1)[][]) {
     for (let i = 0; i < this.rows; i++) {
       if (!this.points[i]) {
@@ -24,9 +28,32 @@ class PointsStack {
       }
       for (let j = 0; j < this.columns; j++) {
         let val = pattern ? pattern[i][j] : 0
-        this.points[i][j] = new Point(val)
+        this.points[i][j] = new Point(!!val)
       }
     }
+  }
+
+  // private isEqual = (row: number) => {
+  //   return this.points[row].every(p => p.isFill())
+  // }
+
+  // findEqualRows() {
+  //   return this.points.reduce(
+  //     (acc, next, index) => {
+  //       const isEqual = this.isEqual(index)
+  //       if (isEqual) {
+  //         acc.push(index)
+  //       }
+
+  //       return acc
+  //     },
+  //     [] as number[]
+  //   )
+  // }
+
+  shrink(numRow: number) {
+    this.points.splice(numRow, 1)
+    this.points.unshift(this.points[0].map(() => new Point(false)))
   }
 
   getPoint(pos: number[]) {
@@ -56,16 +83,17 @@ class PointsStack {
   }
 
   addPoints(points: { [key: string]: Point }) {
-    for (let key in Object.keys(points)) {
+    Object.keys(points).forEach(key => {
       const [x, y] = key.split(',')
-      let match = this.points[y][x]
-
-      if (!match) {
+      let match = null
+      try {
+        match = this.points[y][x]
+      } catch {
         throw new Error('Coordinate is not exists')
       }
 
-      match = points[key]
-    }
+      this.points[y][x] = points[key]
+    })
   }
 }
 

@@ -30,7 +30,7 @@ class Figure implements IFigure {
   ) {
     this.pattern = pattern
     this.position = position
-    this.color = color || Colors.black
+    this.color = color || Colors.violet
   }
 
   setPosition(pos: number[]) {
@@ -45,14 +45,16 @@ class Figure implements IFigure {
   }
 
   getFigurePoints() {
-    const height = this.pattern.length
-    const width = this.pattern[0].length
-
-    return this.pattern.map((ptrnRow, y) => {
-      return ptrnRow.map((value, x) => {
-        return new Point(!!value, value ? this.color : Colors.transparent)
+    let coordPoint = {}
+    this.pattern.forEach((ptrnRow, y) => {
+      ptrnRow.forEach((value, x) => {
+        coordPoint[
+          `${x + this.position[0]},${y + this.position[1]}`
+        ] = new Point(!!value, value ? this.color : Colors.transparent)
       })
     })
+
+    return coordPoint
   }
 
   isFillPoint(pos: number[]) {

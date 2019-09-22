@@ -36,9 +36,7 @@ class RendererCanvas {
     }
   }
 
-  renderPoints(
-    points: Point[]    
-  ) {
+  renderPoints(points: Point[]) {
     const width = this.width
     const height = this.height
 
@@ -62,7 +60,7 @@ class RendererCanvas {
           this.square
         )
         this.ctx.fill()
-        this.ctx.strokeStyle = Colors.black
+        this.ctx.strokeStyle = Colors.violet
         this.ctx.stroke()
       }
 

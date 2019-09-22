@@ -8,7 +8,7 @@ export const forthPattern = [[1, 1, 1, 1]]
 class FigureMaker {
   static create(type: FigureType, pos?: number[]) {
     let pattern = []
-    let color = Colors.black
+    let color = Colors.violet
 
     if (type === FigureType.first) {
       pattern = firstPattern

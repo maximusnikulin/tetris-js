@@ -4,6 +4,7 @@ import PointsStack from '../PointsStack/PointsStack'
 interface IPositioner {}
 
 class Positioner implements IPositioner {
-  canChangePositionFigure(figure: Figure, stack: PointsStack) {}
-  canShrinkPointsStack(stack: PointsStack) {}
+  canChangePosVertical(figure: Figure, stack: PointsStack) {}
+  canChangePosHorizontal(figure: Figure, stack: PointsStack) {}
+  canShrinkRaw(stack: PointsStack) {}
 }
