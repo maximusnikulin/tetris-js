@@ -24,19 +24,19 @@ describe('Test PointsStack', () => {
   })
 
   test('It should return all points in stack as matrix', () => {
-    expect(pointsStack.getPoints()).toEqual(stackFiveOnFour)
+    expect(pointsStack.getPointsMatrix()).toEqual(stackFiveOnFour)
   })
 
   test('It should add points to stack', () => {
     const figure = FigureMaker.create(FigureType.first, [0, 0])
     pointsStack.addPoints(figure.getFigurePoints())
-    expect(pointsStack.getPoints()).toEqual(stackAfterAddFigureFirst)
+    expect(pointsStack.getPointsMatrix()).toEqual(stackAfterAddFigureFirst)
   })
 
   test('It should return points row', () => {
     const figure = FigureMaker.create(FigureType.first, [1, 2])
     pointsStack.addPoints(figure.getFigurePoints())
-    expect(pointsStack.getPoints()).toEqual(stackAfterAddFigureToBottom)
+    expect(pointsStack.getPointsMatrix()).toEqual(stackAfterAddFigureToBottom)
     expect(pointsStack.getRow(3)).toEqual(stackRow)
   })
 
@@ -45,7 +45,7 @@ describe('Test PointsStack', () => {
     let pointsStack = new PointsStack(4, 4)
     pointsStack.addPoints(figure.getFigurePoints())
     pointsStack.shrink(3)
-    expect(pointsStack.getPoints()).toEqual(stackAfterShrink)
+    expect(pointsStack.getPointsMatrix()).toEqual(stackAfterShrink)
   })
 
   test('It should return point from pos', () => {

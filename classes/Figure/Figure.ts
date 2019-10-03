@@ -45,7 +45,7 @@ class Figure implements IFigure {
   }
 
   getFigurePoints() {
-    let coordPoint = {}
+    let coordPoint: { [key: string]: Point } = {}
     this.pattern.forEach((ptrnRow, y) => {
       ptrnRow.forEach((value, x) => {
         coordPoint[

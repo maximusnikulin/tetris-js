@@ -36,7 +36,7 @@ class RendererCanvas {
     }
   }
 
-  renderPoints(points: Point[]) {
+  renderPoints(points: { [key: string]: Point }) {
     const width = this.width
     const height = this.height
 
@@ -50,7 +50,7 @@ class RendererCanvas {
       const [x, y] = key.split(',').map(Number)
 
       this.ctx.fillStyle = Colors.transparent
-      if (point.value === 1) {
+      if (point.fill) {
         this.ctx.fillStyle = point.color
         this.ctx.rect(
           // TODO: Create util for thar
@@ -60,7 +60,7 @@ class RendererCanvas {
           this.square
         )
         this.ctx.fill()
-        this.ctx.strokeStyle = Colors.violet
+        // this.ctx.strokeStyle = Colors.violet
         this.ctx.stroke()
       }
 

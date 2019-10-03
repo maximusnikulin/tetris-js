@@ -9,6 +9,13 @@ const p: (val: number, color?: Colors) => [number, Colors] = (
   return [val, color]
 }
 
+export const pointsStackObject = {
+  [`0,0`]: new Point(),
+  [`0,1`]: new Point(),
+  [`1,0`]: new Point(),
+  [`1,1`]: new Point(),
+}
+
 export const stackFiveOnFour = createPointsByPattern([
   [0, 0, 0, 0, 0],
   [0, 0, 0, 0, 0],

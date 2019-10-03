@@ -17,8 +17,19 @@ class PointsStack {
     this.create(pattern)
   }
 
-  getPoints() {
+  getPointsMatrix() {
     return this.points
+  }
+
+  getPoints() {
+    const res: { [key: string]: Point } = {}
+    this.points.forEach((row, indRow) =>
+      row.forEach((point, indPoint) => {
+        res[`${indPoint},${indRow}`] = point
+      })
+    )
+
+    return res
   }
 
   private create(pattern?: (0 | 1)[][]) {
@@ -32,24 +43,6 @@ class PointsStack {
       }
     }
   }
-
-  // private isEqual = (row: number) => {
-  //   return this.points[row].every(p => p.isFill())
-  // }
-
-  // findEqualRows() {
-  //   return this.points.reduce(
-  //     (acc, next, index) => {
-  //       const isEqual = this.isEqual(index)
-  //       if (isEqual) {
-  //         acc.push(index)
-  //       }
-
-  //       return acc
-  //     },
-  //     [] as number[]
-  //   )
-  // }
 
   shrink(numRow: number) {
     this.points.splice(numRow, 1)
