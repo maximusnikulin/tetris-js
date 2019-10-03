@@ -1,1 +1,0 @@
-{"version":3,"sources":["style.less"],"names":[],"mappings":"AAAA;EACE,cAAA;EACA,cAAA","file":"style.2cf34713.css","sourceRoot":"..","sourcesContent":[".tetris-canvas {\n  margin: 0 auto;\n  display: block;\n}\n"]}
