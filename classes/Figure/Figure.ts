@@ -1,4 +1,5 @@
 import { Point } from '../Point'
+import PointsStack from '../PointsStack/PointsStack'
 
 export enum FigureType {
   'first' = 1,
@@ -42,6 +43,23 @@ class Figure implements IFigure {
       height: this.pattern.length,
       width: this.pattern[0].length,
     }
+  }
+
+  shrinkDown() {
+    const [x, y] = this.position
+    this.setPosition([x, y + 1])
+  }
+
+  canShrinkDown(pointsStack: PointsStack) {
+    const figPoints = this.getFigurePoints()
+    const maxY = pointsStack.getSize().rows
+
+    return Object.keys(figPoints).every(pos => {
+      const [x, y] = pos.split(',').map(Number)
+      if (y == maxY - 1) return false
+      const pointInStack = pointsStack.getPoint([x, y + 1])
+      return !(pointInStack.isFill() && figPoints[pos].isFill())
+    })
   }
 
   getFigurePoints() {

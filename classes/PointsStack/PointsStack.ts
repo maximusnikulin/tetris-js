@@ -10,11 +10,11 @@ class PointsStack {
   public points: Point[][]
   private columns: number
   private rows: number
-  constructor(columns: number, rows: number, pattern?: (0 | 1)[][]) {
+  constructor(columns: number, rows: number, points?: Point[][]) {
     this.rows = rows
     this.columns = columns
     this.points = []
-    this.create(pattern)
+    this.create(points)
   }
 
   getPointsMatrix() {
@@ -32,21 +32,70 @@ class PointsStack {
     return res
   }
 
-  private create(pattern?: (0 | 1)[][]) {
+  private create(points?: Point[][]) {
+    if (points) {
+      this.points = points
+      return
+    }
+
     for (let i = 0; i < this.rows; i++) {
       if (!this.points[i]) {
         this.points[i] = []
       }
       for (let j = 0; j < this.columns; j++) {
-        let val = pattern ? pattern[i][j] : 0
-        this.points[i][j] = new Point(!!val)
+        this.points[i][j] = new Point(false)
       }
     }
   }
 
-  shrink(numRow: number) {
-    this.points.splice(numRow, 1)
+  shrinkRow(numRow: number) {
+    const row = this.getRow(numRow)
+  }
+
+  getEqualsRows() {
+    return this.points.reduce((acc: number[], row, index) => {
+      if (row.every(point => point.isFill())) {
+        acc.push(index)
+      }
+
+      return acc
+    }, [])
+  }
+
+  isСombinableRows(rowNum: number, combineRowNum: number) {
+    let row = this.getRow(rowNum)
+    let combineRow = this.getRow(combineRowNum)
+
+    return !row.every((point, index) => {
+      return point.isFill() && combineRow[index].isFill()
+    })
+  }
+
+  addEmptyRow() {
     this.points.unshift(this.points[0].map(() => new Point(false)))
+  }
+
+  combineRow(rowNum, combineRowNum) {
+    let row = this.getRow(rowNum)
+    let combineRow = this.getRow(combineRowNum)
+
+    const newRow = row.map((point, index) => {
+      if (point.isFill()) {
+        return combineRow[index]
+      }
+      return point
+    })
+
+    this.points.splice(rowNum, 2, newRow)
+    this.addEmptyRow()
+  }
+
+  collapse(numRow: number) {
+    const equalRows = this.getEqualsRows()
+    equalRows.forEach(() => {
+      this.points.splice(numRow, 1)
+      this.addEmptyRow()
+    })
   }
 
   getPoint(pos: number[]) {
@@ -75,6 +124,20 @@ class PointsStack {
     return this.points[row]
   }
 
+  canAddPoints(points: { [key: string]: Point }) {
+    return !Object.keys(points).some(key => {
+      const [x, y] = key.split(',')
+      let match = null
+      try {
+        match = this.points[y][x]
+      } catch {
+        throw new Error('Coordinate is not exists')
+      }
+
+      return match.fill
+    })
+  }
+
   addPoints(points: { [key: string]: Point }) {
     Object.keys(points).forEach(key => {
       const [x, y] = key.split(',')
@@ -83,6 +146,10 @@ class PointsStack {
         match = this.points[y][x]
       } catch {
         throw new Error('Coordinate is not exists')
+      }
+
+      if (match.fill) {
+        throw new Error('Point filled')
       }
 
       this.points[y][x] = points[key]

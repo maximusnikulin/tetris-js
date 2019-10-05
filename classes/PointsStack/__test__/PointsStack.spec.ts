@@ -5,10 +5,14 @@ import {
   stackRow,
   stackAfterAddFigureToBottom,
   stackAfterShrink,
+  stackWithEquals,
+  stackGetPoints,
+  getPointsObject,
 } from './mocks'
-import FigureMaker from '../../FigureMaker'
+import FigureFactory from '../../FigureFactory'
 import { FigureType, Colors } from '../../Figure/Figure'
 import { Point } from '../../Point'
+import { createPointsByPattern } from '../utils'
 
 describe('Test PointsStack', () => {
   let pointsStack: PointsStack = null
@@ -28,30 +32,45 @@ describe('Test PointsStack', () => {
   })
 
   test('It should add points to stack', () => {
-    const figure = FigureMaker.create(FigureType.first, [0, 0])
+    const figure = FigureFactory.create(FigureType.first, [0, 0])
     pointsStack.addPoints(figure.getFigurePoints())
     expect(pointsStack.getPointsMatrix()).toEqual(stackAfterAddFigureFirst)
   })
 
+  test('It should return points object with coordinates', () => {
+    pointsStack = new PointsStack(2, 2, stackGetPoints)
+    expect(pointsStack.getPoints()).toEqual(getPointsObject)
+  })
+
   test('It should return points row', () => {
-    const figure = FigureMaker.create(FigureType.first, [1, 2])
+    const figure = FigureFactory.create(FigureType.first, [1, 2])
     pointsStack.addPoints(figure.getFigurePoints())
     expect(pointsStack.getPointsMatrix()).toEqual(stackAfterAddFigureToBottom)
     expect(pointsStack.getRow(3)).toEqual(stackRow)
   })
 
   test('It should shrink raw of points', () => {
-    let figure = FigureMaker.create(FigureType.first, [0, 2])
+    let figure = FigureFactory.create(FigureType.first, [0, 2])
     let pointsStack = new PointsStack(4, 4)
     pointsStack.addPoints(figure.getFigurePoints())
-    pointsStack.shrink(3)
+    pointsStack.collapse(3)
     expect(pointsStack.getPointsMatrix()).toEqual(stackAfterShrink)
   })
 
   test('It should return point from pos', () => {
-    let figure = FigureMaker.create(FigureType.first, [0, 0])
+    let figure = FigureFactory.create(FigureType.first, [0, 0])
     let pointsStack = new PointsStack(4, 4)
     pointsStack.addPoints(figure.getFigurePoints())
     expect(pointsStack.getPoint([0, 1])).toEqual(new Point(true, Colors.violet))
   })
+
+  test('It should return equals rows', () => {
+    let pointsStack = new PointsStack(4, 4, stackWithEquals)
+  })
+
+  test('It should remove equals rows', () => {})
+
+  test('It should check to rows for combine', () => {})
+
+  test('It should combine two rows', () => {})
 })

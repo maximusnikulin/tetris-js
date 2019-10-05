@@ -5,10 +5,16 @@ export const secondPattern = [[1, 1, 1, 1], [0, 0, 0, 1]]
 export const thirdPattern = [[1, 1, 1, 1], [1, 0, 0, 0]]
 export const forthPattern = [[1, 1, 1, 1]]
 
-class FigureMaker {
-  static create(type: FigureType, pos?: number[]) {
+let index = 0
+class FigureFactory {
+  static create(
+    type: FigureType,
+    pos?: number[],
+    color: Colors = Colors.violet
+  ) {
     let pattern = []
-    let color = Colors.violet
+
+    index++
 
     if (type === FigureType.first) {
       pattern = firstPattern
@@ -34,4 +40,4 @@ class FigureMaker {
   }
 }
 
-export default FigureMaker
+export default FigureFactory

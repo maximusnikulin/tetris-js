@@ -1,8 +1,8 @@
 import { Colors } from './Figure/Figure'
 
 interface IPoint {
-  fill: boolean
-  color: Colors
+  isFill(): boolean
+  getColor(): Colors
 }
 
 export interface Pos {
@@ -11,8 +11,8 @@ export interface Pos {
 }
 
 export class Point implements IPoint {
-  fill: boolean
-  color: Colors
+  private fill: boolean
+  private color: Colors
   constructor(fill: boolean = false, color = Colors.transparent) {
     this.color = color
     this.fill = fill

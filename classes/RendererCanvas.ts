@@ -50,17 +50,14 @@ class RendererCanvas {
       const [x, y] = key.split(',').map(Number)
 
       this.ctx.fillStyle = Colors.transparent
-      if (point.fill) {
-        this.ctx.fillStyle = point.color
-        this.ctx.rect(
-          // TODO: Create util for thar
+      if (point.isFill()) {
+        this.ctx.fillStyle = point.getColor()
+        this.ctx.fillRect(
           x * this.square + 0.5,
           y * this.square + 0.5,
           this.square,
           this.square
         )
-        this.ctx.fill()
-        // this.ctx.strokeStyle = Colors.violet
         this.ctx.stroke()
       }
 

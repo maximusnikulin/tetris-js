@@ -1,10 +1,10 @@
 import Figure, { FigureType } from '../Figure'
-import FigureMaker, { firstPattern } from '../../FigureMaker'
+import FigureFactory, { firstPattern } from '../../FigureFactory'
 
 describe('Test Layout class', () => {
   let figureFirst: Figure = null
   beforeEach(() => {
-    figureFirst = FigureMaker.create(FigureType.first)
+    figureFirst = FigureFactory.create(FigureType.first)
   })
 
   test('It should get value of first type pattern', () => {
