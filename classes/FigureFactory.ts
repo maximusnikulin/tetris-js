@@ -1,11 +1,12 @@
 import Figure, { FigureType, Colors } from './Figure/Figure'
+import { getRndValInterval } from './helpers'
 
 export const firstPattern = [[0, 1, 1, 0], [1, 1, 1, 1]]
 export const secondPattern = [[1, 1, 1, 1], [0, 0, 0, 1]]
 export const thirdPattern = [[1, 1, 1, 1], [1, 0, 0, 0]]
 export const forthPattern = [[1, 1, 1, 1]]
+export const fivePattern = [[1, 1, 0], [0, 1, 1]]
 
-let index = 0
 class FigureFactory {
   static create(
     type: FigureType,
@@ -14,28 +15,28 @@ class FigureFactory {
   ) {
     let pattern = []
 
-    index++
-
     if (type === FigureType.first) {
       pattern = firstPattern
-      color = Colors.violet
+    }
+
+    if (type === FigureType.five) {
+      pattern = fivePattern
     }
 
     if (type === FigureType.second) {
       pattern = secondPattern
-      color = Colors.green
     }
 
     if (type === FigureType.third) {
       pattern = thirdPattern
-      color = Colors.blue
     }
 
     if (type === FigureType.forth) {
       pattern = forthPattern
-      color = Colors.yellow
     }
 
+    const colorId = getRndValInterval(0, 4)
+    color = Colors[Object.keys(Colors)[colorId]]
     return new Figure(pattern, pos, color)
   }
 }

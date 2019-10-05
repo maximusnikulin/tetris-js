@@ -1,12 +1,9 @@
-import Figure, { FigureType, Colors } from './Figure/Figure'
+import Figure, { FigureType } from './Figure/Figure'
 import FigureFactory from './FigureFactory'
 import { getRndValInterval } from './helpers'
 import PointsStack from './PointsStack/PointsStack'
-import RendererCanvas from './RendererCanvas'
-import { createPointsByPattern } from './PointsStack/utils'
-import { p } from './PointsStack/__test__/mocks'
-import { Point } from './Point'
 import PositionerFacad from './PositionerFacad'
+import RendererCanvas from './RendererCanvas'
 
 interface ITetris {}
 
@@ -20,17 +17,11 @@ export class Tetris implements ITetris {
   isFull: boolean
   //NodeJS.Timeout
   interval: any
-  figure: any
+  figure: Figure | null
   positioner: PositionerFacad
   positionerFigureStack: PositionerFacad
   constructor() {
     this.pointsStack = new PointsStack(10, 20)
-    // this.pointsStack.points = createPointsByPattern([
-    //   [0, 0, p(1), 0, 0],
-    //   [p(1), p(1), p(1), p(1), p(1)],
-    //   [p(1), p(1), p(1), p(1), p(1)],
-    //   [p(1), p(1), 0, p(1), p(1)],
-    // ])
 
     const { columns, rows } = this.pointsStack.getSize()
     this.renderer = new RendererCanvas(columns * 20, rows * 20)
@@ -41,8 +32,9 @@ export class Tetris implements ITetris {
   }
 
   createFigure() {
+    const typeId = getRndValInterval(1, 5)
     const { columns } = this.pointsStack.getSize()
-    const figure = FigureFactory.create(FigureType.first)
+    const figure = FigureFactory.create(typeId)
     let rndX = getRndValInterval(0, columns - figure.getSize().width)
     figure.setPosition([rndX, 0])
     return figure
@@ -61,6 +53,7 @@ export class Tetris implements ITetris {
   getPointsSnap() {
     const figurePoints = this.figure.getFigurePoints()
     const pointsStack = this.pointsStack.getPoints()
+
     return {
       ...pointsStack,
       ...figurePoints,
@@ -72,7 +65,7 @@ export class Tetris implements ITetris {
     this.renderer.renderPoints(points)
   }
 
-  /** Incapsulate it to figure????:start **/
+  //** Incapsulate it to figure:start ???? **//
   stepFigure() {
     if (this.positioner.figureIsShrinkedDown()) {
       this.render()
@@ -82,10 +75,9 @@ export class Tetris implements ITetris {
     if (this.positioner.figurePointsAddedToStack()) {
       this.render()
       clearInterval(this.interval)
-      // this.pointsStack.shrink()
+      this.pointsStack.collapse()
       this.runFigure()
     } else {
-      clearInterval(this.interval)
       this.endGame()
     }
   }
@@ -105,8 +97,9 @@ export class Tetris implements ITetris {
       this.render()
       this.interval = setInterval(this.stepFigure.bind(this), 10)
     } else {
+      console.log('!!!')
       this.endGame()
     }
   }
-  /** Incapsulate it to figure????:end **/
+  //** Incapsulate it to figure:end ???? **//
 }

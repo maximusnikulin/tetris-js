@@ -6,15 +6,16 @@ export enum FigureType {
   'second',
   'third',
   'forth',
+  'five',
 }
 
 export enum Colors {
   green = 'green',
   blue = 'blue',
-  black = 'black',
+  aqua = 'aqua',
   violet = 'violet',
-  transparent = 'transparent',
   yellow = 'yellow',
+  transparent = 'transparent',
 }
 
 export interface IFigure {}
@@ -64,8 +65,13 @@ class Figure implements IFigure {
 
   getFigurePoints() {
     let coordPoint: { [key: string]: Point } = {}
+
     this.pattern.forEach((ptrnRow, y) => {
       ptrnRow.forEach((value, x) => {
+        if (!value) {
+          return
+        }
+
         coordPoint[
           `${x + this.position[0]},${y + this.position[1]}`
         ] = new Point(!!value, value ? this.color : Colors.transparent)

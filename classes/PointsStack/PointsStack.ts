@@ -1,5 +1,6 @@
 import Figure, { Colors } from '../Figure/Figure'
 import { Point, Pos } from '../Point'
+import { p } from './__test__/mocks'
 
 export const sum = (a: number, b: number) => a + b
 
@@ -23,11 +24,13 @@ class PointsStack {
 
   getPoints() {
     const res: { [key: string]: Point } = {}
-    this.points.forEach((row, indRow) =>
+
+    this.points.forEach((row, index) => {
+      const indRow = index
       row.forEach((point, indPoint) => {
         res[`${indPoint},${indRow}`] = point
       })
-    )
+    })
 
     return res
   }
@@ -48,10 +51,6 @@ class PointsStack {
     }
   }
 
-  shrinkRow(numRow: number) {
-    const row = this.getRow(numRow)
-  }
-
   getEqualsRows() {
     return this.points.reduce((acc: number[], row, index) => {
       if (row.every(point => point.isFill())) {
@@ -62,40 +61,16 @@ class PointsStack {
     }, [])
   }
 
-  isСombinableRows(rowNum: number, combineRowNum: number) {
-    let row = this.getRow(rowNum)
-    let combineRow = this.getRow(combineRowNum)
-
-    return !row.every((point, index) => {
-      return point.isFill() && combineRow[index].isFill()
-    })
-  }
-
-  addEmptyRow() {
+  removeRow(rowNum: number) {
+    this.points.splice(rowNum, 1)
     this.points.unshift(this.points[0].map(() => new Point(false)))
   }
 
-  combineRow(rowNum, combineRowNum) {
-    let row = this.getRow(rowNum)
-    let combineRow = this.getRow(combineRowNum)
-
-    const newRow = row.map((point, index) => {
-      if (point.isFill()) {
-        return combineRow[index]
-      }
-      return point
-    })
-
-    this.points.splice(rowNum, 2, newRow)
-    this.addEmptyRow()
-  }
-
-  collapse(numRow: number) {
-    const equalRows = this.getEqualsRows()
-    equalRows.forEach(() => {
-      this.points.splice(numRow, 1)
-      this.addEmptyRow()
-    })
+  collapse() {
+    let equalRows = []
+    while ((equalRows = this.getEqualsRows()).length) {
+      equalRows.forEach(rowNum => this.removeRow(rowNum))
+    }
   }
 
   getPoint(pos: number[]) {
@@ -125,7 +100,7 @@ class PointsStack {
   }
 
   canAddPoints(points: { [key: string]: Point }) {
-    return !Object.keys(points).some(key => {
+    return Object.keys(points).every(key => {
       const [x, y] = key.split(',')
       let match = null
       try {
@@ -134,25 +109,23 @@ class PointsStack {
         throw new Error('Coordinate is not exists')
       }
 
-      return match.fill
+      return !(points[key].isFill() && match.isFill())
     })
   }
 
   addPoints(points: { [key: string]: Point }) {
     Object.keys(points).forEach(key => {
       const [x, y] = key.split(',')
-      let match = null
+      let match: Point | null = null
       try {
         match = this.points[y][x]
       } catch {
         throw new Error('Coordinate is not exists')
       }
 
-      if (match.fill) {
-        throw new Error('Point filled')
+      if (!match.isFill()) {
+        this.points[y][x] = points[key]
       }
-
-      this.points[y][x] = points[key]
     })
   }
 }
