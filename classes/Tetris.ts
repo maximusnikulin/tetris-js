@@ -54,6 +54,8 @@ export class Tetris implements ITetris {
       } else if (positioner.canAddFigureToStack()) {
         positioner.addFigureToStack()
         clearInterval(this.interval)
+        this.interval = null
+        this.pointsStack.collapse()
         this.runCircleFigure()
       } else {
         clearInterval(this.interval)

@@ -21,7 +21,6 @@ export enum Colors {
 export interface IFigure {}
 
 class Figure implements IFigure {
-  // Standart size of figure 4 x 2
   pattern: (0 | 1)[][]
   position: number[]
   color: Colors
