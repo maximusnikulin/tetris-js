@@ -5,6 +5,7 @@ import PointsStack from './PointsStack/PointsStack'
 import PositionerFacad from './Positioner'
 import RendererCanvas from './RendererCanvas'
 import Positioner from './Positioner'
+import Statistic from './Statistic/Statistic'
 
 interface ITetris {}
 
@@ -14,12 +15,13 @@ export class Tetris implements ITetris {
   //NodeJS.Timeout
   interval: any
   figure: Figure | null = null
-  // nextFigure: Figure | null = null
   positioner: Positioner | null = null
+  statistic: Statistic
 
   constructor() {
-    this.pointsStack = new PointsStack(10, 6) as PointsStack
+    this.pointsStack = new PointsStack(10, 20) as PointsStack
     this.renderer = this.createRenderer(this.pointsStack) as RendererCanvas
+    this.statistic = new Statistic()
     this.init()
   }
 
@@ -57,18 +59,17 @@ export class Tetris implements ITetris {
         clearInterval(this.interval)
         console.log('end')
       }
-    }, 50)
+    }, this.statistic.data.speed * 100)
   }
 
   private initKeyListener() {
-    document.addEventListener('keypress', e => {
+    document.addEventListener('keydown', e => {
       if (!this.positioner) {
         return
       }
-      clearInterval(this.interval)
+
       this.positioner.shrinkFigureByKey(e.keyCode)
       this.render()
-      this.runFigureDownInterval()
     })
   }
 
@@ -100,41 +101,4 @@ export class Tetris implements ITetris {
 
     this.renderer.renderPoints(points)
   }
-
-  //** Incapsulate it to figure:start ???? **//
-  // stepFigure() {
-  //   if (this.positioner.figureIsShrinkedDown()) {
-  //     this.render()
-  //     return
-  //   }
-
-  //   if (this.positioner.figurePointsAddedToStack()) {
-  //     this.render()
-  //     clearInterval(this.interval)
-  //     this.pointsStack.collapse()
-  //     this.runFigure()
-  //   } else {
-  //     this.endGame()
-  //   }
-  // }
-
-  // endGame() {
-  //   clearInterval(this.interval)
-  //   this.figure = null
-  //   alert('End game')
-  // }
-
-  // runFigure() {
-  //   this.fillFigureStack()
-  //   this.setActiveFgiure()
-  //   this.positioner = new PositionerFacad(this.pointsStack, this.figure)
-
-  //   if (this.positioner.canAddFigure()) {
-  //     this.render()
-  //     this.interval = setInterval(this.stepFigure.bind(this), 10)
-  //   } else {
-  //     console.log('!!!')
-  //     this.endGame()
-  //   }
-  // }
 }

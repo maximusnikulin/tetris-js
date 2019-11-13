@@ -31,48 +31,106 @@ export default class Positioner {
     this.pointsStack.addPoints(this.figure.getMapPoints())
   }
 
-  shrinkFigureDown(diff: number = 1) {
+  shrinkFigureDown() {
+    this.shrinkFigureVertical(1)
+  }
+
+  shrinkFigureVertical(diff: number = 1) {
     const [x, y] = this.figure.getPosition()
     this.figure.setPosition([x, y + diff])
   }
 
-  // canShrinkNewFigure() {
-  //   const heightFigure = this.figure.getPattern().length
-  //   return this.canShrinkFigureDown(heightFigure)
-  // }
+  shrinkFigureLeft() {
+    this.shrinkFigureHorizontal(-1)
+  }
 
-  // shrinkNewFigure() {
-  //   const heightFigure = this.figure.getPattern().length
-  //   this.shrinkFigureDown(heightFigure)
-  // }
+  shrinkFigureRight() {
+    this.shrinkFigureHorizontal(1)
+  }
 
-  canShrinkFigureDown(diff: number = 1) {
-    let res = true
-    for (let i = 0; i < diff; i++) {
-      const figPoints = this.figure.getMapPoints()
-      const maxY = this.pointsStack.getSize().rows
+  shrinkFigureHorizontal(diff: number = 0) {
+    const [x, y] = this.figure.getPosition()
+    this.figure.setPosition([x + diff, y])
+  }
 
-      res = Object.keys(figPoints).every(pos => {
-        const [x, y] = pos.split(',').map(Number)
-        if (y == maxY - 1) return false
-        const pointInStack = this.pointsStack.getPoint([x, y + 1])
-        return !(pointInStack.isFill() && figPoints[pos].isFill())
-      })
+  shrinkFigureMaxDown() {
+    while (this.canShrinkFigureDown()) {
+      this.shrinkFigureDown()
+    }
+  }
+
+  canShrinkFigureDown(diff: 1 | -1 = 1) {
+    const maxY = this.pointsStack.getSize().rows
+    const [x, y] = this.figure.getPosition()
+    const size = this.figure.getSize()
+    const newBottomY = y + diff + size.height
+    if (newBottomY > maxY) {
+      return false
     }
 
-    return res
+    return this.canShrinkFigure(([x, y]) => [x, y + 1])
+  }
+
+  canShrinkFigureLeft() {
+    return this.canShrinkFigureVertical(-1)
+  }
+
+  canShrinkFigureRight() {
+    return this.canShrinkFigureVertical(1)
+  }
+
+  canShrinkFigure(getNewCoordinates: (oldPointPos: number[]) => number[]) {
+    const figPoints = this.figure.getMapPoints()
+    return Object.keys(figPoints).every(pos => {
+      const [x, y] = pos.split(',').map(Number)
+      const pointInStack = this.pointsStack.getPoint(getNewCoordinates([x, y]))
+      return !(pointInStack.isFill() && figPoints[pos].isFill())
+    })
+  }
+
+  canShrinkFigureVertical(diff: -1 | 1) {
+    const [x, y] = this.figure.getPosition()
+    const size = this.figure.getSize()
+    if (diff < 1) {
+      const newX = x + diff
+      if (newX < 0) {
+        return false
+      }
+    } else {
+      const newRightX = x + diff + size.width
+      if (newRightX > this.pointsStack.getSize().columns) {
+        return false
+      }
+    }
+
+    return this.canShrinkFigure(([x, y]) => [x + diff, y])
   }
 
   shrinkFigureByKey(keyCode: number) {
     const code = keyCode as 37 | 39 | 40 | 38
-    // switch (e.keyCode) {
-    //   //left
-    //   case 37:
-    //   // right
-    //   case 39:
-    //   // bottom
-    //   case 40:
-    //   case 38:
-    // }
+    switch (code) {
+      case 37:
+        {
+          if (this.canShrinkFigureLeft()) {
+            this.shrinkFigureLeft()
+          }
+        }
+        break
+      case 39:
+        {
+          if (this.canShrinkFigureRight()) {
+            this.shrinkFigureRight()
+          }
+        }
+        break
+      case 40:
+        {
+          this.shrinkFigureMaxDown()
+        }
+        break
+      case 38: {
+        //rotate
+      }
+    }
   }
 }

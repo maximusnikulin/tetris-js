@@ -3,7 +3,7 @@ export default class Statistic {
   constructor() {
     this.data = {
       scores: 0,
-      speed: 1,
+      speed: 10,
     }
   }
 
