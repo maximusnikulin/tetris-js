@@ -7,18 +7,14 @@ export interface ILayout {}
 
 class PointsStack {
   private points: Point[][]
-  columns: number
-  rows: number
+  private columns: number
+  private rows: number
 
   constructor(columns: number, rows: number, points?: Point[][]) {
     this.points = []
     this.columns = columns
     this.rows = rows
     this.create(columns, rows, points)
-  }
-
-  getPointsMatrix() {
-    return this.points
   }
 
   getMapPoints() {
@@ -97,18 +93,8 @@ class PointsStack {
     return this.points[row]
   }
 
-  canAddPoints(points: { [key: string]: Point }) {
-    return Object.keys(points).every(key => {
-      const [x, y] = key.split(',').map(Number)
-      let match = null
-      try {
-        match = this.points[y][x]
-      } catch {
-        throw new Error('Coordinate is not exists')
-      }
-
-      return !(points[key].isFill() && match.isFill())
-    })
+  getPoints() {
+    return this.points
   }
 
   addPoints(points: { [key: string]: Point }) {

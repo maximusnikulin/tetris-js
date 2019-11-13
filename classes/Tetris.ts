@@ -4,6 +4,7 @@ import { getRndValInterval } from './helpers'
 import PointsStack from './PointsStack/PointsStack'
 import PositionerFacad from './Positioner'
 import RendererCanvas from './RendererCanvas'
+import Positioner from './Positioner'
 
 interface ITetris {}
 
@@ -13,35 +14,63 @@ export class Tetris implements ITetris {
   //NodeJS.Timeout
   interval: any
   figure: Figure | null = null
+  // nextFigure: Figure | null = null
+  positioner: Positioner | null = null
 
   constructor() {
-    this.pointsStack = new PointsStack(10, 20) as PointsStack
+    this.pointsStack = new PointsStack(10, 6) as PointsStack
     this.renderer = this.createRenderer(this.pointsStack) as RendererCanvas
     this.init()
   }
 
   private init() {
     this.renderer.renderGrid()
-    this.figure = this.createFigure()
     this.initKeyListener()
+    this.runCircleFigure()
+  }
+
+  private runCircleFigure() {
+    console.log('!!!')
+    this.figure = this.createFigure()
+    this.positioner = new Positioner(this.pointsStack, this.figure)
+
+    if (this.positioner.canAddFigureToStack()) {
+      this.render()
+      this.runFigureDownInterval()
+    } else {
+      clearInterval(this.interval)
+      console.log('end')
+    }
+  }
+
+  private runFigureDownInterval() {
+    this.interval = setInterval(() => {
+      const positioner = this.positioner as Positioner
+      if (positioner.canShrinkFigureDown()) {
+        positioner.shrinkFigureDown()
+        this.render()
+      } else if (positioner.canAddFigureToStack()) {
+        positioner.addFigureToStack()
+        clearInterval(this.interval)
+        this.runCircleFigure()
+      } else {
+        clearInterval(this.interval)
+        console.log('end')
+      }
+    }, 50)
   }
 
   private initKeyListener() {
     document.addEventListener('keypress', e => {
-      // this.positioner
-      // switch (e.keyCode) {
-      //   //left
-      //   case 37:
-      //   // right
-      //   case 39:
-      //   // bottom
-      //   case 40:
-      //   case 38:
-      // }
+      if (!this.positioner) {
+        return
+      }
+      clearInterval(this.interval)
+      this.positioner.shrinkFigureByKey(e.keyCode)
+      this.render()
+      this.runFigureDownInterval()
     })
   }
-
-  private step() {}
 
   private createFigure() {
     const typeId = getRndValInterval(1, 5)
