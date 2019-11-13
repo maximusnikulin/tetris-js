@@ -9,9 +9,9 @@ class RendererCanvas {
   height: number
   columns: number
   rows: number
-  constructor(width, height, square = 20) {
+  constructor(width: number, height: number, square = 20) {
     this.node = <HTMLCanvasElement>document.getElementById('tetris-js')
-    this.ctx = this.node.getContext('2d')
+    this.ctx = this.node.getContext('2d') as CanvasRenderingContext2D
     this.columns = width / square + 1
     this.rows = height / square + 1
     this.width = width + 1

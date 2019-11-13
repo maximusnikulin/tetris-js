@@ -46,24 +46,7 @@ class Figure implements IFigure {
     }
   }
 
-  shrinkDown() {
-    const [x, y] = this.position
-    this.setPosition([x, y + 1])
-  }
-
-  canShrinkDown(pointsStack: PointsStack) {
-    const figPoints = this.getFigurePoints()
-    const maxY = pointsStack.getSize().rows
-
-    return Object.keys(figPoints).every(pos => {
-      const [x, y] = pos.split(',').map(Number)
-      if (y == maxY - 1) return false
-      const pointInStack = pointsStack.getPoint([x, y + 1])
-      return !(pointInStack.isFill() && figPoints[pos].isFill())
-    })
-  }
-
-  getFigurePoints() {
+  getMapPoints() {
     let coordPoint: { [key: string]: Point } = {}
 
     this.pattern.forEach((ptrnRow, y) => {

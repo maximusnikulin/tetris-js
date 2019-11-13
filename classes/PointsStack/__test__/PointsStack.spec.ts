@@ -16,7 +16,7 @@ import PointsStack from '../PointsStack'
 // } from './mocks'
 
 describe('Test PointsStack', () => {
-  let pointsStack: PointsStack = null
+  let pointsStack: PointsStack
   beforeEach(() => {
     pointsStack = new PointsStack(5, 4)
   })

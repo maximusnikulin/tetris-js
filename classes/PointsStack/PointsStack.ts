@@ -1,30 +1,28 @@
 import Figure, { Colors } from '../Figure/Figure'
 import { Point, Pos } from '../Point'
-import { p } from './__test__/mocks'
 
 export const sum = (a: number, b: number) => a + b
 
 export interface ILayout {}
 
 class PointsStack {
-  // TODO: Make private it
-  public points: Point[][]
-  private columns: number
-  private rows: number
+  private points: Point[][]
+  columns: number
+  rows: number
+
   constructor(columns: number, rows: number, points?: Point[][]) {
-    this.rows = rows
-    this.columns = columns
     this.points = []
-    this.create(points)
+    this.columns = columns
+    this.rows = rows
+    this.create(columns, rows, points)
   }
 
   getPointsMatrix() {
     return this.points
   }
 
-  getPoints() {
-    const res: { [key: string]: Point } = {}
-
+  getMapPoints() {
+    let res: { [key: string]: Point } = {}
     this.points.forEach((row, index) => {
       const indRow = index
       row.forEach((point, indPoint) => {
@@ -35,17 +33,17 @@ class PointsStack {
     return res
   }
 
-  private create(points?: Point[][]) {
+  private create(columns: number, rows: number, points?: Point[][]) {
     if (points) {
       this.points = points
       return
     }
 
-    for (let i = 0; i < this.rows; i++) {
+    for (let i = 0; i < rows; i++) {
       if (!this.points[i]) {
         this.points[i] = []
       }
-      for (let j = 0; j < this.columns; j++) {
+      for (let j = 0; j < columns; j++) {
         this.points[i][j] = new Point(false)
       }
     }
@@ -78,7 +76,7 @@ class PointsStack {
     const match = this.points[y][x]
 
     if (!this.points[y][x]) {
-      throw new Error('Cant add point')
+      throw new Error("Can't get point")
     }
 
     return match
@@ -101,7 +99,7 @@ class PointsStack {
 
   canAddPoints(points: { [key: string]: Point }) {
     return Object.keys(points).every(key => {
-      const [x, y] = key.split(',')
+      const [x, y] = key.split(',').map(Number)
       let match = null
       try {
         match = this.points[y][x]
@@ -115,8 +113,9 @@ class PointsStack {
 
   addPoints(points: { [key: string]: Point }) {
     Object.keys(points).forEach(key => {
-      const [x, y] = key.split(',')
-      let match: Point | null = null
+      const [x, y] = key.split(',').map(Number)
+      let match: Point
+
       try {
         match = this.points[y][x]
       } catch {
