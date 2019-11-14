@@ -1,4 +1,3 @@
-import Figure, { FigureType } from './Figure/Figure'
 import FigureFactory from './FigureFactory'
 import { getRndValInterval } from './helpers'
 import PointsStack from './PointsStack/PointsStack'
@@ -6,6 +5,7 @@ import PositionerFacad from './Positioner'
 import RendererCanvas from './RendererCanvas'
 import Positioner from './Positioner'
 import Statistic from './Statistic/Statistic'
+import Figure from './Figure/Figure'
 
 interface ITetris {}
 
@@ -32,8 +32,7 @@ export class Tetris implements ITetris {
   }
 
   private runCircleFigure() {
-    console.log('!!!')
-    this.figure = this.createFigure()
+    this.figure = FigureFactory.createRandomFigure(this.pointsStack.getSize())
     this.positioner = new Positioner(this.pointsStack, this.figure)
 
     if (this.positioner.canAddFigureToStack()) {
@@ -73,15 +72,6 @@ export class Tetris implements ITetris {
       this.positioner.shrinkFigureByKey(e.keyCode)
       this.render()
     })
-  }
-
-  private createFigure() {
-    const typeId = getRndValInterval(1, 5)
-    const { columns } = this.pointsStack.getSize()
-    const figure = FigureFactory.create(typeId)
-    let rndX = getRndValInterval(0, columns - figure.getSize().width)
-    figure.setPosition([rndX, 0])
-    return figure
   }
 
   private createRenderer(pointsStack: PointsStack) {

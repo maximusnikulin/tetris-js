@@ -1,4 +1,3 @@
-import Figure, { Colors } from '../Figure/Figure'
 import { Point, Pos } from '../Point'
 
 export const sum = (a: number, b: number) => a + b

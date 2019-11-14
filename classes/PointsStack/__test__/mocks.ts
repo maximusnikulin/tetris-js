@@ -1,6 +1,6 @@
-import { createPointsByPattern, createRowByPattern } from '../utils'
-import { Point } from '../../Point'
-import { Colors } from '../../Figure/Figure'
+// import { createPointsByPattern, createRowByPattern } from '../utils'
+// import { Point } from '../../Point'
+// import { Colors } from '../../Figure/Figure'
 
 // export const p: (val: number, color?: Colors) => [number, Colors] = (
 //   val,

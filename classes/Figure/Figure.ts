@@ -1,12 +1,11 @@
 import { Point } from '../Point'
-import PointsStack from '../PointsStack/PointsStack'
 
-export enum FigureType {
-  'first' = 1,
-  'second',
-  'third',
-  'forth',
-  'five',
+export enum FigureTypes {
+  O = 0,
+  S,
+  J,
+  L,
+  I,
 }
 
 export enum Colors {
@@ -18,37 +17,43 @@ export enum Colors {
   transparent = 'transparent',
 }
 
+export interface FigureState {
+  patterns: number[][][]
+  nextPattern: () => void
+  getPattern: () => number[][]
+  activePattern: number
+}
+
 export interface IFigure {}
 
 class Figure implements IFigure {
-  pattern: (0 | 1)[][]
   position: number[]
   color: Colors
-  constructor(
-    pattern: (0 | 1)[][],
-    position: number[] = [0, 0],
-    color?: Colors
-  ) {
-    this.pattern = pattern
+  state: FigureState
+
+  constructor(state: FigureState, position: number[] = [0, 0], color: Colors) {
+    this.state = state
     this.position = position
-    this.color = color || Colors.violet
+    this.color = color
   }
 
   setPosition(pos: number[]) {
     this.position = pos
   }
 
+  rotateFigure() {}
+
   getSize() {
     return {
-      height: this.pattern.length,
-      width: this.pattern[0].length,
+      height: this.state.getPattern().length,
+      width: this.state.getPattern()[0].length,
     }
   }
 
   getMapPoints() {
     let coordPoint: { [key: string]: Point } = {}
 
-    this.pattern.forEach((ptrnRow, y) => {
+    this.state.getPattern().forEach((ptrnRow, y) => {
       ptrnRow.forEach((value, x) => {
         if (!value) {
           return
@@ -65,11 +70,11 @@ class Figure implements IFigure {
 
   isFillPoint(pos: number[]) {
     const [x, y] = pos
-    return !!this.pattern[y][x]
+    return !!this.state.getPattern()[y][x]
   }
 
   getPattern() {
-    return this.pattern
+    return this.state.getPattern()
   }
 
   getPosition() {

@@ -1,5 +1,5 @@
 import { Point } from './Point'
-import Figure, { Colors } from './Figure/Figure'
+import { Colors } from './Figure/Figure'
 
 class RendererCanvas {
   ctx: CanvasRenderingContext2D

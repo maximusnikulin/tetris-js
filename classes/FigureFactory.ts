@@ -1,62 +1,45 @@
-import Figure, { FigureType, Colors } from './Figure/Figure'
+import Figure, { FigureState, Colors } from './Figure/Figure'
 import { getRndValInterval } from './helpers'
+import figureTypes from './Figure/FigureTypes'
+import figurePatterns from './Figure/FigureTypes'
 
-export const firstPattern = [
-  [0, 1, 0],
-  [1, 1, 1],
-]
+const createFigureState = (
+  patterns: number[][][],
+  activePattern: number
+): FigureState => ({
+  patterns,
+  activePattern,
+  nextPattern() {
+    if (this.activePattern === patterns.length) {
+      this.activePattern = 0
+    } else {
+      this.activePattern++
+    }
+  },
+  getPattern() {
+    return this.patterns[this.activePattern]
+  },
+})
 
-export const secondPattern = [
-  [1, 1, 0],
-  [0, 1, 1],
-]
-
-export const thirdPattern = [
-  [1, 1, 1],
-  [0, 0, 1],
-]
-
-export const forthPattern = [[1, 1, 1, 1]]
-
-export const fivePattern = [
-  [1, 1],
-  [1, 1],
-]
+const getRandomColor = () => {
+  const colorId = getRndValInterval(0, 4)
+  const nameColors = Object.keys(Colors) as (keyof typeof Colors)[]
+  const colorKey = nameColors[colorId as number]
+  return Colors[colorKey]
+}
 
 class FigureFactory {
-  static create(
-    type: FigureType,
-    pos?: number[],
-    color: Colors = Colors.violet
-  ) {
-    let pattern: any = []
+  static createRandomFigure(stackSize: { columns: number; rows: number }) {
+    const { columns, rows } = stackSize
+    const rndTypeIndex = getRndValInterval(0, figureTypes.length - 1)
+    const patterns = figurePatterns[rndTypeIndex]
+    const activePattern = getRndValInterval(0, patterns.length - 1)
 
-    if (type === FigureType.first) {
-      pattern = firstPattern
-    }
+    const state = createFigureState(patterns, activePattern)
+    const color = getRandomColor()
 
-    if (type === FigureType.five) {
-      pattern = fivePattern
-    }
-
-    if (type === FigureType.second) {
-      pattern = secondPattern
-    }
-
-    if (type === FigureType.third) {
-      pattern = thirdPattern
-    }
-
-    if (type === FigureType.forth) {
-      pattern = forthPattern
-    }
-
-    const colorId = getRndValInterval(0, 4)
-    const nameColors = Object.keys(Colors) as (keyof typeof Colors)[]
-
-    const colorKey = nameColors[colorId as number]
-    color = Colors[colorKey]
-    return new Figure(pattern, pos, color)
+    let rndX = getRndValInterval(0, columns - patterns[activePattern].length)
+    return new Figure(state, [rndX, 0], color)
   }
 }
 
