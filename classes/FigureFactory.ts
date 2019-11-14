@@ -52,7 +52,10 @@ class FigureFactory {
     }
 
     const colorId = getRndValInterval(0, 4)
-    // color = Colors[Object.keys(Colors)[colorId]]
+    const nameColors = Object.keys(Colors) as (keyof typeof Colors)[]
+
+    const colorKey = nameColors[colorId as number]
+    color = Colors[colorKey]
     return new Figure(pattern, pos, color)
   }
 }
