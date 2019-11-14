@@ -1,7 +1,7 @@
-import Figure, { FigureState, Colors } from './Figure/Figure'
-import { getRndValInterval } from './helpers'
-import figureTypes from './Figure/FigureTypes'
-import figurePatterns from './Figure/FigureTypes'
+import Figure, { FigureState, Colors } from './Figure'
+import { getRndValInterval } from '../helpers'
+import figureTypes from './FigureTypes'
+import figurePatterns from './FigureTypes'
 
 const createFigureState = (
   patterns: number[][][],
@@ -38,7 +38,9 @@ class FigureFactory {
     const state = createFigureState(patterns, activePattern)
     const color = getRandomColor()
 
-    let rndX = getRndValInterval(0, columns - patterns[activePattern].length)
+    let rndX = getRndValInterval(0, columns - patterns[activePattern][0].length)
+
+    console.log(rndX)
     return new Figure(state, [rndX, 0], color)
   }
 }

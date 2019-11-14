@@ -1,4 +1,4 @@
-import FigureFactory from './FigureFactory'
+import FigureFactory from './Figure/FigureFactory'
 import { getRndValInterval } from './helpers'
 import PointsStack from './PointsStack/PointsStack'
 import PositionerFacad from './Positioner'
@@ -40,8 +40,12 @@ export class Tetris implements ITetris {
       this.runFigureDownInterval()
     } else {
       clearInterval(this.interval)
-      console.log('end')
+      this.endGame()
     }
+  }
+
+  endGame() {
+    alert('endGame')
   }
 
   private runFigureDownInterval() {
@@ -58,9 +62,9 @@ export class Tetris implements ITetris {
         this.runCircleFigure()
       } else {
         clearInterval(this.interval)
-        console.log('end')
+        this.endGame()
       }
-    }, this.statistic.data.speed * 100)
+    }, (this.statistic.data.speed / 3) * 100)
   }
 
   private initKeyListener() {
