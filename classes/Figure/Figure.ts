@@ -19,7 +19,7 @@ export enum Colors {
 
 export interface FigureState {
   patterns: number[][][]
-  nextPattern: () => void
+  setNextPattern: () => void
   getPattern: () => number[][]
   activePattern: number
 }

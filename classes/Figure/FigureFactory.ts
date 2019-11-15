@@ -3,21 +3,21 @@ import { getRndValInterval } from '../helpers'
 import figureTypes from './FigureTypes'
 import figurePatterns from './FigureTypes'
 
-const createFigureState = (
+export const createFigureState = (
   patterns: number[][][],
   activePattern: number
 ): FigureState => ({
   patterns,
   activePattern,
-  nextPattern() {
+  setNextPattern() {
     if (this.activePattern === patterns.length) {
-      this.activePattern = 0
+      this.activePattern = 1
     } else {
       this.activePattern++
     }
   },
   getPattern() {
-    return this.patterns[this.activePattern]
+    return this.patterns[this.activePattern - 1]
   },
 })
 
@@ -29,6 +29,10 @@ const getRandomColor = () => {
 }
 
 class FigureFactory {
+  static create(state: FigureState, pos: number[], color: Colors) {
+    return new Figure(state, pos, color)
+  }
+
   static createRandomFigure(stackSize: { columns: number; rows: number }) {
     const { columns, rows } = stackSize
     const rndTypeIndex = getRndValInterval(0, figureTypes.length - 1)
