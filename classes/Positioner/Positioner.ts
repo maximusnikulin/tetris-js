@@ -1,5 +1,5 @@
-import PointsStack from './PointsStack/PointsStack'
-import Figure from './Figure/Figure'
+import PointsStack from '../PointsStack/PointsStack'
+import Figure from '../Figure/Figure'
 
 export default class Positioner {
   private figure: Figure

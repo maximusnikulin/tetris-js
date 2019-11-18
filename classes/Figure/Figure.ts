@@ -1,13 +1,5 @@
 import { Point } from '../Point'
 
-export enum FigureTypes {
-  O = 0,
-  S,
-  J,
-  L,
-  I,
-}
-
 export enum Colors {
   green = 'green',
   blue = 'blue',

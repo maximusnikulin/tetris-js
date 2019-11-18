@@ -1,9 +1,9 @@
 import FigureFactory from './Figure/FigureFactory'
 import { getRndValInterval } from './helpers'
 import PointsStack from './PointsStack/PointsStack'
-import PositionerFacad from './Positioner'
+import PositionerFacad from './Positioner/Positioner'
 import RendererCanvas from './RendererCanvas'
-import Positioner from './Positioner'
+import Positioner from './Positioner/Positioner'
 import Statistic from './Statistic/Statistic'
 import Figure from './Figure/Figure'
 

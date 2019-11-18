@@ -61,5 +61,12 @@ const O = [
   ],
 ]
 
-const figurePatterns = [O, I, S, L, T]
-export default figurePatterns
+export enum FigureTypes {
+  O = 'O',
+  I = 'I',
+  T = 'T',
+  L = 'L',
+  S = 'S',
+}
+
+export const FigureTypePatterns = { O, I, T, L, S }

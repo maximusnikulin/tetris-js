@@ -1,19 +1,13 @@
 import Figure, { Colors } from '../Figure'
-import FigureFactory, { createFigureState } from '../FigureFactory'
-import figurePatterns from '../FigureTypes'
+import FigureFactory from '../FigureFactory'
+import { FigureTypes, FigureTypePatterns } from '../FigureTypes'
 
-const TPatterns = figurePatterns[4]
-const activePattern = 1
-const pattern = TPatterns[activePattern]
+const TPatterns = FigureTypePatterns[FigureTypes.T]
 
 describe('Test Layout class', () => {
   let figure: Figure
   beforeEach(() => {
-    figure = FigureFactory.create(
-      createFigureState(TPatterns, 1),
-      [0, 0],
-      Colors.green
-    )
+    figure = FigureFactory.create(FigureTypes.T, 1, [0, 0], Colors.green)
   })
 
   test('It should get first T pattern', () => {
