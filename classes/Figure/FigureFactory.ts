@@ -29,12 +29,12 @@ class FigureFactory {
         Object.keys(FigureTypes)[rndTypeIndex] as keyof typeof FigureTypes
       ]
 
-    const activePattern = getRndValInterval(0, patterns.length - 1)
+    const activePattern = getRndValInterval(1, patterns.length)
 
     const state = createFigureState(patterns, activePattern)
     const color = getRandomColor()
 
-    let rndX = getRndValInterval(0, columns - patterns[activePattern][0].length)
+    let rndX = getRndValInterval(0, columns - state.getPattern()[0].length)
 
     return new Figure(state, [rndX, 0], color)
   }

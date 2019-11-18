@@ -106,14 +106,6 @@ export default class Positioner {
     return this.canShrinkFigure(([x, y]) => [x + diff, y])
   }
 
-  // canRotateFigure () {
-
-  // }
-
-  // rotateFigure () {
-  //   // this.figure.rotateFigure()
-  // }
-
   shrinkFigureByKey(keyCode: number) {
     const code = keyCode as 37 | 39 | 40 | 38
     switch (code) {

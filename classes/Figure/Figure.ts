@@ -23,9 +23,9 @@ class Figure implements IFigure {
   color: Colors
   state: FigureState
 
-  constructor(state: FigureState, position: number[] = [0, 0], color: Colors) {
+  constructor(state: FigureState, pos: number[] = [0, 0], color: Colors) {
     this.state = state
-    this.position = position
+    this.position = pos
     this.color = color
   }
 
@@ -44,8 +44,9 @@ class Figure implements IFigure {
 
   getMapPoints() {
     let coordPoint: { [key: string]: Point } = {}
-
-    this.state.getPattern().forEach((ptrnRow, y) => {
+    let pattern = this.state.getPattern()
+    debugger
+    pattern.forEach((ptrnRow, y) => {
       ptrnRow.forEach((value, x) => {
         if (!value) {
           return
