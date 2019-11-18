@@ -1,93 +1,73 @@
 import { Point } from '../Point'
 
-export enum FigureType {
-  'first' = 1,
-  'second',
-  'third',
-  'forth',
-  'five',
-}
-
 export enum Colors {
   green = 'green',
   blue = 'blue',
-  black = 'black',
+  aqua = 'aqua',
   violet = 'violet',
-  transparent = 'transparent',
   yellow = 'yellow',
+  transparent = 'transparent',
+}
+
+export interface FigureState {
+  patterns: number[][][]
+  setNextPattern: () => void
+  getPattern: () => number[][]
+  activePattern: number
 }
 
 export interface IFigure {}
 
-export interface PosXY {
-  x: number
-  y: number
-}
-
 class Figure implements IFigure {
-  // Standart size of figure 4 x 2
-  pattern: (0 | 1)[][]
-  position: PosXY
+  position: number[]
   color: Colors
-  constructor(
-    pattern: (0 | 1)[][],
-    position: { x: number; y: number } = { x: 0, y: 0 },
-    color?: Colors
-  ) {
-    this.pattern = pattern
-    this.position = position
-    this.color = color || Colors.black
+  state: FigureState
+
+  constructor(state: FigureState, pos: number[] = [0, 0], color: Colors) {
+    this.state = state
+    this.position = pos
+    this.color = color
   }
 
-  setPosition(pos: Partial<PosXY>) {
-    for (let key in pos) {
-      this.position[key] = pos[key]
-    }
+  setPosition(pos: number[]) {
+    this.position = pos
   }
 
-  getPointsArea() {
-    const { x: dX, y: dY } = this.position
-    return this.pattern.map((ptrnRow, y) =>
-      ptrnRow.map(
-        (value, x) =>
-          new Point(
-            x + dX,
-            y + dY,
-            value,
-            value ? this.color : Colors.transparent
-          )
-      )
-    )
-  }
+  rotateFigure() {}
 
   getSize() {
     return {
-      height: this.pattern.length,
-      width: this.pattern[0].length,
+      height: this.state.getPattern().length,
+      width: this.state.getPattern()[0].length,
     }
   }
 
-  getFlatPoints() {
-    const { x: dX, y: dY } = this.position
+  getMapPoints() {
+    let coordPoint: { [key: string]: Point } = {}
+    let pattern = this.state.getPattern()
+    debugger
+    pattern.forEach((ptrnRow, y) => {
+      ptrnRow.forEach((value, x) => {
+        if (!value) {
+          return
+        }
 
-    let points: Point[] = []
-    this.pattern.forEach((ptrnRow, y) => {
-      return ptrnRow.forEach((value, x) =>
-        points.push(
-          new Point(
-            x + dX,
-            y + dY,
-            value,
-            value ? this.color : Colors.transparent
-          )
-        )
-      )
+        coordPoint[
+          `${x + this.position[0]},${y + this.position[1]}`
+        ] = new Point(!!value, value ? this.color : Colors.transparent)
+      })
     })
-    return points
+
+    return coordPoint
+  }
+
+  isFillPoint(pos: number[]) {
+    const [x, y] = pos
+    return !!this.state.getPattern()[y][x]
   }
 
   getPattern() {
-    return this.pattern
+    return this.state.getPattern()
   }
 
   getPosition() {

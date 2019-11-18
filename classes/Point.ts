@@ -1,32 +1,25 @@
-import { Colors, PosXY } from './Figure/Figure'
+import { Colors } from './Figure/Figure'
 
 interface IPoint {
+  isFill(): boolean
+  getColor(): Colors
+}
+
+export interface Pos {
   x: number
   y: number
-  value: 0 | 1
-  color: Colors
 }
 
 export class Point implements IPoint {
-  x: number
-  y: number
-  value: 0 | 1
-  color: Colors
-  constructor(x: number, y: number, value?: 0 | 1, color = Colors.transparent) {
-    this.x = x
-    this.y = y
+  private fill: boolean
+  private color: Colors
+  constructor(fill: boolean = false, color = Colors.transparent) {
     this.color = color
-    if (typeof value !== 'undefined') {
-      this.value = value
-    }
+    this.fill = fill
   }
 
-  getPosition() {
-    return { x: this.x, y: this.y }
-  }
-
-  getValue() {
-    return this.value
+  isFill() {
+    return this.fill
   }
 
   getColor() {
@@ -38,16 +31,7 @@ export class Point implements IPoint {
     return this
   }
 
-  setValue(value: 1 | 0) {
-    this.value = value
-    return this
-  }
-
-  setPosition(pos: Partial<PosXY>) {
-    for (let key in pos) {
-      this[key] = pos[key]
-    }
-
-    return this
+  setValue(value: boolean) {
+    this.fill = value
   }
 }

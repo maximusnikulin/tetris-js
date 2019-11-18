@@ -1,158 +1,101 @@
-import RendererCanvas from './RendererCanvas'
-import FigureMaker from './FigureMaker'
-import Figure, { FigureType, PosXY } from './Figure/Figure'
+import Figure from './Figure/Figure'
+import FigureFactory from './Figure/FigureFactory'
 import PointsStack from './PointsStack/PointsStack'
-import { Point } from './Point'
+import Positioner from './Positioner/Positioner'
+import RendererCanvas from './RendererCanvas'
+import Statistic from './Statistic/Statistic'
 
 interface ITetris {}
 
 export class Tetris implements ITetris {
   renderer: RendererCanvas
   pointsStack: PointsStack
-  figureStack: Figure[]
-  square: number
-  width: number
-  height: number
-  isFull: boolean
-  //@ts-ignore
-  interval: NodeJS.Timeout
-  canHandleKey: boolean
+  //NodeJS.Timeout
+  interval: any
+  figure: Figure | null = null
+  positioner: Positioner | null = null
+  statistic: Statistic
+
   constructor() {
-    this.pointsStack = new PointsStack(10, 20)
-    const { columns, rows } = this.pointsStack.getSize()
-    this.square = 20
-    this.width = columns * this.square
-    this.height = rows * this.square
-    this.renderer = new RendererCanvas(this.width, this.height)
-    this.figureStack = []
+    this.pointsStack = new PointsStack(10, 5) as PointsStack
+    this.renderer = this.createRenderer(this.pointsStack) as RendererCanvas
+    this.statistic = new Statistic()
+    this.init()
+  }
+
+  private init() {
     this.renderer.renderGrid()
-    this.isFull = false
-    this.canHandleKey = true
-    this.initListeners()
+    this.initKeyListener()
+    this.runCircleFigure()
   }
 
-  createFigure(pos: PosXY) {
-    return FigureMaker.create(FigureType.first, pos)
-  }
+  private runCircleFigure() {
+    this.figure = FigureFactory.createRandomFigure(this.pointsStack.getSize())
+    this.positioner = new Positioner(this.pointsStack, this.figure)
 
-  getRenderPoints(figure: Figure, pointsStack: PointsStack) {
-    const stackPoints = pointsStack.getFlatPoints()
-    if (!figure) {
-      return stackPoints
+    if (this.positioner.canAddFigureToStack()) {
+      this.render()
+      this.runFigureDownInterval()
+    } else {
+      clearInterval(this.interval)
+      this.endGame()
     }
-
-    const figurePoints = figure.getFlatPoints()
-
-    return stackPoints.map(point => {
-      const { x, y } = point.getPosition()
-      const matchPoint = figurePoints.find(figPoint => {
-        const { x: fpX, y: fpY } = figPoint.getPosition()
-        return fpX === x && fpY === y
-      })
-
-      return matchPoint || point
-    })
   }
 
   endGame() {
-    alert('END GAME')
-    clearInterval(this.interval)
+    this.render()
     this.interval = null
+    this.positioner = null
+    console.log('endGame')
   }
 
-  handleKeyPress = e => {
-    // if (!this.canHandleKey) return
-    const figure = this.getCurrentFigure()
-    if ((e.keyCode !== 40 && e.keyCode !== 37 && e.keyCode !== 39) || !figure) {
-      return
-    }
-
-    let { x, y } = figure.getPosition()
-
-    if (e.keyCode === 40) {
-      let dY = 1
-      while (
-        this.pointsStack.canChangePosPoints(figure.getPointsArea(), { dY })
-      ) {
-        dY++
-      }
-
-      figure.setPosition({ y })
-      this.addFigureToStack(figure)
-    } else {
-      let dX = 0
-
-      if (e.keyCode === 37) {
-        dX = -1
-      }
-
-      if (e.keyCode === 39) {
-        dX = 1
-      }
-
-      if (this.pointsStack.canChangePosPoints(figure.getPointsArea(), { dX })) {
-        figure.setPosition({ x: x + dX })
-        this.render()
-      }
-    }
-  }
-
-  initListeners() {
-    // window.addEventListener('keydown', e => this.handleKeyPress(e))
-  }
-
-  removeListeners() {
-    // window.removeEventListener('keydown', this.handleKeyPress)
-  }
-
-  runCycle() {
-    let res = this.runStep()
-
+  private runFigureDownInterval() {
     this.interval = setInterval(() => {
-      const isEnd = !this.runStep()
-      if (isEnd) {
+      const positioner = this.positioner as Positioner
+      if (positioner.canShrinkFigureDown()) {
+        positioner.shrinkFigureDown()
+        this.render()
+      } else if (positioner.canAddFigureToStack()) {
+        positioner.addFigureToStack()
+        clearInterval(this.interval)
+        this.interval = null
+        this.pointsStack.collapse()
+        this.runCircleFigure()
+      } else {
+        clearInterval(this.interval)
         this.endGame()
       }
-    }, 100)
+    }, (this.statistic.data.speed / 3) * 100)
+  }
+
+  private initKeyListener() {
+    document.addEventListener('keydown', e => {
+      if (!this.interval || !this.positioner) {
+        return
+      }
+
+      this.positioner.shrinkFigureByKey(e.keyCode)
+      this.render()
+    })
+  }
+
+  private createRenderer(pointsStack: PointsStack) {
+    const { columns, rows } = pointsStack.getSize()
+    return new RendererCanvas(columns * 20, rows * 20)
   }
 
   render() {
-    this.renderer.renderPoints(
-      this.getRenderPoints(this.getCurrentFigure(), this.pointsStack)
-    )
-  }
+    let points = {}
 
-  addFigureToStack = (figure: Figure) => {
-    this.pointsStack.addPoints(figure.getPointsArea())
-    this.figureStack.pop()
-  }
-
-  getCurrentFigure() {
-    return this.figureStack[this.figureStack.length - 1] || null
-  }
-
-  runStep() {
-    let figure = this.getCurrentFigure()
-    let dY = 1
-    if (!figure) {
-      dY = 0
-      let figurePos = { x: 2, y: 0 }
-      figure = this.createFigure(figurePos)
-      this.figureStack.push(figure)
-    }
-
-    let { x, y } = figure.getPosition()
-    if (this.pointsStack.canChangePosPoints(figure.getPointsArea(), { dY })) {
-      figure.setPosition({ y: y + dY })
-      this.render()
+    if (!this.figure) {
+      points = this.pointsStack.getMapPoints()
     } else {
-      if (y === 0) {
-        return false
+      points = {
+        ...this.pointsStack.getMapPoints(),
+        ...this.figure.getMapPoints(),
       }
-      this.addFigureToStack(figure)
-      this.render()
     }
 
-    return true
+    this.renderer.renderPoints(points)
   }
 }

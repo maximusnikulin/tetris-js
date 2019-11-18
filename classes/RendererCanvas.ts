@@ -1,5 +1,5 @@
 import { Point } from './Point'
-import Figure, { Colors } from './Figure/Figure'
+import { Colors } from './Figure/Figure'
 
 class RendererCanvas {
   ctx: CanvasRenderingContext2D
@@ -9,9 +9,9 @@ class RendererCanvas {
   height: number
   columns: number
   rows: number
-  constructor(width, height, square = 20) {
+  constructor(width: number, height: number, square = 20) {
     this.node = <HTMLCanvasElement>document.getElementById('tetris-js')
-    this.ctx = this.node.getContext('2d')
+    this.ctx = this.node.getContext('2d') as CanvasRenderingContext2D
     this.columns = width / square + 1
     this.rows = height / square + 1
     this.width = width + 1
@@ -36,8 +36,7 @@ class RendererCanvas {
     }
   }
 
-  renderPoints(points: Point[]) {
-    // debugger
+  renderPoints(points: { [key: string]: Point }) {
     const width = this.width
     const height = this.height
 
@@ -46,26 +45,24 @@ class RendererCanvas {
     this.ctx.beginPath()
     this.renderGrid()
 
-    points.forEach(point => {
+    Object.keys(points).forEach(key => {
+      const point = points[key]
+      const [x, y] = key.split(',').map(Number)
+
       this.ctx.fillStyle = Colors.transparent
-      if (point.value === 1) {
-        const { x, y } = point.getPosition()
-        this.ctx.fillStyle = point.color
-        this.ctx.rect(
-          //TODO: Create util for thar
+      if (point.isFill()) {
+        this.ctx.fillStyle = point.getColor()
+        this.ctx.fillRect(
           x * this.square + 0.5,
           y * this.square + 0.5,
           this.square,
           this.square
         )
-        this.ctx.fill()
-        this.ctx.strokeStyle = Colors.black
         this.ctx.stroke()
       }
 
       this.ctx.closePath()
     })
-    console.log('render')
   }
 }
 

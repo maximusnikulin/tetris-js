@@ -1,5 +1,4 @@
-import Figure, { Colors, PosXY } from '../Figure/Figure'
-import { Point } from '../Point'
+import { Point, Pos } from '../Point'
 
 export const sum = (a: number, b: number) => a + b
 
@@ -9,54 +8,73 @@ class PointsStack {
   private points: Point[][]
   private columns: number
   private rows: number
-  constructor(columns: number, rows: number, defaultValue: 1 | 0 = 0) {
-    this.rows = rows
+
+  constructor(columns: number, rows: number, points?: Point[][]) {
+    this.points = []
     this.columns = columns
-    this.points = [[]]
-    this.create(defaultValue)
+    this.rows = rows
+    this.create(columns, rows, points)
   }
 
-  private create(defaultValue) {
-    for (let i = 0; i < this.rows; i++) {
-      for (let j = 0; j < this.columns; j++) {
-        if (!this.points[i]) {
-          this.points[i] = []
-        }
-        this.points[i][j] = new Point(j, i, defaultValue)
+  getMapPoints() {
+    let res: { [key: string]: Point } = {}
+    this.points.forEach((row, index) => {
+      const indRow = index
+      row.forEach((point, indPoint) => {
+        res[`${indPoint},${indRow}`] = point
+      })
+    })
+
+    return res
+  }
+
+  private create(columns: number, rows: number, points?: Point[][]) {
+    if (points) {
+      this.points = points
+      return
+    }
+
+    for (let i = 0; i < rows; i++) {
+      if (!this.points[i]) {
+        this.points[i] = []
+      }
+      for (let j = 0; j < columns; j++) {
+        this.points[i][j] = new Point(false)
       }
     }
   }
 
-  getFlatPoints() {
-    let points: Point[] = []
-    this.points.forEach(row => {
-      row.forEach(point => points.push(point))
-    })
-    return points
+  getEqualsRows() {
+    return this.points.reduce((acc: number[], row, index) => {
+      if (row.every(point => point.isFill())) {
+        acc.push(index)
+      }
+
+      return acc
+    }, [])
   }
 
-  getPoint(pos: PosXY): Point {
-    const { x, y } = pos
-    return this.points[y][x]
+  removeRow(rowNum: number) {
+    this.points.splice(rowNum, 1)
+    this.points.unshift(this.points[0].map(() => new Point(false)))
   }
 
-  addPoints(points: Point[][]) {
-    points.forEach(row => {
-      row.forEach(point => {
-        const { x, y } = point.getPosition()
-        this.points[y][x] = point
-      })
-    })
-  }
-
-  getAreaPointsMeasure = (points: Point[][]) => {
-    const { x, y } = points[0][0].getPosition()
-    return {
-      height: points.length,
-      width: points[0].length,
-      x,
-      y,
+  collapse() {
+    let equalRows = []
+    while ((equalRows = this.getEqualsRows()).length) {
+      equalRows.forEach(rowNum => this.removeRow(rowNum))
     }
+  }
+
+  getPoint(pos: number[]) {
+    const [x, y] = pos
+    const match = this.points[y][x]
+
+    if (!this.points[y][x]) {
+      throw new Error("Can't get point")
+    }
+
+    return match
   }
 
   getSize() {
@@ -66,36 +84,33 @@ class PointsStack {
     }
   }
 
-  resetRow(row: number) {}
-
-  shrink(row: number) {}
-
-  canChangePosPoints(points: Point[][], diff: { dY?: number; dX?: number }) {
-    const { height, width, x, y } = this.getAreaPointsMeasure(points)
-    let { dX = 0, dY = 1 } = diff
-
-    if (y + height + dY > this.rows || x + width + dX > this.columns || x < 0) {
-      return false
+  getRow(row: number) {
+    if (!this.points[row]) {
+      throw new Error('Row is not exists')
     }
 
-    if (dX) {
-    }
+    return this.points[row]
+  }
 
-    if (dY) {
-      let res = true
+  getPoints() {
+    return this.points
+  }
 
-      points[height - 1].forEach(point => {
-        const { x, y } = point.getPosition()
+  addPoints(points: { [key: string]: Point }) {
+    Object.keys(points).forEach(key => {
+      const [x, y] = key.split(',').map(Number)
+      let match: Point
 
-        if (this.getPoint({ x, y: y + dY }).getValue() + point.getValue() > 1) {
-          res = false
-        }
-      })
+      try {
+        match = this.points[y][x]
+      } catch {
+        throw new Error('Coordinate is not exists')
+      }
 
-      return res
-    }
-
-    return true
+      if (!match.isFill()) {
+        this.points[y][x] = points[key]
+      }
+    })
   }
 }
 
