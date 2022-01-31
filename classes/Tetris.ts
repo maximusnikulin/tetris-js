@@ -17,7 +17,7 @@ export class Tetris implements ITetris {
   statistic: Statistic
 
   constructor() {
-    this.pointsStack = new PointsStack(10, 5) as PointsStack
+    this.pointsStack = new PointsStack(10, 20) as PointsStack
     this.renderer = this.createRenderer(this.pointsStack) as RendererCanvas
     this.statistic = new Statistic()
     this.init()
@@ -69,7 +69,7 @@ export class Tetris implements ITetris {
   }
 
   private initKeyListener() {
-    document.addEventListener('keydown', e => {
+    document.addEventListener('keydown', (e) => {
       if (!this.interval || !this.positioner) {
         return
       }
