@@ -13,6 +13,7 @@ export interface Pos {
 export class Point implements IPoint {
   private fill: boolean
   private color: Colors
+
   constructor(fill: boolean = false, color = Colors.transparent) {
     this.color = color
     this.fill = fill

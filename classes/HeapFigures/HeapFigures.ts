@@ -4,7 +4,7 @@ export const sum = (a: number, b: number) => a + b
 
 export interface ILayout {}
 
-class PointsStack {
+class HeapFigures {
   private points: Point[][]
   private columns: number
   private rows: number
@@ -46,7 +46,7 @@ class PointsStack {
 
   getEqualsRows() {
     return this.points.reduce((acc: number[], row, index) => {
-      if (row.every(point => point.isFill())) {
+      if (row.every((point) => point.isFill())) {
         acc.push(index)
       }
 
@@ -62,7 +62,7 @@ class PointsStack {
   collapse() {
     let equalRows = []
     while ((equalRows = this.getEqualsRows()).length) {
-      equalRows.forEach(rowNum => this.removeRow(rowNum))
+      equalRows.forEach((rowNum) => this.removeRow(rowNum))
     }
   }
 
@@ -97,7 +97,7 @@ class PointsStack {
   }
 
   addPoints(points: { [key: string]: Point }) {
-    Object.keys(points).forEach(key => {
+    Object.keys(points).forEach((key) => {
       const [x, y] = key.split(',').map(Number)
       let match: Point
 
@@ -114,4 +114,4 @@ class PointsStack {
   }
 }
 
-export default PointsStack
+export default HeapFigures

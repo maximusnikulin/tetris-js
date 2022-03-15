@@ -10,7 +10,9 @@ class RendererCanvas {
   columns: number
   rows: number
 
-  constructor(width: number, height: number, square = 20) {
+  constructor(inWidth: number, inHeight: number, square = 20) {
+    const width = inWidth * square
+    const height = inHeight * square
     this.node = <HTMLCanvasElement>document.getElementById('tetris-js')
     this.ctx = this.node.getContext('2d') as CanvasRenderingContext2D
     this.columns = width / square + 1
@@ -24,6 +26,7 @@ class RendererCanvas {
 
   renderGrid() {
     this.ctx.lineWidth = 1
+    this.ctx.strokeStyle = 'red'
     for (let i = 0; i <= this.columns; i++) {
       this.ctx.moveTo(i * this.square + 0.5, 0)
       this.ctx.lineTo(i * this.square + 0.5, this.height)

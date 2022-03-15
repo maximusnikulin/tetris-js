@@ -73,13 +73,6 @@ const O = [
   ],
 ]
 
-export enum FigureTypes {
-  O,
-  I,
-  T,
-  L,
-  S,
-  Z,
-}
+export const FigurePatterns = { O, I, T, L, S, Z }
 
-export const FigureTypePatterns = { O, I, T, L, S, Z }
+export type FigureTypes = keyof typeof FigurePatterns

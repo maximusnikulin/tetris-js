@@ -1,33 +1,33 @@
 import Figure from './Figure/Figure'
 import FigureFactory from './Figure/FigureFactory'
-import PointsStack from './PointsStack/PointsStack'
+import HeapFigures from './HeapFigures/HeapFigures'
 import PositionerFacade from './Positioner/Positioner'
 import RendererCanvas from './RendererCanvas'
 import Statistic from './Statistic/Statistic'
 
-interface ITetris {}
-
-export class Tetris implements ITetris {
+export class Tetris {
+  gridSize = { rows: 20, columns: 10, squareSize: 30 }
   renderer: RendererCanvas
-  pointsStack: PointsStack
+  heapFigures!: HeapFigures
   //NodeJS.Timeout
   interval: any
   figure: Figure | null = null
-  positioner: PositionerFacade | null = null
+  // positioner: PositionerFacade | null = null
   // statistic: Statistic
 
   constructor() {
-    this.pointsStack = new PointsStack(10, 20) as PointsStack
-    this.renderer = this.createRenderer(this.pointsStack) as RendererCanvas
+    const { columns, rows, squareSize } = this.gridSize
+    this.renderer = new RendererCanvas(columns, rows, squareSize)
+    // this.pointsStack = new HeapFigures(10, 20) as HeapFigures
     // this.statistic = new Statistic()
-    // this.init()
+    this.prepareGame()
   }
 
-  // private init() {
-  //   this.renderer.renderGrid()
-  //   this.initKeyListener()
-  //   this.startGame()
-  // }
+  private prepareGame() {
+    this.renderer.renderGrid()
+    // this.initKeyListener()
+    // this.startGame()
+  }
 
   // private startGame() {
   //   this.tickGame()
@@ -80,11 +80,6 @@ export class Tetris implements ITetris {
     //   this.positioner.shrinkFigureByKey(e.keyCode)
     //   this.render()
     // })
-  }
-
-  private createRenderer(pointsStack: PointsStack) {
-    const { columns, rows } = pointsStack.getSize()
-    return new RendererCanvas(columns * 20, rows * 20)
   }
 
   // render() {

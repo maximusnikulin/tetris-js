@@ -1,4 +1,5 @@
 import { Point } from '../Point'
+import { FigurePatterns, FigureTypes } from './FigureTypes'
 
 export enum Colors {
   green = 'green',
@@ -11,40 +12,58 @@ export enum Colors {
 
 export interface FigureState {
   patterns: number[][][]
-  setNextPattern: () => void
-  getPattern: () => number[][]
+  // setNextPattern: () => void
+  // getPattern: () => number[][]
   activePattern: number
 }
 
-export interface IFigure {}
-
-class Figure implements IFigure {
-  position: number[]
+class Figure {
+  position: [number, number]
   color: Colors
-  state: FigureState
+  type: FigureTypes = 'I'
+  activePattern: number = 0
 
-  constructor(state: FigureState, pos: number[] = [0, 0], color: Colors) {
-    this.state = state
+  constructor(
+    type: FigureTypes,
+    pos: [number, number],
+    color: Colors,
+    activePattern: number = 0
+  ) {
+    this.type = type
+    this.activePattern = activePattern
     this.position = pos
     this.color = color
   }
 
-  setPosition(pos: number[]) {
+  private getPatterns() {
+    return FigurePatterns[this.type]
+  }
+
+  getPattern() {
+    return this.getPatterns()[this.activePattern]
+  }
+
+  setNextPattern() {
+    this.activePattern =
+      this.activePattern === this.getPatterns().length - 1
+        ? 0
+        : this.activePattern++
+  }
+
+  setPosition(pos: [number, number]) {
     this.position = pos
   }
 
-  rotateFigure() {}
-
   getSize() {
     return {
-      height: this.state.getPattern().length,
-      width: this.state.getPattern()[0].length,
+      height: this.getPattern().length,
+      width: this.getPattern()[0].length,
     }
   }
 
   getMapPoints() {
     let coordPoint: { [key: string]: Point } = {}
-    let pattern = this.state.getPattern()
+    let pattern = this.getPattern()
     pattern.forEach((ptrnRow, y) => {
       ptrnRow.forEach((value, x) => {
         if (!value) {
@@ -61,11 +80,7 @@ class Figure implements IFigure {
 
   isFillPoint(pos: number[]) {
     const [x, y] = pos
-    return !!this.state.getPattern()[y][x]
-  }
-
-  getPattern() {
-    return this.state.getPattern()
+    return !!this.getPattern()[y][x]
   }
 
   getPosition() {

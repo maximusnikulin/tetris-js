@@ -1,11 +1,11 @@
-import PointsStack from '../PointsStack/PointsStack'
+import HeapFigures from '../HeapFigures/PointsStack'
 import Figure from '../Figure/Figure'
 
 export default class PositionerFacade {
   private figure: Figure
-  private pointsStack: PointsStack
+  private pointsStack: HeapFigures
   createdTs: number
-  constructor(pointsStack: PointsStack, figure: Figure) {
+  constructor(pointsStack: HeapFigures, figure: Figure) {
     this.pointsStack = pointsStack
     this.figure = figure
     this.createdTs = Date.now()
