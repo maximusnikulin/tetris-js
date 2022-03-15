@@ -1,7 +1,7 @@
 import PointsStack from '../PointsStack/PointsStack'
 import Figure from '../Figure/Figure'
 
-export default class Positioner {
+export default class PositionerFacade {
   private figure: Figure
   private pointsStack: PointsStack
   createdTs: number
@@ -14,7 +14,7 @@ export default class Positioner {
   canAddFigureToStack() {
     const figureMapPoints = this.figure.getMapPoints()
     const points = this.pointsStack.getPoints()
-    return Object.keys(figureMapPoints).every(key => {
+    return Object.keys(figureMapPoints).every((key) => {
       const [x, y] = key.split(',').map(Number)
       let match = null
       try {
@@ -31,29 +31,29 @@ export default class Positioner {
     this.pointsStack.addPoints(this.figure.getMapPoints())
   }
 
-  shrinkFigureDown() {
+  private shrinkFigureDown() {
     this.shrinkFigureVertical(1)
   }
 
-  shrinkFigureVertical(diff: number = 1) {
+  private shrinkFigureVertical(diff: number = 1) {
     const [x, y] = this.figure.getPosition()
     this.figure.setPosition([x, y + diff])
   }
 
-  shrinkFigureLeft() {
+  private shrinkFigureLeft() {
     this.shrinkFigureHorizontal(-1)
   }
 
-  shrinkFigureRight() {
+  private shrinkFigureRight() {
     this.shrinkFigureHorizontal(1)
   }
 
-  shrinkFigureHorizontal(diff: number = 0) {
+  private shrinkFigureHorizontal(diff: number = 0) {
     const [x, y] = this.figure.getPosition()
     this.figure.setPosition([x + diff, y])
   }
 
-  shrinkFigureMaxDown() {
+  private shrinkFigureMaxDown() {
     while (this.canShrinkFigureDown()) {
       this.shrinkFigureDown()
     }
@@ -71,24 +71,26 @@ export default class Positioner {
     return this.canShrinkFigure(([x, y]) => [x, y + 1])
   }
 
-  canShrinkFigureLeft() {
+  private canShrinkFigureLeft() {
     return this.canShrinkFigureVertical(-1)
   }
 
-  canShrinkFigureRight() {
+  private canShrinkFigureRight() {
     return this.canShrinkFigureVertical(1)
   }
 
-  canShrinkFigure(getNewCoordinates: (oldPointPos: number[]) => number[]) {
+  private canShrinkFigure(
+    getNewCoordinates: (oldPointPos: number[]) => number[]
+  ) {
     const figPoints = this.figure.getMapPoints()
-    return Object.keys(figPoints).every(pos => {
+    return Object.keys(figPoints).every((pos) => {
       const [x, y] = pos.split(',').map(Number)
       const pointInStack = this.pointsStack.getPoint(getNewCoordinates([x, y]))
       return !(pointInStack.isFill() && figPoints[pos].isFill())
     })
   }
 
-  canShrinkFigureVertical(diff: -1 | 1) {
+  private canShrinkFigureVertical(diff: -1 | 1) {
     const [x, y] = this.figure.getPosition()
     const size = this.figure.getSize()
     if (diff < 1) {
@@ -105,6 +107,8 @@ export default class Positioner {
 
     return this.canShrinkFigure(([x, y]) => [x + diff, y])
   }
+
+  private canRotateFigure() {}
 
   shrinkFigureByKey(keyCode: number) {
     const code = keyCode as 37 | 39 | 40 | 38
@@ -129,7 +133,6 @@ export default class Positioner {
         }
         break
       case 38: {
-        //rotate
       }
     }
   }

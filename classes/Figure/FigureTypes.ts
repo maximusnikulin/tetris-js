@@ -31,6 +31,18 @@ const S = [
   ],
 ]
 
+const Z = [
+  [
+    [1, 1, 0],
+    [0, 1, 1],
+  ],
+  [
+    [0, 1],
+    [1, 1],
+    [1, 0],
+  ],
+]
+
 const L = [
   [
     [1, 0],
@@ -62,11 +74,12 @@ const O = [
 ]
 
 export enum FigureTypes {
-  O = 'O',
-  I = 'I',
-  T = 'T',
-  L = 'L',
-  S = 'S',
+  O,
+  I,
+  T,
+  L,
+  S,
+  Z,
 }
 
-export const FigureTypePatterns = { O, I, T, L, S }
+export const FigureTypePatterns = { O, I, T, L, S, Z }

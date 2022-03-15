@@ -1,7 +1,7 @@
 import Figure from './Figure/Figure'
 import FigureFactory from './Figure/FigureFactory'
 import PointsStack from './PointsStack/PointsStack'
-import Positioner from './Positioner/Positioner'
+import PositionerFacade from './Positioner/Positioner'
 import RendererCanvas from './RendererCanvas'
 import Statistic from './Statistic/Statistic'
 
@@ -13,70 +13,73 @@ export class Tetris implements ITetris {
   //NodeJS.Timeout
   interval: any
   figure: Figure | null = null
-  positioner: Positioner | null = null
-  statistic: Statistic
+  positioner: PositionerFacade | null = null
+  // statistic: Statistic
 
   constructor() {
     this.pointsStack = new PointsStack(10, 20) as PointsStack
     this.renderer = this.createRenderer(this.pointsStack) as RendererCanvas
-    this.statistic = new Statistic()
-    this.init()
+    // this.statistic = new Statistic()
+    // this.init()
   }
 
-  private init() {
-    this.renderer.renderGrid()
-    this.initKeyListener()
-    this.runCircleFigure()
-  }
+  // private init() {
+  //   this.renderer.renderGrid()
+  //   this.initKeyListener()
+  //   this.startGame()
+  // }
 
-  private runCircleFigure() {
-    this.figure = FigureFactory.createRandomFigure(this.pointsStack.getSize())
-    this.positioner = new Positioner(this.pointsStack, this.figure)
+  // private startGame() {
+  //   this.tickGame()
+  // }
 
-    if (this.positioner.canAddFigureToStack()) {
-      this.render()
-      this.runFigureDownInterval()
-    } else {
-      clearInterval(this.interval)
-      this.endGame()
-    }
-  }
+  // endGame() {
+  //   this.render()
+  //   this.resetInterval()
+  //   console.log('endGame')
+  // }
 
-  endGame() {
-    this.render()
-    this.interval = null
-    this.positioner = null
-    console.log('endGame')
-  }
+  // resetInterval = () => {
+  //   clearInterval(this.interval)
+  // }
 
-  private runFigureDownInterval() {
-    this.interval = setInterval(() => {
-      const positioner = this.positioner as Positioner
-      if (positioner.canShrinkFigureDown()) {
-        positioner.shrinkFigureDown()
-        this.render()
-      } else if (positioner.canAddFigureToStack()) {
-        positioner.addFigureToStack()
-        clearInterval(this.interval)
-        this.interval = null
-        this.pointsStack.collapse()
-        this.runCircleFigure()
-      } else {
-        clearInterval(this.interval)
-        this.endGame()
-      }
-    }, (this.statistic.data.speed / 3) * 100)
-  }
+  // public tickGame() {
+  //   this.figure = FigureFactory.createRandomFigure(this.pointsStack.getSize())
+  //   this.positioner = new PositionerFacade(this.pointsStack, this.figure)
+
+  //   if (this.positioner.canAddFigureToStack()) {
+  //     this.render()
+  //   }
+
+  //   const positioner = this.positioner
+  //   // this.interval = setInterval(
+  //   //   () => this.tickFigure(positioner),
+  //   //   (this.statistic.data.speed / 3) * 100
+  //   // )
+  // }
+
+  // private tickFigure(positioner: PositionerFacade) {
+  //   if (positioner.canShrinkFigureDown()) {
+  //     positioner.shrinkFigureDown()
+  //     this.render()
+  //   } else if (positioner.canAddFigureToStack()) {
+  //     positioner.addFigureToStack()
+  //     this.resetInterval()
+  //     this.pointsStack.collapse()
+  //     this.tickGame()
+  //   } else {
+  //     this.endGame()
+  //   }
+  // }
 
   private initKeyListener() {
-    document.addEventListener('keydown', (e) => {
-      if (!this.interval || !this.positioner) {
-        return
-      }
-
-      this.positioner.shrinkFigureByKey(e.keyCode)
-      this.render()
-    })
+    // document.addEventListener('keydown', (e) => {
+    //   if (!this.positioner) {
+    //     return
+    //   }
+    //   this.positioner.shrinkFigureByKey(e.keyCode)
+    //   this.render()
+    // })
   }
 
   private createRenderer(pointsStack: PointsStack) {
@@ -84,18 +87,18 @@ export class Tetris implements ITetris {
     return new RendererCanvas(columns * 20, rows * 20)
   }
 
-  render() {
-    let points = {}
+  // render() {
+  //   let points = {}
 
-    if (!this.figure) {
-      points = this.pointsStack.getMapPoints()
-    } else {
-      points = {
-        ...this.pointsStack.getMapPoints(),
-        ...this.figure.getMapPoints(),
-      }
-    }
+  //   if (!this.figure) {
+  //     points = this.pointsStack.getMapPoints()
+  //   } else {
+  //     points = {
+  //       ...this.pointsStack.getMapPoints(),
+  //       ...this.figure.getMapPoints(),
+  //     }
+  //   }
 
-    this.renderer.renderPoints(points)
-  }
+  //   this.renderer.renderPoints(points)
+  // }
 }

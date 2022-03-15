@@ -45,16 +45,14 @@ class Figure implements IFigure {
   getMapPoints() {
     let coordPoint: { [key: string]: Point } = {}
     let pattern = this.state.getPattern()
-    debugger
     pattern.forEach((ptrnRow, y) => {
       ptrnRow.forEach((value, x) => {
         if (!value) {
           return
         }
 
-        coordPoint[
-          `${x + this.position[0]},${y + this.position[1]}`
-        ] = new Point(!!value, value ? this.color : Colors.transparent)
+        coordPoint[`${x + this.position[0]},${y + this.position[1]}`] =
+          new Point(!!value, value ? this.color : Colors.transparent)
       })
     })
 

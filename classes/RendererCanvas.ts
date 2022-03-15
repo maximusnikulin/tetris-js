@@ -9,6 +9,7 @@ class RendererCanvas {
   height: number
   columns: number
   rows: number
+
   constructor(width: number, height: number, square = 20) {
     this.node = <HTMLCanvasElement>document.getElementById('tetris-js')
     this.ctx = this.node.getContext('2d') as CanvasRenderingContext2D
@@ -45,7 +46,7 @@ class RendererCanvas {
     this.ctx.beginPath()
     this.renderGrid()
 
-    Object.keys(points).forEach(key => {
+    Object.keys(points).forEach((key) => {
       const point = points[key]
       const [x, y] = key.split(',').map(Number)
 
