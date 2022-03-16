@@ -1,5 +1,5 @@
+import { Colors } from '../helpers/helpers'
 import { Point } from '../Point'
-import { Colors } from '../Figure/Figure'
 import { IRenderer } from './RendererType'
 
 class RendererCanvas implements IRenderer {
@@ -41,7 +41,7 @@ class RendererCanvas implements IRenderer {
     }
   }
 
-  renderPoints(points: Point[]) {
+  renderPoints(points: Record<string, Point>) {
     const width = this.width
     const height = this.height
 
@@ -50,20 +50,20 @@ class RendererCanvas implements IRenderer {
     this.ctx.beginPath()
     this.renderGrid()
 
-    points.forEach((point) => {
-      const { x, y } = point.getPos()
-
+    Object.keys(points).forEach((key) => {
+      const [x, y] = key.split(',').map(Number)
+      const point = points[key]
       this.ctx.fillStyle = Colors.transparent
-      if (point.isFill()) {
-        this.ctx.fillStyle = point.getColor()
-        this.ctx.fillRect(
-          x * this.square + 0.5,
-          y * this.square + 0.5,
-          this.square,
-          this.square
-        )
-        this.ctx.stroke()
-      }
+      // if (point.isFill()) {
+      this.ctx.fillStyle = point.getColor()
+      this.ctx.fillRect(
+        x * this.square + 0.5,
+        y * this.square + 0.5,
+        this.square,
+        this.square
+      )
+      this.ctx.stroke()
+      // }
 
       this.ctx.closePath()
     })

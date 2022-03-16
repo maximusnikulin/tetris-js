@@ -1,43 +1,39 @@
-import { Colors } from './Figure/Figure'
+import { Colors } from './helpers/helpers'
 
 interface IPoint {
   isFill(): boolean
   getColor(): Colors
 }
 
-export interface Pos {
-  x: number
-  y: number
-}
+// export interface Pos {
+//   x: number
+//   y: number
+// }
 
 export class Point implements IPoint {
   private fill: boolean
-  private color: Colors
-  pos: Pos
+  private colorFill: Colors
+  private colorEmpty: Colors
 
   constructor(
     fill: boolean = false,
-    pos: Pos,
-    color: Colors = Colors.transparent
+    colorFill: Colors = Colors.transparent,
+    colorEmpty: Colors = Colors.transparent
   ) {
-    this.color = color
+    this.colorFill = colorFill
+    this.colorEmpty = colorEmpty
     this.fill = fill
-    this.pos = pos
   }
 
   isFill() {
     return this.fill
   }
 
-  getPos() {
-    return this.pos
-  }
-
   getColor() {
     if (!this.fill) {
-      return Colors.transparent
+      return this.colorEmpty
     }
 
-    return this.color
+    return this.colorFill
   }
 }

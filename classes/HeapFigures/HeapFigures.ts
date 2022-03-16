@@ -1,6 +1,6 @@
 import Figure from '../Figure/Figure'
-import { flatArray } from '../helpers'
-import { Point, Pos } from '../Point'
+import { matrixToMap } from '../helpers/helpers'
+import { Point } from '../Point'
 
 export const sum = (a: number, b: number) => a + b
 
@@ -25,7 +25,7 @@ class HeapFigures {
       }
 
       for (let j = 0; j < columns; j++) {
-        this.points[i][j] = new Point(false, { x: i, y: j })
+        this.points[i][j] = new Point(false)
       }
     }
   }
@@ -58,6 +58,8 @@ class HeapFigures {
 
   getPoint(pos: [number, number]) {
     const [x, y] = pos
+    console.log(x, y)
+
     const match = this.points[y][x]
 
     if (!this.points[y][x]) {
@@ -83,7 +85,7 @@ class HeapFigures {
   // }
 
   getPoints() {
-    return flatArray(this.points)
+    return matrixToMap(this.points)
   }
 
   // addPoints(points: { [key: string]: Point }) {

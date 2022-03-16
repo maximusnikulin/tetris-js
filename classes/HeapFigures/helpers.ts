@@ -1,4 +1,4 @@
-import { Colors } from '../Figure/Figure'
+import { Colors } from '../helpers/helpers'
 import { Point } from '../Point'
 
 const createPoint = (el: number | [number, Colors]) => {
@@ -14,7 +14,7 @@ const createPoint = (el: number | [number, Colors]) => {
 export const createPointsByPattern = (
   pattern: (number | [number, Colors])[][]
 ) => {
-  return pattern.map(row => row.map(createPoint))
+  return pattern.map((row) => row.map(createPoint))
 }
 
 export const p: (val: number, color?: Colors) => [number, Colors] = (

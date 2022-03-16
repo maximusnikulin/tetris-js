@@ -12,6 +12,7 @@ export interface TetrisConfig {
   rows: number
   square: number
 }
+
 export class Tetris {
   renderer: IRenderer
   heapFigures: HeapFigures
@@ -29,9 +30,7 @@ export class Tetris {
     this.positioner = new PositionerFacade(this.heapFigures)
     this.renderer = renderer
     FigureFactory.init(columns, rows)
-
     this.prepareGame()
-
     this.startGame()
   }
 
@@ -40,12 +39,12 @@ export class Tetris {
   }
 
   private prepareGame() {
-    this.renderer.renderGrid()
     this.initKeyListener()
   }
 
   private tick() {
     this.figure = FigureFactory.createRandomFigure()
+    this.positioner.setFigure(this.figure)
     this.render()
   }
 
@@ -100,10 +99,10 @@ export class Tetris {
   }
 
   render() {
-    const points = [
+    const points = {
       ...this.heapFigures.getPoints(),
-      ...(this.figure?.getPoints() ?? []),
-    ]
+      ...(this.figure?.getPoints() ?? {}),
+    }
 
     this.renderer.renderPoints(points)
   }

@@ -14,14 +14,13 @@ export default class PositionerFacade {
   }
 
   canMergeFigureWithHeap() {
-    const figureMapPoints = this.figure.getMapPoints()
+    const figureMapPoints = this.figure.getPoints()
     const points = this.heapFigures.getPoints()
 
     return Object.keys(figureMapPoints).every((key) => {
-      const [x, y] = key.split(',').map(Number)
       let match = null
       try {
-        match = points[y][x]
+        match = points[key]
       } catch {
         throw new Error('Coordinate is not exists')
       }
@@ -86,7 +85,7 @@ export default class PositionerFacade {
   private canChangePosFigure(
     getNewCoordinates: (oldPointPos: [number, number]) => [number, number]
   ) {
-    const figPoints = this.figure.getMapPoints()
+    const figPoints = this.figure.getPoints()
     return Object.keys(figPoints).every((pos) => {
       const [x, y] = pos.split(',').map(Number)
       const pointInStack = this.heapFigures.getPoint(getNewCoordinates([x, y]))
@@ -97,14 +96,15 @@ export default class PositionerFacade {
   isNewPosFigureBetweenEdges(diff: 1 | -1) {
     const [x, y] = this.figure.getPosition()
     const size = this.figure.getSize()
+    const { maxX, minX } = this.figure.getEdgeInterval()
     if (diff < 1) {
       const newX = x + diff
-      if (newX < 0) {
+      if (newX < minX) {
         return false
       }
     } else {
       const newRightX = x + diff + size.width
-      if (newRightX > this.heapFigures.getSize().columns) {
+      if (newRightX > maxX) {
         return false
       }
     }
