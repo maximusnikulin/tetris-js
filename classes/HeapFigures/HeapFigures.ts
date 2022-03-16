@@ -1,3 +1,4 @@
+import Figure from '../Figure/Figure'
 import { Point, Pos } from '../Point'
 
 export const sum = (a: number, b: number) => a + b
@@ -9,31 +10,14 @@ class HeapFigures {
   private columns: number
   private rows: number
 
-  constructor(columns: number, rows: number, points?: Point[][]) {
+  constructor(columns: number, rows: number) {
     this.points = []
     this.columns = columns
     this.rows = rows
-    this.create(columns, rows, points)
+    this.create(columns, rows)
   }
 
-  getMapPoints() {
-    let res: { [key: string]: Point } = {}
-    this.points.forEach((row, index) => {
-      const indRow = index
-      row.forEach((point, indPoint) => {
-        res[`${indPoint},${indRow}`] = point
-      })
-    })
-
-    return res
-  }
-
-  private create(columns: number, rows: number, points?: Point[][]) {
-    if (points) {
-      this.points = points
-      return
-    }
-
+  private create(columns: number, rows: number) {
     for (let i = 0; i < rows; i++) {
       if (!this.points[i]) {
         this.points[i] = []
@@ -44,7 +28,11 @@ class HeapFigures {
     }
   }
 
-  getEqualsRows() {
+  // private getPointCoordKey(x: number, y: number) {
+  //   return `${x},${y}`
+  // }
+
+  getFilledRows() {
     return this.points.reduce((acc: number[], row, index) => {
       if (row.every((point) => point.isFill())) {
         acc.push(index)
@@ -54,64 +42,64 @@ class HeapFigures {
     }, [])
   }
 
-  removeRow(rowNum: number) {
-    this.points.splice(rowNum, 1)
-    this.points.unshift(this.points[0].map(() => new Point(false)))
-  }
+  // removeRow(rowNum: number) {
+  //   this.points.splice(rowNum, 1)
+  //   this.points.unshift(this.points[0].map(() => new Point(false)))
+  // }
 
-  collapse() {
-    let equalRows = []
-    while ((equalRows = this.getEqualsRows()).length) {
-      equalRows.forEach((rowNum) => this.removeRow(rowNum))
-    }
-  }
+  // collapse() {
+  //   let equalRows = []
+  //   while ((equalRows = this.getEqualsRows()).length) {
+  //     equalRows.forEach((rowNum) => this.removeRow(rowNum))
+  //   }
+  // }
 
-  getPoint(pos: number[]) {
-    const [x, y] = pos
-    const match = this.points[y][x]
+  // getPoint(pos: number[]) {
+  //   const [x, y] = pos
+  //   const match = this.points[y][x]
 
-    if (!this.points[y][x]) {
-      throw new Error("Can't get point")
-    }
+  //   if (!this.points[y][x]) {
+  //     throw new Error("Can't get point")
+  //   }
 
-    return match
-  }
+  //   return match
+  // }
 
-  getSize() {
-    return {
-      columns: this.columns,
-      rows: this.rows,
-    }
-  }
+  // getSize() {
+  //   return {
+  //     columns: this.columns,
+  //     rows: this.rows,
+  //   }
+  // }
 
-  getRow(row: number) {
-    if (!this.points[row]) {
-      throw new Error('Row is not exists')
-    }
+  // getRow(row: number) {
+  //   if (!this.points[row]) {
+  //     throw new Error('Row is not exists')
+  //   }
 
-    return this.points[row]
-  }
+  //   return this.points[row]
+  // }
 
-  getPoints() {
-    return this.points
-  }
+  // getPoints() {
+  //   return this.points
+  // }
 
-  addPoints(points: { [key: string]: Point }) {
-    Object.keys(points).forEach((key) => {
-      const [x, y] = key.split(',').map(Number)
-      let match: Point
+  // addPoints(points: { [key: string]: Point }) {
+  //   Object.keys(points).forEach((key) => {
+  //     const [x, y] = key.split(',').map(Number)
+  //     let match: Point
 
-      try {
-        match = this.points[y][x]
-      } catch {
-        throw new Error('Coordinate is not exists')
-      }
+  //     try {
+  //       match = this.points[y][x]
+  //     } catch {
+  //       throw new Error('Coordinate is not exists')
+  //     }
 
-      if (!match.isFill()) {
-        this.points[y][x] = points[key]
-      }
-    })
-  }
+  //     if (!match.isFill()) {
+  //       this.points[y][x] = points[key]
+  //     }
+  //   })
+  // }
 }
 
 export default HeapFigures
