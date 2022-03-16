@@ -1,35 +1,28 @@
+import { Layout, LayoutParams } from './Layout'
 import Figure from './Figure/Figure'
 import FigureFactory from './Figure/FigureFactory'
 import HeapFigures from './HeapFigures/HeapFigures'
-import PositionerFacade from './Positioner/Positioner'
+import PositionerFacade from './Positioner/PositionerFacade'
 import RendererCanvas from './Renderer/RendererCanvas'
 import { IRenderer } from './Renderer/RendererType'
 // import Statistic from './Statistic/Statistic'
 
-export interface TetrisConfig {
-  renderer: IRenderer
-  columns: number
-  rows: number
-  square: number
-}
-
 export class Tetris {
   renderer: IRenderer
-  heapFigures: HeapFigures
+  heap: HeapFigures
   //NodeJS.Timeout
   interval: any
   figure: Figure | null = null
-  positioner!: PositionerFacade
-  // statistic: Statistic
-  config: TetrisConfig
+  nextFigure: Figure | null = null
+  positioner: PositionerFacade | null = null
 
-  constructor(config: TetrisConfig) {
-    const { columns, rows, renderer } = config
-    this.config = config
-    this.heapFigures = new HeapFigures(columns, rows)
-    this.positioner = new PositionerFacade(this.heapFigures)
+  constructor(config: { renderer: IRenderer; size: LayoutParams }) {
+    const {
+      renderer,
+      size: { columns, rows, square },
+    } = config
+    this.heap = new HeapFigures(columns, rows)
     this.renderer = renderer
-    FigureFactory.init(columns, rows)
     this.prepareGame()
     this.startGame()
   }
@@ -43,8 +36,8 @@ export class Tetris {
   }
 
   private tick() {
-    this.figure = FigureFactory.createRandomFigure()
-    this.positioner.setFigure(this.figure)
+    this.figure = FigureFactory.createRandomFigure(this.heap)
+    this.positioner = new PositionerFacade(this.heap, this.figure)
     this.render()
   }
 
@@ -100,8 +93,8 @@ export class Tetris {
 
   render() {
     const points = {
-      ...this.heapFigures.getPoints(),
-      ...(this.figure?.getPoints() ?? {}),
+      ...this.heap.getPointsMap(),
+      ...(this.figure?.getPointsMap() ?? {}),
     }
 
     this.renderer.renderPoints(points)

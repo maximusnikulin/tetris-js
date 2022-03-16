@@ -1,22 +1,29 @@
+import HeapFigures from '../HeapFigures/HeapFigures'
 import {
   Colors,
-  getEmptyLines,
   getRandomColor,
   getRandomPattern,
   getRndValInterval,
 } from '../helpers/helpers'
+import PositionerFacade from '../Positioner/PositionerFacade'
 import Figure from './Figure'
-import { FigurePatterns, FigureTypes } from './FigureTypes'
-import { random, sample, zip, zipWith } from 'lodash'
+import { FigureTypes } from './FigureTypes'
 
 class FigureFactory {
-  static rows: number
-  static columns: number
+  private static rows: number
+  private static columns: number
 
   static init(columns: number, rows: number) {
     FigureFactory.rows = rows
     FigureFactory.columns = columns
     return FigureFactory
+  }
+
+  static getSize() {
+    return {
+      rows: FigureFactory.rows,
+      columns: FigureFactory.columns,
+    }
   }
 
   static create(
@@ -28,21 +35,26 @@ class FigureFactory {
     return new Figure(type, pos, color, activePattern)
   }
 
-  static createRandomFigure() {
+  static createRandomFigure(heap: HeapFigures) {
     const { type: pType, index: pIndex } = getRandomPattern()
     const rndColor = getRandomColor()
 
     const figure = new Figure(pType, [0, 0], rndColor, pIndex)
+    const positioner = new PositionerFacade(heap, figure)
+    const { minY, minX, maxX } = positioner.getFigureAreaParams()
 
-    const { minY, minX, maxX } = figure.getEdgeInterval()
+    let rndX = getRndValInterval(minX, maxX)
 
-    let rndX = getRndValInterval(-minX, maxX)
     figure.setPosition([rndX, minY])
     console.log(
-      'Figure generated:',
-      figure.getPattern(),
-      figure.getType(),
-      figure.getColor()
+      'Figure generated ===> \n',
+      'pattern:' + figure.getPattern() + '\n',
+      'type:' + figure.getType(),
+      +'\n',
+      'color:' + figure.getColor(),
+      +'\n',
+      'position:' + figure.getPosition(),
+      +'\n'
     )
     return figure
   }

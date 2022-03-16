@@ -7,37 +7,6 @@ export function getRndValInterval(min: number, max: number) {
   return Math.floor(Math.random() * (max - min + 1)) + min
 }
 
-export const getEmptyLines = (pattern: number[][]) =>
-  pattern.reduce(
-    (acc, next) => {
-      if (acc.done) {
-        return acc
-      }
-
-      if (next.some(Boolean)) {
-        acc.done = true
-        return acc
-      }
-
-      acc.count++
-      return acc
-    },
-    {
-      done: false,
-      count: 0,
-    }
-  ).count
-
-export function flatArray(structure: any[]): any[] {
-  return structure.reduce((acc, next) => {
-    if (Array.isArray(next)) {
-      return acc.concat(flatArray(next as any[]))
-    }
-
-    return acc.concat(next)
-  }, [])
-}
-
 export enum Colors {
   green = 'rgb(131, 235, 122)',
   pink = 'rgb(233, 118, 172)',
@@ -45,7 +14,8 @@ export enum Colors {
   violet = 'rgb(91, 89, 231)',
   yellow = 'rgb(231, 233, 118)',
   transparent = 'transparent',
-  lightGrey = 'rgb(212, 212, 212)',
+  area = 'rgb(212, 212, 212)',
+  grid = '#ff0000',
 }
 
 export const getRandomColor = () => {
@@ -69,7 +39,7 @@ export const getRandomPattern = () => {
 export const matrixToMap = <T, B = T>(
   matrix: T[][],
   transformEl: (el: T) => B = (el) => el as unknown as B,
-  transformKey: (x: number, y: number) => string = (x, y) => `${x}, ${y}`
+  transformKey: (x: number, y: number) => string = (x, y) => `${x},${y}`
 ) => {
   return matrix.reduce((acc, nextRow, pY) => {
     nextRow.forEach((el, pX) => {

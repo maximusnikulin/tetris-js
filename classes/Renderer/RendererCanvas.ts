@@ -1,3 +1,4 @@
+import { LayoutParams } from '../Layout'
 import { Colors } from '../helpers/helpers'
 import { Point } from '../Point'
 import { IRenderer } from './RendererType'
@@ -11,9 +12,10 @@ class RendererCanvas implements IRenderer {
   columns: number
   rows: number
 
-  constructor(rows: number, columns: number, square = 20) {
-    const width = rows * square
-    const height = columns * square
+  constructor(params: LayoutParams) {
+    const { rows, square, columns } = params
+    const width = columns * square
+    const height = rows * square
     this.node = <HTMLCanvasElement>document.getElementById('tetris-js')
     this.ctx = this.node.getContext('2d') as CanvasRenderingContext2D
     this.columns = width / square + 1
@@ -27,7 +29,7 @@ class RendererCanvas implements IRenderer {
 
   renderGrid() {
     this.ctx.lineWidth = 1
-    this.ctx.strokeStyle = 'red'
+    this.ctx.strokeStyle = Colors.grid
     for (let i = 0; i <= this.columns; i++) {
       this.ctx.moveTo(i * this.square + 0.5, 0)
       this.ctx.lineTo(i * this.square + 0.5, this.height)
@@ -53,8 +55,6 @@ class RendererCanvas implements IRenderer {
     Object.keys(points).forEach((key) => {
       const [x, y] = key.split(',').map(Number)
       const point = points[key]
-      this.ctx.fillStyle = Colors.transparent
-      // if (point.isFill()) {
       this.ctx.fillStyle = point.getColor()
       this.ctx.fillRect(
         x * this.square + 0.5,
@@ -63,10 +63,8 @@ class RendererCanvas implements IRenderer {
         this.square
       )
       this.ctx.stroke()
-      // }
-
-      this.ctx.closePath()
     })
+    this.ctx.closePath()
   }
 }
 

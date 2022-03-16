@@ -1,14 +1,16 @@
-import { zip } from 'lodash'
-import { Colors, getEmptyLines, matrixToMap } from '../helpers/helpers'
+import { Layout } from '../Layout'
+import getEmptyLines from '../helpers/getEmptyLines'
+import { Colors, matrixToMap } from '../helpers/helpers'
+import { letsMemoize } from '../helpers/memoizeDecorator'
 import { Point } from '../Point'
-import FigureFactory from './FigureFactory'
 import { FigurePatterns, FigureTypes } from './FigureTypes'
+import HeapFigures from '../HeapFigures/HeapFigures'
 
 class Figure {
-  position: [number, number]
-  color: Colors
-  type: FigureTypes = 'I'
-  activePattern: number = 0
+  private position: [number, number]
+  private color: Colors
+  private type: FigureTypes = 'I'
+  private activePattern: number = 0
 
   constructor(
     type: FigureTypes,
@@ -22,11 +24,15 @@ class Figure {
     this.color = color
   }
 
+  getPatternIndex() {
+    return this.activePattern
+  }
+
   getType() {
     return this.type
   }
 
-  private getPatterns() {
+  getPatterns() {
     return FigurePatterns[this.type]
   }
 
@@ -34,11 +40,30 @@ class Figure {
     return this.getPatterns()[this.activePattern]
   }
 
-  setNextPattern() {
-    this.activePattern =
+  private getNextPatternIndex() {
+    return (this.activePattern =
       this.activePattern === this.getPatterns().length - 1
         ? 0
-        : this.activePattern++
+        : this.activePattern + 1)
+  }
+
+  private getPrevPatternIndex() {
+    return (this.activePattern =
+      this.activePattern === 0
+        ? this.getPatterns().length - 1
+        : this.activePattern - 1)
+  }
+
+  setPrevPattern() {
+    this.activePattern = this.getPrevPatternIndex()
+  }
+
+  setPattern(pIndex: number) {
+    this.activePattern = pIndex
+  }
+
+  setNextPattern() {
+    this.activePattern = this.getNextPatternIndex()
   }
 
   setPosition(pos: [number, number]) {
@@ -52,12 +77,13 @@ class Figure {
     }
   }
 
-  getPoints() {
+  getPointsMap() {
     let pattern = this.getPattern()
+    let [pX, pY] = this.position
     return matrixToMap(
       pattern,
-      (el) => new Point(!!el, this.color, Colors.lightGrey),
-      (x, y) => `${x + this.position[0]},${y + this.position[1]}`
+      (el) => new Point(!!el, this.color, Colors.area),
+      (x, y) => `${pX + x},${pY + y}`
     )
   }
 
@@ -72,20 +98,6 @@ class Figure {
 
   getColor() {
     return this.color
-  }
-
-  getEdgeInterval() {
-    const pattern = this.getPattern()
-    const emptyLinesTop = getEmptyLines(pattern)
-    const transparentPattern = zip(...pattern) as unknown as number[][]
-    const rev = [...transparentPattern].reverse()
-    const emptyLinesLeft = getEmptyLines(transparentPattern)
-    const emptyLinesRight = getEmptyLines(rev)
-    return {
-      minY: -emptyLinesTop,
-      minX: -emptyLinesLeft,
-      maxX: FigureFactory.columns - pattern[0].length + emptyLinesRight,
-    }
   }
 }
 

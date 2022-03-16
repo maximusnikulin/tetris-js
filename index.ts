@@ -1,16 +1,16 @@
 import RendererCanvas from './classes/Renderer/RendererCanvas'
 import { Tetris } from './classes/Tetris'
 
-const config = {
+const size = {
   columns: 10,
   rows: 20,
   square: 30,
 }
 
 // * DI for renderer, so we can replace to webGL, simple HTML, or Canvas like now
-const renderer = new RendererCanvas(config.columns, config.rows, config.square)
+const renderer = new RendererCanvas(size)
 
 new Tetris({
-  ...config,
+  size,
   renderer,
 })

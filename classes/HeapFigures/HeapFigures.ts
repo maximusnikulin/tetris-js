@@ -1,24 +1,29 @@
-import Figure from '../Figure/Figure'
+import { Layout } from '../Layout'
 import { matrixToMap } from '../helpers/helpers'
 import { Point } from '../Point'
 
 export const sum = (a: number, b: number) => a + b
 
-export interface ILayout {}
-
 class HeapFigures {
-  private points: Point[][]
-  private columns: number
-  private rows: number
+  private points: Point[][] = []
 
-  constructor(columns: number, rows: number) {
-    this.points = []
-    this.columns = columns
-    this.rows = rows
+  constructor(columns: number = 10, rows: number = 20) {
     this.create(columns, rows)
   }
 
-  private create(columns: number, rows: number) {
+  // * Dynamicaly can change size by setted points
+  getSize() {
+    return {
+      rows: this.points.length,
+      columns: this.points[0].length,
+    }
+  }
+
+  setPoints(points: Point[][]) {
+    this.points = points
+  }
+
+  create(columns: number, rows: number) {
     for (let i = 0; i < rows; i++) {
       if (!this.points[i]) {
         this.points[i] = []
@@ -29,10 +34,6 @@ class HeapFigures {
       }
     }
   }
-
-  // private getPointCoordKey(x: number, y: number) {
-  //   return `${x},${y}`
-  // }
 
   getFilledRows() {
     return this.points.reduce((acc: number[], row, index) => {
@@ -57,23 +58,9 @@ class HeapFigures {
   // }
 
   getPoint(pos: [number, number]) {
+    const points = this.getPointsMap()
     const [x, y] = pos
-    console.log(x, y)
-
-    const match = this.points[y][x]
-
-    if (!this.points[y][x]) {
-      throw new Error("Can't get point")
-    }
-
-    return match
-  }
-
-  getSize() {
-    return {
-      columns: this.columns,
-      rows: this.rows,
-    }
+    return points[`${x},${y}`] ?? new Point(false)
   }
 
   // getRow(row: number) {
@@ -85,6 +72,9 @@ class HeapFigures {
   // }
 
   getPoints() {
+    return this.points
+  }
+  getPointsMap() {
     return matrixToMap(this.points)
   }
 
