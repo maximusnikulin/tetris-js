@@ -2,11 +2,11 @@ import { Point } from '../Point'
 import { FigurePatterns, FigureTypes } from './FigureTypes'
 
 export enum Colors {
-  green = 'green',
-  blue = 'blue',
-  aqua = 'aqua',
-  violet = 'violet',
-  yellow = 'yellow',
+  green = 'rgb(131, 235, 122)',
+  pink = 'rgb(233, 118, 172)',
+  aqua = 'rgb(118, 229, 233)',
+  violet = 'rgb(91, 89, 231)',
+  yellow = 'rgb(231, 233, 118)',
   transparent = 'transparent',
 }
 
@@ -61,22 +61,34 @@ class Figure {
     }
   }
 
-  getMapPoints() {
-    let coordPoint: { [key: string]: Point } = {}
+  getPoints() {
     let pattern = this.getPattern()
-    pattern.forEach((ptrnRow, y) => {
-      ptrnRow.forEach((value, x) => {
-        if (!value) {
-          return
-        }
-
-        coordPoint[`${x + this.position[0]},${y + this.position[1]}`] =
-          new Point(!!value, value ? this.color : Colors.transparent)
-      })
-    })
-
-    return coordPoint
+    return pattern.reduce((acc, nextRow) => {
+      return acc.concat(
+        nextRow.map((value) => {
+          const [pX, pY] = this.position
+          return new Point(!!value, { x: pX, y: pY }, this.color)
+        })
+      )
+    }, [] as Point[])
   }
+
+  // getMapPoints() {
+  //   let coordPoint: { [key: string]: Point } = {}
+  //   let pattern = this.getPattern()
+  //   pattern.forEach((ptrnRow, y) => {
+  //     ptrnRow.forEach((value, x) => {
+  //       if (!value) {
+  //         return
+  //       }
+
+  //       const [pX, pY] = this.position
+  //       coordPoint[`${x + pX},${y + pY}`] = new Point(!!value, this.color)
+  //     })
+  //   })
+
+  //   return coordPoint
+  // }
 
   isFillPoint(pos: number[]) {
     const [x, y] = pos

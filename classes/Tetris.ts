@@ -2,36 +2,52 @@ import Figure from './Figure/Figure'
 import FigureFactory from './Figure/FigureFactory'
 import HeapFigures from './HeapFigures/HeapFigures'
 import PositionerFacade from './Positioner/Positioner'
-import RendererCanvas from './RendererCanvas'
-import Statistic from './Statistic/Statistic'
+import RendererCanvas from './Renderer/RendererCanvas'
+import { IRenderer } from './Renderer/RendererType'
+// import Statistic from './Statistic/Statistic'
 
+export interface TetrisConfig {
+  renderer: IRenderer
+  columns: number
+  rows: number
+  square: number
+}
 export class Tetris {
-  gridSize = { rows: 20, columns: 10, squareSize: 30 }
-  renderer: RendererCanvas
-  heapFigures!: HeapFigures
+  renderer: IRenderer
+  heapFigures: HeapFigures
   //NodeJS.Timeout
   interval: any
   figure: Figure | null = null
-  // positioner: PositionerFacade | null = null
+  positioner!: PositionerFacade
   // statistic: Statistic
+  config: TetrisConfig
 
-  constructor() {
-    const { columns, rows, squareSize } = this.gridSize
-    this.renderer = new RendererCanvas(columns, rows, squareSize)
-    // this.pointsStack = new HeapFigures(10, 20) as HeapFigures
-    // this.statistic = new Statistic()
+  constructor(config: TetrisConfig) {
+    const { columns, rows, renderer } = config
+    this.config = config
+    this.heapFigures = new HeapFigures(columns, rows)
+    this.positioner = new PositionerFacade(this.heapFigures)
+    this.renderer = renderer
+    FigureFactory.init(columns, rows)
+
     this.prepareGame()
+
+    this.startGame()
+  }
+
+  startGame() {
+    this.tick()
   }
 
   private prepareGame() {
     this.renderer.renderGrid()
-    // this.initKeyListener()
-    // this.startGame()
+    this.initKeyListener()
   }
 
-  // private startGame() {
-  //   this.tickGame()
-  // }
+  private tick() {
+    this.figure = FigureFactory.createRandomFigure()
+    this.render()
+  }
 
   // endGame() {
   //   this.render()
@@ -73,27 +89,22 @@ export class Tetris {
   // }
 
   private initKeyListener() {
-    // document.addEventListener('keydown', (e) => {
-    //   if (!this.positioner) {
-    //     return
-    //   }
-    //   this.positioner.shrinkFigureByKey(e.keyCode)
-    //   this.render()
-    // })
+    document.addEventListener('keydown', (e) => {
+      if (!this.positioner) {
+        return
+      }
+
+      this.positioner.changePosFigureByKey(e.keyCode)
+      this.render()
+    })
   }
 
-  // render() {
-  //   let points = {}
+  render() {
+    const points = [
+      ...this.heapFigures.getPoints(),
+      ...(this.figure?.getPoints() ?? []),
+    ]
 
-  //   if (!this.figure) {
-  //     points = this.pointsStack.getMapPoints()
-  //   } else {
-  //     points = {
-  //       ...this.pointsStack.getMapPoints(),
-  //       ...this.figure.getMapPoints(),
-  //     }
-  //   }
-
-  //   this.renderer.renderPoints(points)
-  // }
+    this.renderer.renderPoints(points)
+  }
 }

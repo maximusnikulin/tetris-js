@@ -1,7 +1,8 @@
-import { Point } from './Point'
-import { Colors } from './Figure/Figure'
+import { Point } from '../Point'
+import { Colors } from '../Figure/Figure'
+import { IRenderer } from './RendererType'
 
-class RendererCanvas {
+class RendererCanvas implements IRenderer {
   ctx: CanvasRenderingContext2D
   node: HTMLCanvasElement
   width: number
@@ -10,9 +11,9 @@ class RendererCanvas {
   columns: number
   rows: number
 
-  constructor(inWidth: number, inHeight: number, square = 20) {
-    const width = inWidth * square
-    const height = inHeight * square
+  constructor(rows: number, columns: number, square = 20) {
+    const width = rows * square
+    const height = columns * square
     this.node = <HTMLCanvasElement>document.getElementById('tetris-js')
     this.ctx = this.node.getContext('2d') as CanvasRenderingContext2D
     this.columns = width / square + 1
@@ -40,7 +41,7 @@ class RendererCanvas {
     }
   }
 
-  renderPoints(points: { [key: string]: Point }) {
+  renderPoints(points: Point[]) {
     const width = this.width
     const height = this.height
 
@@ -49,9 +50,8 @@ class RendererCanvas {
     this.ctx.beginPath()
     this.renderGrid()
 
-    Object.keys(points).forEach((key) => {
-      const point = points[key]
-      const [x, y] = key.split(',').map(Number)
+    points.forEach((point) => {
+      const { x, y } = point.getPos()
 
       this.ctx.fillStyle = Colors.transparent
       if (point.isFill()) {

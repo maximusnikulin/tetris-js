@@ -1,7 +1,18 @@
+import { getRndValInterval } from '../helpers'
 import Figure, { Colors } from './Figure'
 import { FigurePatterns, FigureTypes } from './FigureTypes'
+import { getRandomColor } from './helpers'
 
 class FigureFactory {
+  static rows: number
+  static columns: number
+
+  static init(columns: number, rows: number) {
+    FigureFactory.rows = rows
+    FigureFactory.columns = columns
+    return FigureFactory
+  }
+
   static create(
     type: FigureTypes,
     pos: [number, number],
@@ -11,22 +22,20 @@ class FigureFactory {
     return new Figure(type, pos, color, activePattern)
   }
 
-  // static createRandomFigure(stackSize: { columns: number; rows: number }) {
-  //   const { columns, rows } = stackSize
-  //   const rndTypeIndex = getRndValInterval(
-  //     0,
-  //     Object.keys(FigureTypes).length - 1
-  //   )
-  //   const patterns =
-  //     FigureTypePatterns[
-  //       Object.keys(FigureTypes)[rndTypeIndex] as keyof typeof FigureTypes
-  //     ]
-  //   const activePattern = getRndValInterval(1, patterns.length)
-  //   const state = createFigureState(patterns, activePattern)
-  //   const color = getRandomColor()
-  //   let rndX = getRndValInterval(0, columns - state.getPattern()[0].length)
-  //   return new Figure(state, [rndX, 0], color)
-  // }
+  static createRandomFigure() {
+    const { columns, rows } = FigureFactory
+    const rndTypeIndex = getRndValInterval(
+      0,
+      Object.keys(FigurePatterns).length - 1
+    )
+    const rndType = Object.keys(FigurePatterns)[rndTypeIndex] as FigureTypes
+    const patterns = FigurePatterns[rndType]
+    const rndPatternIndex = getRndValInterval(0, patterns.length)
+    const rndPattern = patterns[rndPatternIndex]
+    const rndColor = getRandomColor()
+    let rndX = getRndValInterval(0, this.columns - rndPattern.length)
+    return new Figure(rndType, [rndX, 0], rndColor, rndPatternIndex)
+  }
 }
 
 export default FigureFactory

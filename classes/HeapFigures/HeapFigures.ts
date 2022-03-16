@@ -1,4 +1,5 @@
 import Figure from '../Figure/Figure'
+import { flatArray } from '../helpers'
 import { Point, Pos } from '../Point'
 
 export const sum = (a: number, b: number) => a + b
@@ -22,8 +23,9 @@ class HeapFigures {
       if (!this.points[i]) {
         this.points[i] = []
       }
+
       for (let j = 0; j < columns; j++) {
-        this.points[i][j] = new Point(false)
+        this.points[i][j] = new Point(false, { x: i, y: j })
       }
     }
   }
@@ -35,7 +37,7 @@ class HeapFigures {
   getFilledRows() {
     return this.points.reduce((acc: number[], row, index) => {
       if (row.every((point) => point.isFill())) {
-        acc.push(index)
+        acc.push()
       }
 
       return acc
@@ -54,23 +56,23 @@ class HeapFigures {
   //   }
   // }
 
-  // getPoint(pos: number[]) {
-  //   const [x, y] = pos
-  //   const match = this.points[y][x]
+  getPoint(pos: [number, number]) {
+    const [x, y] = pos
+    const match = this.points[y][x]
 
-  //   if (!this.points[y][x]) {
-  //     throw new Error("Can't get point")
-  //   }
+    if (!this.points[y][x]) {
+      throw new Error("Can't get point")
+    }
 
-  //   return match
-  // }
+    return match
+  }
 
-  // getSize() {
-  //   return {
-  //     columns: this.columns,
-  //     rows: this.rows,
-  //   }
-  // }
+  getSize() {
+    return {
+      columns: this.columns,
+      rows: this.rows,
+    }
+  }
 
   // getRow(row: number) {
   //   if (!this.points[row]) {
@@ -80,9 +82,9 @@ class HeapFigures {
   //   return this.points[row]
   // }
 
-  // getPoints() {
-  //   return this.points
-  // }
+  getPoints() {
+    return flatArray(this.points)
+  }
 
   // addPoints(points: { [key: string]: Point }) {
   //   Object.keys(points).forEach((key) => {

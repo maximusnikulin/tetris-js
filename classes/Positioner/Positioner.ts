@@ -1,19 +1,22 @@
-import HeapFigures from '../HeapFigures/PointsStack'
+import HeapFigures from '../HeapFigures/HeapFigures'
 import Figure from '../Figure/Figure'
 
 export default class PositionerFacade {
-  private figure: Figure
-  private pointsStack: HeapFigures
-  createdTs: number
-  constructor(pointsStack: HeapFigures, figure: Figure) {
-    this.pointsStack = pointsStack
-    this.figure = figure
-    this.createdTs = Date.now()
+  private heapFigures: HeapFigures
+  private figure!: Figure
+
+  constructor(heap: HeapFigures) {
+    this.heapFigures = heap
   }
 
-  canAddFigureToStack() {
+  setFigure(figure: Figure) {
+    this.figure = figure
+  }
+
+  canMergeFigureWithHeap() {
     const figureMapPoints = this.figure.getMapPoints()
-    const points = this.pointsStack.getPoints()
+    const points = this.heapFigures.getPoints()
+
     return Object.keys(figureMapPoints).every((key) => {
       const [x, y] = key.split(',').map(Number)
       let match = null
@@ -27,40 +30,41 @@ export default class PositionerFacade {
     })
   }
 
-  addFigureToStack() {
-    this.pointsStack.addPoints(this.figure.getMapPoints())
+  addFigureToHeap() {
+    // heapFigures.addPoints(this.figure.getMapPoints())
   }
 
-  private shrinkFigureDown() {
-    this.shrinkFigureVertical(1)
+  private pushFigureDown() {
+    this.changePosFigureVertical(1)
   }
 
-  private shrinkFigureVertical(diff: number = 1) {
+  private pushFigureLeft() {
+    this.changePosFigureHorizontal(-1)
+  }
+
+  private pushFigureRight() {
+    this.changePosFigureHorizontal(1)
+  }
+
+  private changePosFigureVertical(diff: number = 1) {
     const [x, y] = this.figure.getPosition()
     this.figure.setPosition([x, y + diff])
   }
 
-  private shrinkFigureLeft() {
-    this.shrinkFigureHorizontal(-1)
-  }
-
-  private shrinkFigureRight() {
-    this.shrinkFigureHorizontal(1)
-  }
-
-  private shrinkFigureHorizontal(diff: number = 0) {
+  private changePosFigureHorizontal(diff: number = 0) {
     const [x, y] = this.figure.getPosition()
     this.figure.setPosition([x + diff, y])
   }
 
-  private shrinkFigureMaxDown() {
-    while (this.canShrinkFigureDown()) {
-      this.shrinkFigureDown()
+  private pushFigureBottom() {
+    while (this.canPushFigureDown()) {
+      this.pushFigureDown()
     }
   }
 
-  canShrinkFigureDown(diff: 1 | -1 = 1) {
-    const maxY = this.pointsStack.getSize().rows
+  private canPushFigureDown() {
+    const diff = 1
+    const maxY = this.heapFigures.getSize().rows
     const [x, y] = this.figure.getPosition()
     const size = this.figure.getSize()
     const newBottomY = y + diff + size.height
@@ -68,29 +72,29 @@ export default class PositionerFacade {
       return false
     }
 
-    return this.canShrinkFigure(([x, y]) => [x, y + 1])
+    return this.canChangePosFigure(([x, y]) => [x, y + 1])
   }
 
-  private canShrinkFigureLeft() {
-    return this.canShrinkFigureVertical(-1)
+  private canPushFigureLeft() {
+    return this.canChangePosFigureHorizontal(-1)
   }
 
-  private canShrinkFigureRight() {
-    return this.canShrinkFigureVertical(1)
+  private canPushFigureRight() {
+    return this.canChangePosFigureHorizontal(1)
   }
 
-  private canShrinkFigure(
-    getNewCoordinates: (oldPointPos: number[]) => number[]
+  private canChangePosFigure(
+    getNewCoordinates: (oldPointPos: [number, number]) => [number, number]
   ) {
     const figPoints = this.figure.getMapPoints()
     return Object.keys(figPoints).every((pos) => {
       const [x, y] = pos.split(',').map(Number)
-      const pointInStack = this.pointsStack.getPoint(getNewCoordinates([x, y]))
+      const pointInStack = this.heapFigures.getPoint(getNewCoordinates([x, y]))
       return !(pointInStack.isFill() && figPoints[pos].isFill())
     })
   }
 
-  private canShrinkFigureVertical(diff: -1 | 1) {
+  isNewPosFigureBetweenEdges(diff: 1 | -1) {
     const [x, y] = this.figure.getPosition()
     const size = this.figure.getSize()
     if (diff < 1) {
@@ -100,36 +104,42 @@ export default class PositionerFacade {
       }
     } else {
       const newRightX = x + diff + size.width
-      if (newRightX > this.pointsStack.getSize().columns) {
+      if (newRightX > this.heapFigures.getSize().columns) {
         return false
       }
     }
 
-    return this.canShrinkFigure(([x, y]) => [x + diff, y])
+    return true
   }
 
-  private canRotateFigure() {}
+  private canChangePosFigureHorizontal(diff: -1 | 1) {
+    return (
+      this.isNewPosFigureBetweenEdges(diff) &&
+      this.canChangePosFigure(([x, y]) => [x + diff, y])
+    )
+  }
 
-  shrinkFigureByKey(keyCode: number) {
+  changePosFigureByKey(keyCode: number) {
     const code = keyCode as 37 | 39 | 40 | 38
+
     switch (code) {
       case 37:
         {
-          if (this.canShrinkFigureLeft()) {
-            this.shrinkFigureLeft()
+          if (this.canPushFigureLeft()) {
+            this.pushFigureLeft()
           }
         }
         break
       case 39:
         {
-          if (this.canShrinkFigureRight()) {
-            this.shrinkFigureRight()
+          if (this.canPushFigureRight()) {
+            this.pushFigureRight()
           }
         }
         break
       case 40:
         {
-          this.shrinkFigureMaxDown()
+          this.pushFigureBottom()
         }
         break
       case 38: {
