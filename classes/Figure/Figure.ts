@@ -1,10 +1,12 @@
-import getEmptyLines from '../helpers/getEmptyLines'
-import { matrixToMap } from '../helpers/helpers'
-import { letsMemoize } from '../helpers/memoizeDecorator'
+import { Colors } from '../constants'
+import {
+  createPointsByPattern,
+  getSnapPoints,
+  matrixToMap,
+  toConsole,
+} from '../helpers/common'
 import { Point } from '../Point'
 import { FigurePatterns, FigureTypes } from './FigureTypes'
-import HeapFigures from '../HeapFigures/HeapFigures'
-import { Colors } from '../constants'
 
 class Figure {
   private position: [number, number]
@@ -77,13 +79,19 @@ class Figure {
     }
   }
 
+  getPoints() {
+    let pattern = this.getPattern()
+    return createPointsByPattern(pattern, this.color)
+  }
+
   getPointsMap() {
     let pattern = this.getPattern()
     let [pX, pY] = this.position
     return matrixToMap(
       pattern,
-      (el) => new Point(!!el, this.color, Colors.area),
-      (x, y) => `${pX + x},${pY + y}`
+      (el) => new Point(!!el, this.color, Colors.transparent),
+      (x, y) => `${pX + x},${pY + y}`,
+      (el) => el > 0
     )
   }
 
@@ -98,6 +106,10 @@ class Figure {
 
   getColor() {
     return this.color
+  }
+
+  toStirng() {
+    return toConsole(getSnapPoints(this.getPoints()))
   }
 }
 

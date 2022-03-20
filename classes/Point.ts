@@ -18,7 +18,7 @@ export class Point implements IPoint {
   constructor(
     fill: boolean = false,
     colorFill: Colors = Colors.transparent,
-    colorEmpty: Colors = Colors.transparent
+    colorEmpty: Colors = Colors.area
   ) {
     this.colorFill = colorFill
     this.colorEmpty = colorEmpty

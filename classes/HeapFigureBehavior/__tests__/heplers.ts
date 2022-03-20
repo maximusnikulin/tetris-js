@@ -1,28 +1,28 @@
 import Figure from '../../Figure/Figure'
-import HeapFigures from '../../HeapFigures/HeapFigures'
-import { getSnapDebug } from '../../HeapFigures/helpers'
-import PositionerFacade from '../PositionerFacade'
+import HeapPoints from '../../HeapPoints/HeapPoints'
+import { getSnapHeapAndFigure } from '../../helpers/common'
+import HeapFigureBehaviorFacade from '../HeapFigureBehaviorFacade'
 
 export function rotateFigureTest(params: {
-  heap: HeapFigures
+  heap: HeapPoints
   figure: Figure
   initPos: [number, number]
 }) {
   const { heap, figure, initPos } = params
   const type = figure.getType()
-  const positioner = new PositionerFacade(heap, figure)
+  const positioner = new HeapFigureBehaviorFacade(heap, figure)
   const patternsLength = figure.getPatterns().length
   figure.setPattern(0)
 
   const rotates = () => {
     const pos = positioner.getFigure().getPosition()
     let countRotates = 0
-    let snaps = [getSnapDebug(positioner)]
+    let snaps = [getSnapHeapAndFigure(positioner)]
     while (positioner.canRotateFigure() && countRotates < patternsLength) {
       if (positioner.canRotateFigure()) {
         positioner.rotateFigure()
         countRotates++
-        snaps.push(getSnapDebug(positioner))
+        snaps.push(getSnapHeapAndFigure(positioner))
       }
     }
 
@@ -70,12 +70,12 @@ export function rotateFigureTest(params: {
 }
 
 export function pushDownVertFigureTest(params: {
-  heap: HeapFigures
+  heap: HeapPoints
   figure: Figure
 }) {
   const { heap, figure } = params
   const type = figure.getType()
-  const positioner = new PositionerFacade(heap, figure)
+  const positioner = new HeapFigureBehaviorFacade(heap, figure)
   const patternsLength = figure.getPatterns().length
 
   let steps = 0
@@ -91,12 +91,12 @@ export function pushDownVertFigureTest(params: {
     const patternIndex = figure.getPatternIndex()
     const { minY, x } = positioner.getFigureAreaParams()
     figure.setPosition([x, minY])
-    const snaps = [getSnapDebug(positioner)]
+    const snaps = [getSnapHeapAndFigure(positioner)]
 
     while (positioner.canPushFigureDown()) {
       positioner.pushFigureDown()
       steps++
-      snaps.push(getSnapDebug(positioner))
+      snaps.push(getSnapHeapAndFigure(positioner))
     }
 
     i++
@@ -111,14 +111,14 @@ export function pushDownVertFigureTest(params: {
 
 export function roundUpHorFigureTest(params: {
   figure: Figure
-  heap: HeapFigures
+  heap: HeapPoints
   initPos?: [number, number]
 }) {
   const { figure, heap, initPos = [0, 1] } = params
 
   figure.setPosition(initPos)
 
-  const positioner = new PositionerFacade(heap, figure)
+  const positioner = new HeapFigureBehaviorFacade(heap, figure)
   const patternsLength = figure.getPatterns().length
   let i = 0
 
@@ -134,22 +134,22 @@ export function roundUpHorFigureTest(params: {
     const patternIndex = figure.getPatternIndex()
 
     figure.setPosition(initPos)
-    let snapsLeft = [getSnapDebug(positioner)]
+    let snapsLeft = [getSnapHeapAndFigure(positioner)]
     let stepsLeft = 0
 
     while (positioner.canPushFigureLeft()) {
       positioner.pushFigureLeft()
-      snapsLeft.push(getSnapDebug(positioner))
+      snapsLeft.push(getSnapHeapAndFigure(positioner))
       stepsLeft++
     }
 
     figure.setPosition(initPos)
-    let snapsRight = [getSnapDebug(positioner)]
+    let snapsRight = [getSnapHeapAndFigure(positioner)]
     let stepsRight = 0
 
     while (positioner.canPushFigureRight()) {
       positioner.pushFigureRight()
-      snapsRight.push(getSnapDebug(positioner))
+      snapsRight.push(getSnapHeapAndFigure(positioner))
       stepsRight++
     }
 

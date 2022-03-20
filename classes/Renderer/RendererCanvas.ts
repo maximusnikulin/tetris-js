@@ -54,16 +54,20 @@ class RendererCanvas implements IRenderer {
     Object.keys(points).forEach((key) => {
       const [x, y] = key.split(',').map(Number)
       const point = points[key]
-      this.ctx.fillStyle = point.getColor()
-      this.ctx.fillRect(
-        x * this.square + 0.5,
-        y * this.square + 0.5,
-        this.square,
-        this.square
-      )
-      this.ctx.stroke()
+      this.ctx.fillStyle = Colors.transparent
+      if (point.isFill()) {
+        this.ctx.fillStyle = point.getColor()
+        this.ctx.fillRect(
+          x * this.square + 0.5,
+          y * this.square + 0.5,
+          this.square,
+          this.square
+        )
+        this.ctx.stroke()
+      }
+
+      this.ctx.closePath()
     })
-    this.ctx.closePath()
   }
 }
 

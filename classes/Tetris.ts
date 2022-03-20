@@ -1,92 +1,90 @@
 import { LayoutParams } from './constants'
 import Figure from './Figure/Figure'
 import FigureFactory from './Figure/FigureFactory'
-import HeapFigures from './HeapFigures/HeapFigures'
-import PositionerFacade from './Positioner/PositionerFacade'
-import RendererCanvas from './Renderer/RendererCanvas'
+import HeapPoints from './HeapPoints/HeapPoints'
+import HeapFigureBehaviorFacade from './HeapFigureBehavior/HeapFigureBehaviorFacade'
 import { IRenderer } from './Renderer/RendererType'
 // import Statistic from './Statistic/Statistic'
 
 export class Tetris {
   renderer: IRenderer
-  heap: HeapFigures
   //NodeJS.Timeout
   interval: any
   figure: Figure | null = null
   nextFigure: Figure | null = null
-  positioner: PositionerFacade | null = null
+  behavior!: HeapFigureBehaviorFacade
+  heap!: HeapPoints
+  size!: LayoutParams
+  level = 1
 
   constructor(config: { renderer: IRenderer; size: LayoutParams }) {
-    const {
-      renderer,
-      size: { columns, rows, square },
-    } = config
-    this.heap = new HeapFigures(columns, rows)
+    const { renderer, size } = config
     this.renderer = renderer
+    this.size = size
     this.prepareGame()
-    this.startGame()
-  }
-
-  startGame() {
-    this.tick()
   }
 
   private prepareGame() {
+    this.resetGame()
     this.initKeyListener()
-  }
-
-  private tick() {
-    this.figure = FigureFactory.createRandomFigure(this.heap)
-    this.positioner = new PositionerFacade(this.heap, this.figure)
+    this.generateRound()
     this.render()
   }
 
-  // endGame() {
-  //   this.render()
-  //   this.resetInterval()
-  //   console.log('endGame')
-  // }
+  private resetGame() {
+    const { columns, rows } = this.size
+    this.heap = new HeapPoints(columns, rows)
+    this.level = 1
+    this.figure = null
+    this.nextFigure = null
+  }
 
-  // resetInterval = () => {
-  //   clearInterval(this.interval)
-  // }
+  private generateRound() {
+    this.figure = this.nextFigure || FigureFactory.createRandomFigure(this.heap)
+    this.nextFigure = FigureFactory.createRandomFigure(this.heap)
+    console.log('Curr Figure ===>', this.figure.toStirng())
+    console.log('Next Figure ===>', this.nextFigure.toStirng())
+    this.behavior = new HeapFigureBehaviorFacade(this.heap, this.figure)
 
-  // public tickGame() {
-  //   this.figure = FigureFactory.createRandomFigure(this.pointsStack.getSize())
-  //   this.positioner = new PositionerFacade(this.pointsStack, this.figure)
+    this.interval = setInterval(() => {
+      this.tickFigure()
+    }, 500)
+  }
 
-  //   if (this.positioner.canAddFigureToStack()) {
-  //     this.render()
-  //   }
+  endGame() {
+    this.resetInterval()
+    alert('endGame')
+  }
 
-  //   const positioner = this.positioner
-  //   // this.interval = setInterval(
-  //   //   () => this.tickFigure(positioner),
-  //   //   (this.statistic.data.speed / 3) * 100
-  //   // )
-  // }
+  resetInterval = () => {
+    clearInterval(this.interval)
+  }
 
-  // private tickFigure(positioner: PositionerFacade) {
-  //   if (positioner.canShrinkFigureDown()) {
-  //     positioner.shrinkFigureDown()
-  //     this.render()
-  //   } else if (positioner.canAddFigureToStack()) {
-  //     positioner.addFigureToStack()
-  //     this.resetInterval()
-  //     this.pointsStack.collapse()
-  //     this.tickGame()
-  //   } else {
-  //     this.endGame()
-  //   }
-  // }
+  private tickFigure(wasTicked: boolean = false) {
+    if (this.behavior.canPushFigureDown()) {
+      this.behavior.pushFigureDown()
+      this.render()
+    } else if (this.behavior.canMergeFigureWithHeap()) {
+      // * lock delay https://strategywiki.org/wiki/Tetris/Features
+      this.resetInterval()
+      this.behavior.mergeFigureWithHeap()
+      this.behavior.getHeap().collapseFilledRows()
+      this.render()
+      this.generateRound()
+      this.render()
+    } else {
+      this.endGame()
+      this.render()
+    }
+  }
 
   private initKeyListener() {
     document.addEventListener('keydown', (e) => {
-      if (!this.positioner) {
+      if (!this.behavior) {
         return
       }
 
-      this.positioner.changePosFigureByKey(e.keyCode)
+      this.behavior.changePosFigureByKey(e.keyCode)
       this.render()
     })
   }

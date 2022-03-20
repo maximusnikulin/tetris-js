@@ -1,15 +1,15 @@
-import { createPointsByPattern, p } from '../helpers'
-
 // import { createPointsByPattern, createRowByPattern } from '../utils'
 // import { Point } from '../../Point'
 // import { Colors } from '../../Figure/Figure'
 
-// export const stackFiveOnFour = createPointsByPattern([
-//   [0, 0, 0, 0, 0],
-//   [0, 0, 0, 0, 0],
-//   [0, 0, 0, 0, 0],
-//   [0, 0, 0, 0, 0],
-// ])
+import { createPointsByPattern } from '../../helpers/common'
+
+export const stackFiveOnFour = createPointsByPattern([
+  [0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0],
+])
 
 // export const stackBeforeSimpleAddPoints = createPointsByPattern([
 //   [0, 0, 0, 0, 0],

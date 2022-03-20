@@ -3,7 +3,7 @@ import { Tetris } from './classes/Tetris'
 
 const size = {
   columns: 10,
-  rows: 20,
+  rows: 10,
   square: 30,
 }
 

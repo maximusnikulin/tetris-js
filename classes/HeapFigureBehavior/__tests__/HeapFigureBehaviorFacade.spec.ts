@@ -1,11 +1,15 @@
 import { toMatchFile } from 'jest-file-snapshot'
+import { Colors } from '../../constants'
 import Figure from '../../Figure/Figure'
 import FigureFactory from '../../Figure/FigureFactory'
 import { FigurePatterns, FigureTypes } from '../../Figure/FigureTypes'
-import HeapFigures from '../../HeapFigures/HeapFigures'
-import { createPointsByPattern, getSnapDebug } from '../../HeapFigures/helpers'
-import { Colors } from '../../helpers/helpers'
-import PositionerFacade from '../PositionerFacade'
+import HeapPoints from '../../HeapPoints/HeapPoints'
+import {
+  createPointsByPattern,
+  getSnapExplicitDebug,
+  getSnapHeapAndFigure,
+} from '../../helpers/common'
+import HeapFigureBehaviorFacade from '../HeapFigureBehaviorFacade'
 import {
   roundUpHorFigureTest,
   rotateFigureTest,
@@ -24,7 +28,7 @@ const figureTypes: FigureTypes[] = Object.keys(FigurePatterns) as FigureTypes[]
 
 describe('Test Positioner', () => {
   test('pos hor for roundup-empty', () => {
-    let heap = new HeapFigures()
+    let heap = new HeapPoints()
 
     figureTypes.forEach((type) => {
       const figure = FigureFactory.create(type, [0, 0], Colors.aqua, 0)
@@ -35,7 +39,7 @@ describe('Test Positioner', () => {
   })
 
   test('pos hor for roundup-with-vertical', () => {
-    let heap = new HeapFigures()
+    let heap = new HeapPoints()
 
     heap.setPoints(
       createPointsByPattern([
@@ -55,7 +59,7 @@ describe('Test Positioner', () => {
   })
 
   test('pos hor for roundup-with-mixed', () => {
-    let heap = new HeapFigures()
+    let heap = new HeapPoints()
 
     heap.setPoints(
       createPointsByPattern([
@@ -76,7 +80,7 @@ describe('Test Positioner', () => {
   })
 
   test('pos vert for push-down-empty', () => {
-    let heap = new HeapFigures()
+    let heap = new HeapPoints()
 
     heap.setPoints(
       createPointsByPattern([
@@ -98,8 +102,31 @@ describe('Test Positioner', () => {
     })
   })
 
+  test('pos vert for push-down-not-empty', () => {
+    let heap = new HeapPoints()
+
+    heap.setPoints(
+      createPointsByPattern([
+        [0, 0, 0, 0],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0],
+        [0, 1, 0, 0],
+        [0, 1, 0, 0],
+        [0, 1, 0, 0],
+      ])
+    )
+
+    figureTypes.forEach((type) => {
+      const figure = FigureFactory.create(type, [0, 0], Colors.aqua, 0)
+      expect(pushDownVertFigureTest({ figure, heap })).toMatchFile(
+        getPathInSnaps('push-down-not-empty/' + type)
+      )
+    })
+  })
+
   test('rotate figure for rotate-empty area', () => {
-    let heap = new HeapFigures()
+    let heap = new HeapPoints()
 
     heap.setPoints(
       createPointsByPattern([
@@ -120,7 +147,7 @@ describe('Test Positioner', () => {
   })
 
   test('rotate figure for not-empty area', () => {
-    let heap = new HeapFigures()
+    let heap = new HeapPoints()
 
     heap.setPoints(
       createPointsByPattern([
@@ -134,8 +161,8 @@ describe('Test Positioner', () => {
 
     let figure = FigureFactory.create('J', [2, 1], Colors.aqua, 1)
 
-    let positioner = new PositionerFacade(heap, figure)
-    expect(getSnapDebug(positioner)).toMatchInlineSnapshot(`
+    let positioner = new HeapFigureBehaviorFacade(heap, figure)
+    expect(getSnapHeapAndFigure(positioner)).toMatchInlineSnapshot(`
       Array [
         "[\\"0,0,0,0,0,0,0\\"]",
         "[\\"1,1,3,2,3,0,0\\"]",
@@ -147,8 +174,8 @@ describe('Test Positioner', () => {
     expect(positioner.canRotateFigure()).toBeFalsy()
 
     figure = FigureFactory.create('Z', [4, 1], Colors.aqua, 1)
-    positioner = new PositionerFacade(heap, figure)
-    expect(getSnapDebug(positioner)).toMatchInlineSnapshot(`
+    positioner = new HeapFigureBehaviorFacade(heap, figure)
+    expect(getSnapHeapAndFigure(positioner)).toMatchInlineSnapshot(`
       Array [
         "[\\"0,0,0,0,0,0,0\\"]",
         "[\\"1,1,0,0,3,3,2\\"]",
@@ -161,7 +188,7 @@ describe('Test Positioner', () => {
     expect(positioner.canRotateFigure()).toBeFalsy()
 
     figure.setPosition([4, 0])
-    expect(getSnapDebug(positioner)).toMatchInlineSnapshot(`
+    expect(getSnapHeapAndFigure(positioner)).toMatchInlineSnapshot(`
       Array [
         "[\\"0,0,0,0,3,3,3\\"]",
         "[\\"1,1,0,0,2,2,3\\"]",
@@ -172,7 +199,7 @@ describe('Test Positioner', () => {
     `)
     expect(positioner.canRotateFigure()).toBeTruthy()
     positioner.rotateFigure()
-    expect(getSnapDebug(positioner)).toMatchInlineSnapshot(`
+    expect(getSnapHeapAndFigure(positioner)).toMatchInlineSnapshot(`
       Array [
         "[\\"0,0,0,0,3,3,2\\"]",
         "[\\"1,1,0,0,3,2,2\\"]",
@@ -181,5 +208,93 @@ describe('Test Positioner', () => {
         "[\\"1,1,0,0,1,0,0\\"]",
       ]
     `)
+  })
+
+  it('should check can merge figure to heap', () => {
+    const heap = new HeapPoints()
+    const figure = FigureFactory.create('I', [0, 0], Colors.aqua, 0)
+    const positioner = new HeapFigureBehaviorFacade(heap, figure)
+
+    heap.setPoints(
+      createPointsByPattern([
+        [0, 0, 0, 0, 0, 0, 0],
+        [1, 1, 1, 1, 1, 1, 1],
+      ])
+    )
+    const { minY, x } = positioner.getFigureAreaParams()
+    figure.setPosition([x, minY])
+
+    expect(getSnapHeapAndFigure(positioner)).toMatchInlineSnapshot(`
+      Array [
+        "[\\"2,2,2,2,0,0,0\\"]",
+        "[\\"1,1,1,1,1,1,1\\"]",
+      ]
+    `)
+
+    expect(positioner.canMergeFigureWithHeap()).toBeTruthy()
+  })
+
+  it('cant merge figure to heap', () => {
+    const heap = new HeapPoints()
+    const figure = FigureFactory.create('I', [0, 0], Colors.aqua, 0)
+    const positioner = new HeapFigureBehaviorFacade(heap, figure)
+
+    heap.setPoints(
+      createPointsByPattern([
+        [1, 0, 0, 0, 0, 0, 0],
+        [1, 1, 1, 1, 1, 1, 1],
+      ])
+    )
+    const { minY, x } = positioner.getFigureAreaParams()
+    figure.setPosition([x, minY])
+    expect(getSnapHeapAndFigure(positioner)).toMatchInlineSnapshot(`
+      Array [
+        "[\\"1,2,2,2,0,0,0\\"]",
+        "[\\"1,1,1,1,1,1,1\\"]",
+      ]
+    `)
+
+    expect(positioner.canMergeFigureWithHeap()).toBeFalsy()
+  })
+
+  it('cant merge figure by figures to heap', () => {
+    const heap = new HeapPoints()
+    const figure1 = FigureFactory.create('I', [0, 0], Colors.aqua, 0)
+    const positioner1 = new HeapFigureBehaviorFacade(heap, figure1)
+    heap.setPoints(
+      createPointsByPattern([
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+      ])
+    )
+
+    const { maxY } = positioner1.getFigureAreaParams()
+    figure1.setPosition([0, maxY])
+
+    expect(positioner1.canMergeFigureWithHeap()).toBeTruthy()
+    positioner1.mergeFigureWithHeap()
+    expect(getSnapExplicitDebug(heap)).toMatchInlineSnapshot(`
+      Array [
+        "[\\"0,0,0,0,0,0,0\\"]",
+        "[\\"0,0,0,0,0,0,0\\"]",
+        "[\\"0,0,0,0,0,0,0\\"]",
+        "[\\"1,1,1,1,0,0,0\\"]",
+      ]
+    `)
+
+    const figure2 = FigureFactory.create('I', [0, 0], Colors.aqua, 0)
+    const positioner2 = new HeapFigureBehaviorFacade(heap, figure2)
+    expect(getSnapHeapAndFigure(positioner2)).toMatchInlineSnapshot(`
+      Array [
+        "[\\"3,3,3,3,0,0,0\\"]",
+        "[\\"3,3,3,3,0,0,0\\"]",
+        "[\\"2,2,2,2,0,0,0\\"]",
+        "[\\"1,1,1,1,0,0,0\\"]",
+      ]
+    `)
+
+    expect(positioner2.canPushFigureDown()).toBeFalsy()
   })
 })

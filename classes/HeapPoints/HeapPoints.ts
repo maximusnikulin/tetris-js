@@ -1,9 +1,9 @@
-import { matrixToMap } from '../helpers/helpers'
+import { getSnapPoints, matrixToMap, toConsole } from '../helpers/common'
 import { Point } from '../Point'
 
 export const sum = (a: number, b: number) => a + b
 
-class HeapFigures {
+class HeapPoints {
   private points: Point[][] = []
 
   constructor(columns: number = 10, rows: number = 20) {
@@ -37,24 +37,24 @@ class HeapFigures {
   getFilledRows() {
     return this.points.reduce((acc: number[], row, index) => {
       if (row.every((point) => point.isFill())) {
-        acc.push()
+        acc.push(index)
       }
 
       return acc
     }, [])
   }
 
-  // removeRow(rowNum: number) {
-  //   this.points.splice(rowNum, 1)
-  //   this.points.unshift(this.points[0].map(() => new Point(false)))
-  // }
+  collapseFilledRows() {
+    let equalRows = []
+    while ((equalRows = this.getFilledRows()).length) {
+      equalRows.forEach((rowNum) => this.collapseRow(rowNum))
+    }
+  }
 
-  // collapse() {
-  //   let equalRows = []
-  //   while ((equalRows = this.getEqualsRows()).length) {
-  //     equalRows.forEach((rowNum) => this.removeRow(rowNum))
-  //   }
-  // }
+  collapseRow(rowNum: number) {
+    this.points.splice(rowNum, 1)
+    this.points.unshift(this.points[0].map(() => new Point(false)))
+  }
 
   getPoint(pos: [number, number]) {
     const points = this.getPointsMap()
@@ -79,17 +79,22 @@ class HeapFigures {
     return matrixToMap(this.points)
   }
 
-  addPoints(points: { [key: string]: Point }) {
+  mergePoints(points: { [key: string]: Point }) {
     const heapPoints = this.getPointsMap()
     Object.keys(points).forEach((keyPos) => {
-      if (keyPos in heapPoints) {
-        const addPoint = points[keyPos]
+      const pointInHeap = heapPoints[keyPos]
+      const addPoint = points[keyPos]
+      if (pointInHeap && addPoint.isFill()) {
         const heapPoint = heapPoints[keyPos]
         heapPoint.setColor(addPoint.getColor())
         heapPoint.setIsFill(addPoint.isFill())
       }
     })
   }
+
+  toStirng() {
+    return toConsole(getSnapPoints(this.getPoints()))
+  }
 }
 
-export default HeapFigures
+export default HeapPoints

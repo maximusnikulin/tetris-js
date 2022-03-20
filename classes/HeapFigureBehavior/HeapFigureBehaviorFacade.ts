@@ -1,13 +1,12 @@
-import HeapFigures from '../HeapFigures/HeapFigures'
+import HeapPoints from '../HeapPoints/HeapPoints'
 import Figure from '../Figure/Figure'
-import { Layout } from '../Layout'
 import getEmptyLines from '../helpers/getEmptyLines'
+import { Point } from '../Point'
 
-export default class PositionerFacade {
-  private heap: HeapFigures
+export default class HeapFigureBehaviorFacade {
+  private heap: HeapPoints
   private figure!: Figure
-
-  constructor(heap: HeapFigures, figure: Figure) {
+  constructor(heap: HeapPoints, figure: Figure) {
     this.heap = heap
     this.figure = figure
   }
@@ -29,6 +28,7 @@ export default class PositionerFacade {
     const { width, height } = this.figure.getSize()
     const { columns, rows } = this.heap.getSize()
     const [x, y] = this.figure.getPosition()
+
     return {
       width,
       height,
@@ -41,24 +41,18 @@ export default class PositionerFacade {
     }
   }
 
+  mergeFigureWithHeap() {
+    this.heap.mergePoints(this.figure.getPointsMap())
+  }
+
   canMergeFigureWithHeap() {
     const figureMapPoints = this.figure.getPointsMap()
     const points = this.heap.getPointsMap()
 
     return Object.keys(figureMapPoints).every((key) => {
-      let match = null
-      try {
-        match = points[key]
-      } catch {
-        throw new Error('Coordinate is not exists')
-      }
-
+      let match = points[key] ?? new Point(false)
       return !(figureMapPoints[key].isFill() && match.isFill())
     })
-  }
-
-  addFigureToHeap() {
-    // heapFigures.addPoints(this.figure.getMapPoints())
   }
 
   pushFigureDown() {
@@ -110,7 +104,7 @@ export default class PositionerFacade {
       return false
     }
 
-    return this.canChangePosFigure(([x, y]) => [x, newY])
+    return this.canChangePosFigure(([x, y]) => [x, y + 1])
   }
 
   canPushFigureLeft() {
@@ -163,8 +157,11 @@ export default class PositionerFacade {
     const { maxX, minY, maxY, minX, x, y } = this.getFigureAreaParams()
     const gX = x > maxX ? maxX : x < minX ? minX : x
     const gY = y > maxY ? maxY : y < minY ? minY : y
+
     this.figure.setPosition([gX, gY])
+
     const canChangePos = this.canChangePosFigure()
+
     if (canChangePos) {
       this.figure.setPrevPattern()
     }
