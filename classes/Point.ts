@@ -1,4 +1,4 @@
-import { Colors } from './helpers/helpers'
+import { Colors } from './constants'
 
 interface IPoint {
   isFill(): boolean
@@ -23,6 +23,14 @@ export class Point implements IPoint {
     this.colorFill = colorFill
     this.colorEmpty = colorEmpty
     this.fill = fill
+  }
+
+  setIsFill(fill: boolean) {
+    this.fill = fill
+  }
+
+  setColor(color: Colors) {
+    this.colorFill = color
   }
 
   isFill() {

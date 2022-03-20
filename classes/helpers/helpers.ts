@@ -1,4 +1,5 @@
 import { random, sample } from 'lodash'
+import { Colors } from '../constants'
 import { FigurePatterns, FigureTypes } from '../Figure/FigureTypes'
 
 export function getRndValInterval(min: number, max: number) {
@@ -6,18 +7,6 @@ export function getRndValInterval(min: number, max: number) {
   max = Math.floor(max)
   return Math.floor(Math.random() * (max - min + 1)) + min
 }
-
-export enum Colors {
-  green = 'rgb(131, 235, 122)',
-  pink = 'rgb(233, 118, 172)',
-  aqua = 'rgb(118, 229, 233)',
-  violet = 'rgb(91, 89, 231)',
-  yellow = 'rgb(231, 233, 118)',
-  transparent = 'transparent',
-  area = 'rgb(212, 212, 212)',
-  grid = '#ff0000',
-}
-
 export const getRandomColor = () => {
   const nameColor = sample(
     Object.keys(Colors).slice(0, 4)

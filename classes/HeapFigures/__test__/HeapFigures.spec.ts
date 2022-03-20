@@ -1,12 +1,11 @@
-// import HeapFigures from '../PointsStack'
+import HeapFigures from '../HeapFigures'
+import FigureFactory from '../../Figure/FigureFactory'
+import { FigureTypes, FigurePatterns } from '../../Figure/FigureTypes'
 // import {
 //   stackFiveOnFour,
 //   stackAfterSimpleAddPoints,
 //   stackBeforeSimpleAddPoints,
 // } from './mocks'
-// import FigureFactory from '../../Figure/FigureFactory'
-// import { FigureTypes, FigurePatterns } from '../../Figure/FigureTypes'
-// import { Colors } from '../../Figure/Figure'
 
 // describe('Test PointsStack', () => {
 //   let pointsStack: HeapFigures

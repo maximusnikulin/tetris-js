@@ -1,5 +1,4 @@
-import { LayoutParams } from '../Layout'
-import { Colors } from '../helpers/helpers'
+import { Colors, LayoutParams } from '../constants'
 import { Point } from '../Point'
 import { IRenderer } from './RendererType'
 

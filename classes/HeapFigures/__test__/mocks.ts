@@ -4,26 +4,26 @@ import { createPointsByPattern, p } from '../helpers'
 // import { Point } from '../../Point'
 // import { Colors } from '../../Figure/Figure'
 
-export const stackFiveOnFour = createPointsByPattern([
-  [0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0],
-])
+// export const stackFiveOnFour = createPointsByPattern([
+//   [0, 0, 0, 0, 0],
+//   [0, 0, 0, 0, 0],
+//   [0, 0, 0, 0, 0],
+//   [0, 0, 0, 0, 0],
+// ])
 
-export const stackBeforeSimpleAddPoints = createPointsByPattern([
-  [0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0],
-])
+// export const stackBeforeSimpleAddPoints = createPointsByPattern([
+//   [0, 0, 0, 0, 0],
+//   [0, 0, 0, 0, 0],
+//   [0, 0, 0, 0, 0],
+//   [0, 0, 0, 0, 0],
+// ])
 
-export const stackAfterSimpleAddPoints = createPointsByPattern([
-  [0, 0, 0, 0, 0],
-  [p(1), 0, 0, 0, 0],
-  [p(1), 0, 0, 0, 0],
-  [p(1), p(1), 0, 0, 0],
-])
+// export const stackAfterSimpleAddPoints = createPointsByPattern([
+//   [0, 0, 0, 0, 0],
+//   [p(1), 0, 0, 0, 0],
+//   [p(1), 0, 0, 0, 0],
+//   [p(1), p(1), 0, 0, 0],
+// ])
 
 // export const stackBeforeCollapse = createPointsByPattern([
 //   [0, p(1), p(1), 0, 0],

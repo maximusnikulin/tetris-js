@@ -1,8 +1,6 @@
-import Figure from '../Figure/Figure'
-import { Colors } from '../helpers/helpers'
+import { Colors } from '../constants'
 import { Point } from '../Point'
 import PositionerFacade from '../Positioner/PositionerFacade'
-import HeapFigures from './HeapFigures'
 
 const createPoint = (el: number) => {
   // if (Array.isArray(el)) {

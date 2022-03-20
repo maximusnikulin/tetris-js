@@ -1,7 +1,6 @@
-import { Colors } from '../../helpers/helpers'
-import Figure from '../Figure'
+import { Colors } from '../../constants'
 import FigureFactory from '../FigureFactory'
-import { FigureTypes, FigurePatterns } from '../FigureTypes'
+import { FigurePatterns } from '../FigureTypes'
 
 const TPatterns = FigurePatterns.T
 

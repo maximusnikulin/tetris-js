@@ -1,6 +1,6 @@
+import { Colors } from '../constants'
 import HeapFigures from '../HeapFigures/HeapFigures'
 import {
-  Colors,
   getRandomColor,
   getRandomPattern,
   getRndValInterval,

@@ -1,4 +1,4 @@
-import { Layout, LayoutParams } from './Layout'
+import { LayoutParams } from './constants'
 import Figure from './Figure/Figure'
 import FigureFactory from './Figure/FigureFactory'
 import HeapFigures from './HeapFigures/HeapFigures'

@@ -1,4 +1,3 @@
-import { Layout } from '../Layout'
 import { matrixToMap } from '../helpers/helpers'
 import { Point } from '../Point'
 
@@ -74,26 +73,23 @@ class HeapFigures {
   getPoints() {
     return this.points
   }
+
+  // TODO: memoize it
   getPointsMap() {
     return matrixToMap(this.points)
   }
 
-  // addPoints(points: { [key: string]: Point }) {
-  //   Object.keys(points).forEach((key) => {
-  //     const [x, y] = key.split(',').map(Number)
-  //     let match: Point
-
-  //     try {
-  //       match = this.points[y][x]
-  //     } catch {
-  //       throw new Error('Coordinate is not exists')
-  //     }
-
-  //     if (!match.isFill()) {
-  //       this.points[y][x] = points[key]
-  //     }
-  //   })
-  // }
+  addPoints(points: { [key: string]: Point }) {
+    const heapPoints = this.getPointsMap()
+    Object.keys(points).forEach((keyPos) => {
+      if (keyPos in heapPoints) {
+        const addPoint = points[keyPos]
+        const heapPoint = heapPoints[keyPos]
+        heapPoint.setColor(addPoint.getColor())
+        heapPoint.setIsFill(addPoint.isFill())
+      }
+    })
+  }
 }
 
 export default HeapFigures

@@ -1,10 +1,10 @@
-import { Layout } from '../Layout'
 import getEmptyLines from '../helpers/getEmptyLines'
-import { Colors, matrixToMap } from '../helpers/helpers'
+import { matrixToMap } from '../helpers/helpers'
 import { letsMemoize } from '../helpers/memoizeDecorator'
 import { Point } from '../Point'
 import { FigurePatterns, FigureTypes } from './FigureTypes'
 import HeapFigures from '../HeapFigures/HeapFigures'
+import { Colors } from '../constants'
 
 class Figure {
   private position: [number, number]
