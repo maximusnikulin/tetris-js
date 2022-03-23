@@ -15,14 +15,13 @@ import {
   rotateFigureTest,
   pushDownVertFigureTest,
 } from './heplers'
+import * as path from 'path'
 
 expect.extend({ toMatchFile })
 
 const getPath = (base: string) => (postfix: string) => base + '/' + postfix
 
-const getPathInSnaps = getPath(
-  'classes/Positioner/__tests__/__file_snapshots__'
-)
+const getPathInSnaps = getPath(path.resolve(__dirname, '__file_snapshots__'))
 
 const figureTypes: FigureTypes[] = Object.keys(FigurePatterns) as FigureTypes[]
 
@@ -152,62 +151,21 @@ describe('Test Positioner', () => {
     heap.setPoints(
       createPointsByPattern([
         [0, 0, 0, 0, 0, 0, 0],
-        [1, 1, 0, 0, 0, 0, 0],
-        [1, 1, 0, 0, 1, 0, 0],
-        [1, 1, 0, 0, 1, 0, 0],
-        [1, 1, 0, 0, 1, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 1, 1, 0],
+        [0, 0, 0, 0, 1, 1, 0],
       ])
     )
 
-    let figure = FigureFactory.create('J', [2, 1], Colors.aqua, 1)
-
-    let positioner = new HeapFigureBehaviorFacade(heap, figure)
-    expect(getSnapHeapAndFigure(positioner)).toMatchInlineSnapshot(`
-      Array [
-        "[\\"0,0,0,0,0,0,0\\"]",
-        "[\\"1,1,3,2,3,0,0\\"]",
-        "[\\"1,1,3,2,1,0,0\\"]",
-        "[\\"1,1,2,2,1,0,0\\"]",
-        "[\\"1,1,0,0,1,0,0\\"]",
-      ]
-    `)
-    expect(positioner.canRotateFigure()).toBeFalsy()
-
-    figure = FigureFactory.create('Z', [4, 1], Colors.aqua, 1)
-    positioner = new HeapFigureBehaviorFacade(heap, figure)
-    expect(getSnapHeapAndFigure(positioner)).toMatchInlineSnapshot(`
-      Array [
-        "[\\"0,0,0,0,0,0,0\\"]",
-        "[\\"1,1,0,0,3,3,2\\"]",
-        "[\\"1,1,0,0,1,2,2\\"]",
-        "[\\"1,1,0,0,1,2,3\\"]",
-        "[\\"1,1,0,0,1,0,0\\"]",
-      ]
-    `)
-
-    expect(positioner.canRotateFigure()).toBeFalsy()
-
-    figure.setPosition([4, 0])
-    expect(getSnapHeapAndFigure(positioner)).toMatchInlineSnapshot(`
-      Array [
-        "[\\"0,0,0,0,3,3,3\\"]",
-        "[\\"1,1,0,0,2,2,3\\"]",
-        "[\\"1,1,0,0,1,2,2\\"]",
-        "[\\"1,1,0,0,1,0,0\\"]",
-        "[\\"1,1,0,0,1,0,0\\"]",
-      ]
-    `)
-    expect(positioner.canRotateFigure()).toBeTruthy()
-    positioner.rotateFigure()
-    expect(getSnapHeapAndFigure(positioner)).toMatchInlineSnapshot(`
-      Array [
-        "[\\"0,0,0,0,3,3,2\\"]",
-        "[\\"1,1,0,0,3,2,2\\"]",
-        "[\\"1,1,0,0,1,2,3\\"]",
-        "[\\"1,1,0,0,1,0,0\\"]",
-        "[\\"1,1,0,0,1,0,0\\"]",
-      ]
-    `)
+    figureTypes.forEach((type) => {
+      const figure = FigureFactory.create(type, [0, 0], Colors.aqua, 0)
+      const behavior = new HeapFigureBehaviorFacade(heap, figure)
+      const { x, minY } = behavior.getFigureAreaParams()
+      expect(
+        rotateFigureTest({ figure, heap, initPos: [x, minY] })
+      ).toMatchFile(getPathInSnaps('rotate-not-empty/' + type))
+    })
   })
 
   it('should check can merge figure to heap', () => {

@@ -161,10 +161,8 @@ export default class HeapFigureBehaviorFacade {
     this.figure.setPosition([gX, gY])
 
     const canChangePos = this.canChangePosFigure()
+    this.figure.setPrevPattern()
 
-    if (canChangePos) {
-      this.figure.setPrevPattern()
-    }
     return canChangePos
   }
 

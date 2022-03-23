@@ -4,7 +4,7 @@ import {
   createPointsByPattern,
   getSnapExplicitDebug,
 } from '../../helpers/common'
-import HeapFigures from '../HeapFigures'
+import HeapPoints from '../HeapPoints'
 // import {
 //   stackFiveOnFour,
 //   stackAfterSimpleAddPoints,
@@ -13,7 +13,7 @@ import HeapFigures from '../HeapFigures'
 
 describe('Test HeapFigures', () => {
   it('should return size of heap', () => {
-    const heap = new HeapFigures(10, 20)
+    const heap = new HeapPoints(10, 20)
     expect(heap!.getSize()).toEqual({
       columns: 10,
       rows: 20,
@@ -21,7 +21,7 @@ describe('Test HeapFigures', () => {
   })
 
   it('should return points as map', () => {
-    const heap = new HeapFigures()
+    const heap = new HeapPoints()
     heap.setPoints(
       createPointsByPattern([
         [0, 0],
@@ -56,7 +56,7 @@ describe('Test HeapFigures', () => {
   })
 
   it('should add points to heap', () => {
-    const heap = new HeapFigures()
+    const heap = new HeapPoints()
     heap.setPoints(
       createPointsByPattern([
         [0, 0, 0, 0],
