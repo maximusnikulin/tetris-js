@@ -5,11 +5,47 @@ import { IRenderer } from './RendererType'
 class RendererCanvas implements IRenderer {
   ctx: CanvasRenderingContext2D
   node: HTMLCanvasElement
-  width: number
+  widthArea: number
   square: number
-  height: number
+  heightArea: number
   columns: number
   rows: number
+  widthStat: number
+
+  getTextStyle(size: number) {
+    return `${size}px 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif`
+  }
+  renderNextFigure(points: Record<string, Point>) {
+    const sX = this.widthArea + 20
+    const sY = this.node.height - 300
+
+    this.ctx.font = this.getTextStyle(24)
+    this.ctx.fillStyle = 'white'
+    this.ctx.fillText('Next figure', 330, 50)
+
+    this.renderPoints(points, [330, 80, 400, 300])
+  }
+
+  renderDigits(level: number, points: number) {
+    this.ctx.font = this.getTextStyle(24)
+    this.ctx.fillStyle = 'white'
+    this.ctx.fillText('Level', 330, 200)
+    this.ctx.font = this.getTextStyle(18)
+    this.ctx.fillText(level.toString(), 330, 230)
+    this.ctx.font = this.getTextStyle(24)
+    this.ctx.fillText('Points', 330, 270)
+    this.ctx.font = this.getTextStyle(18)
+    this.ctx.fillText(points.toString(), 330, 300)
+  }
+
+  renderStatistic(
+    level: number,
+    points: number,
+    nextFigure: Record<string, Point>
+  ): void {
+    this.renderNextFigure(nextFigure)
+    this.renderDigits(level, points)
+  }
 
   constructor(params: LayoutParams) {
     const { rows, square, columns } = params
@@ -19,37 +55,44 @@ class RendererCanvas implements IRenderer {
     this.ctx = this.node.getContext('2d') as CanvasRenderingContext2D
     this.columns = width / square + 1
     this.rows = height / square + 1
-    this.width = width + 1
-    this.height = height + 1
-    this.node.width = this.width
-    this.node.height = this.height
+    this.widthArea = width + 1
+    this.heightArea = height + 1
+    this.widthStat = 200
+    this.node.width = this.widthArea + this.widthStat
+    this.node.height = this.heightArea
     this.square = square
+
+    this.renderGrid()
   }
 
   renderGrid() {
     this.ctx.lineWidth = 1
     this.ctx.strokeStyle = Colors.grid
-    for (let i = 0; i <= this.columns; i++) {
+    for (let i = 0; i < this.columns; i++) {
       this.ctx.moveTo(i * this.square + 0.5, 0)
-      this.ctx.lineTo(i * this.square + 0.5, this.height)
+      this.ctx.lineTo(i * this.square + 0.5, this.heightArea)
       this.ctx.stroke()
     }
 
-    for (let j = 0; j <= this.rows; j++) {
+    for (let j = 0; j < this.rows; j++) {
       this.ctx.moveTo(0, j * this.square + 0.5)
-      this.ctx.lineTo(this.width, j * this.square + 0.5)
+      this.ctx.lineTo(this.widthArea, j * this.square + 0.5)
       this.ctx.stroke()
     }
   }
 
-  renderPoints(points: Record<string, Point>) {
-    const width = this.width
-    const height = this.height
+  renderArea(points: Record<string, Point>) {
+    this.renderPoints(points, [0, 0, this.widthArea, this.heightArea])
+  }
 
-    this.ctx.clearRect(0, 0, width, height)
+  renderPoints(
+    points: Record<string, Point>,
+    rect: [number, number, number, number]
+  ) {
+    this.ctx.clearRect(...rect)
 
-    this.ctx.beginPath()
     this.renderGrid()
+    this.ctx.beginPath()
 
     Object.keys(points).forEach((key) => {
       const [x, y] = key.split(',').map(Number)
@@ -58,8 +101,8 @@ class RendererCanvas implements IRenderer {
       if (point.isFill()) {
         this.ctx.fillStyle = point.getColor()
         this.ctx.fillRect(
-          x * this.square + 0.5,
-          y * this.square + 0.5,
+          rect[0] + x * this.square + 0.5,
+          rect[1] + y * this.square + 0.5,
           this.square,
           this.square
         )

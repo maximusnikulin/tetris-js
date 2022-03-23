@@ -2,6 +2,7 @@ import HeapPoints from '../HeapPoints/HeapPoints'
 import Figure from '../Figure/Figure'
 import getEmptyLines from '../helpers/getEmptyLines'
 import { Point } from '../Point'
+import { getRndValInterval } from '../helpers/common'
 
 export default class HeapFigureBehaviorFacade {
   private heap: HeapPoints
@@ -164,6 +165,11 @@ export default class HeapFigureBehaviorFacade {
     this.figure.setPrevPattern()
 
     return canChangePos
+  }
+
+  getRandomPos() {
+    const { minY, minX, maxX } = this.getFigureAreaParams()
+    return [getRndValInterval(minX, maxX), minY]
   }
 
   changePosFigureByKey(keyCode: number) {

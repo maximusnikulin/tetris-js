@@ -16,12 +16,20 @@ export class Tetris {
   heap!: HeapPoints
   size!: LayoutParams
   level = 1
+  points: number = 0
+  debug: boolean = false
 
   constructor(config: { renderer: IRenderer; size: LayoutParams }) {
     const { renderer, size } = config
     this.renderer = renderer
     this.size = size
     this.prepareGame()
+  }
+
+  log(...args: any) {
+    if (this.debug) {
+      console.log(...args)
+    }
   }
 
   private prepareGame() {
@@ -41,14 +49,16 @@ export class Tetris {
 
   private generateRound() {
     this.figure = this.nextFigure || FigureFactory.createRandomFigure(this.heap)
-    this.nextFigure = FigureFactory.createRandomFigure(this.heap)
-    console.log('Curr Figure ===>', this.figure.toStirng())
-    console.log('Next Figure ===>', this.nextFigure.toStirng())
     this.behavior = new HeapFigureBehaviorFacade(this.heap, this.figure)
+    this.figure.setPosition(this.behavior.getRandomPos())
+    this.nextFigure = FigureFactory.createRandomFigure(this.heap)
+    this.log('Curr Figure ===>', this.figure.toStirng())
+    this.log('Next Figure ===>', this.nextFigure.toStirng())
+    this.renderStat()
 
     this.interval = setInterval(() => {
       this.tickFigure()
-    }, 500)
+    }, 800)
   }
 
   endGame() {
@@ -68,7 +78,8 @@ export class Tetris {
       // * lock delay https://strategywiki.org/wiki/Tetris/Features
       this.resetInterval()
       this.behavior.mergeFigureWithHeap()
-      this.behavior.getHeap().collapseFilledRows()
+      this.collapseRows()
+
       this.render()
       this.generateRound()
       this.render()
@@ -76,6 +87,26 @@ export class Tetris {
       this.endGame()
       this.render()
     }
+  }
+
+  renderStat() {
+    this.renderer.renderStatistic(
+      this.level,
+      this.points,
+      this.nextFigure?.getPointsMap() ?? {}
+    )
+  }
+
+  addPoints(points: number) {
+    this.points += points
+    this.level = Math.min(Math.max(Math.floor(this.points / 200), 1), 10)
+  }
+
+  collapseRows() {
+    const filledRowsLength = this.behavior.getHeap().getFilledRows().length
+    this.addPoints(filledRowsLength * 100)
+    this.behavior.getHeap().collapseFilledRows()
+    this.log('Update Stats ===>', this.level, this.points)
   }
 
   private initKeyListener() {
@@ -95,6 +126,6 @@ export class Tetris {
       ...(this.figure?.getPointsMap() ?? {}),
     }
 
-    this.renderer.renderPoints(points)
+    this.renderer.renderArea(points)
   }
 }

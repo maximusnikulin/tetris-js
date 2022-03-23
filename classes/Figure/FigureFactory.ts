@@ -33,13 +33,11 @@ class FigureFactory {
     const { type: pType, index: pIndex } = getRandomPattern()
     const rndColor = getRandomColor()
 
-    const figure = new Figure(pType, [0, 0], rndColor, pIndex)
+    const figure = new Figure(pType, [0, 0], rndColor, 0)
     const positioner = new HeapFigureBehaviorFacade(heap, figure)
-    const { minY, minX, maxX } = positioner.getFigureAreaParams()
+    const { minY } = positioner.getFigureAreaParams()
 
-    let rndX = getRndValInterval(minX, maxX)
-
-    figure.setPosition([rndX, minY])
+    figure.setPosition([0, minY])
     return figure
   }
 }

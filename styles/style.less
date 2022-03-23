@@ -8,16 +8,27 @@ body {
   margin: 0;
 }
 
-body {
-  overflow: hidden;
-  border: 1px solid rgb(212, 212, 212);
-  padding: 10px;
-  background: rgb(19, 25, 63);
-  min-height: 100vh;
+.wrapper {
   display: flex;
+  min-height: 100vh;
+  padding: 10px;
+  overflow: hidden;
+  background: rgb(19, 25, 63);
 }
 
-.tetris-canvas {
+.game-field {
   display: block;
   margin: auto;
+}
+
+.legend {
+  font-size: 16px;
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  color: white;
+  position: absolute;
+  left: 20px;
+
+  @media screen and (max-width: 800px) {
+    display: none;
+  }
 }

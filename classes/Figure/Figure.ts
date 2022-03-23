@@ -9,7 +9,7 @@ import { Point } from '../Point'
 import { FigurePatterns, FigureTypes } from './FigureTypes'
 
 class Figure {
-  private position: [number, number]
+  private position: number[]
   private color: Colors
   private type: FigureTypes = 'I'
   private activePattern: number = 0
@@ -68,7 +68,7 @@ class Figure {
     this.activePattern = this.getNextPatternIndex()
   }
 
-  setPosition(pos: [number, number]) {
+  setPosition(pos: number[]) {
     this.position = pos
   }
 

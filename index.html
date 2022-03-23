@@ -8,7 +8,34 @@
     <title>Tetris</title>
   </head>
   <body>
-    <canvas class="tetris-canvas" id="tetris-js"></canvas>
+    <div class="wrapper">
+      <div class="legend">
+        <h1>Legend</h1>
+        <table>
+          <tbody>
+            <tr>
+              <td>←</td>
+              <td>shift left</td>
+            </tr>
+            <tr>
+              <td>→</td>
+              <td>shift right</td>
+            </tr>
+            <tr>
+              <td>↓</td>
+              <td>push down</td>
+            </tr>
+            <tr>
+              <td>R</td>
+              <td>rotate</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="game-field">
+        <canvas class="tetris-canvas" id="tetris-js"></canvas>
+      </div>
+    </div>
     <script src="./index.ts"></script>
   </body>
 </html>
