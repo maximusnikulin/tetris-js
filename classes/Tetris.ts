@@ -16,7 +16,7 @@ export class Tetris {
   heap!: HeapPoints
   size!: LayoutParams
   level = 1
-  points: number = 0
+  points: number = 1
   debug: boolean = false
 
   constructor(config: { renderer: IRenderer; size: LayoutParams }) {
@@ -56,9 +56,11 @@ export class Tetris {
     this.log('Next Figure ===>', this.nextFigure.toStirng())
     this.renderStat()
 
+    const timeInterval = 200 + Math.max(800 - this.level * 100, 0)
+    console.log(timeInterval)
     this.interval = setInterval(() => {
       this.tickFigure()
-    }, 800)
+    }, timeInterval)
   }
 
   endGame() {
